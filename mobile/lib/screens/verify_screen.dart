@@ -12,12 +12,15 @@ import '../services/api_client.dart';
 import '../services/repositories.dart';
 import '../theme/app_theme.dart';
 import '../utils/format.dart';
+import '../widgets/ai_result_card.dart';
 import '../widgets/before_after.dart';
 import '../widgets/common.dart';
 import '../widgets/motion.dart';
 import '../widgets/report_photo.dart';
+import '../widgets/risk_meter.dart';
 import '../widgets/status_chip.dart';
 import '../widgets/sumbatan_style.dart';
+import '../widgets/sumbatan_visual.dart';
 import 'lapor_flow.dart';
 import '../theme/rivora_icons.dart';
 
@@ -502,18 +505,31 @@ class _Hasil extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SectionTitle('Penilaian AI sesudah dibersihkan'),
-                  SumbatanBadge(kelas: hasil.kelasSesudah),
+                  Row(
+                    children: [
+                      SumbatanVisual(kelas: hasil.kelasSesudah, width: 80),
+                      const SizedBox(width: Space.lg),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SumbatanBadge(kelas: hasil.kelasSesudah),
+                            const SizedBox(height: Space.xs),
+                            Text(
+                              kataSumbatan(hasil.kelasSesudah),
+                              style: theme.textTheme.bodyMedium,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                   if (hasil.catatan.isNotEmpty) ...[
                     const SizedBox(height: Space.md),
                     Text(hasil.catatan, style: theme.textTheme.bodyLarge),
                   ],
                   const SizedBox(height: Space.md),
-                  Text(
-                    'Keyakinan ${hasil.keyakinan}',
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
-                  ),
+                  KeyakinanAi(keyakinan: hasil.keyakinan),
                 ],
               ),
             ),
@@ -525,8 +541,9 @@ class _Hasil extends StatelessWidget {
   }
 }
 
-/// Skor risiko RW turun setelah saluran dibersihkan: angka menghitung mundur,
-/// bar memendek, level berubah (mis. Risiko tinggi → Waspada).
+/// Risiko RW turun setelah saluran dibersihkan (proposal 3.3): penanda di
+/// meteran bergeser dari level lama ke level baru. Angka hanya untuk
+/// pembaca layar dan lembar "Cara RIVORA menilai" di beranda.
 class _SkorRw extends StatelessWidget {
   const _SkorRw({required this.hasil});
 
@@ -540,12 +557,15 @@ class _SkorRw extends StatelessWidget {
     final sesudah = hasil.skorRwSesudah!;
     final levelSebelum = LevelRisiko.dariSkor(sebelum);
     final levelSesudah = LevelRisiko.dariSkor(sesudah);
-    final warna = context.rivora.risiko(levelSesudah);
+    final rw = hasil.rw ?? 'RW ini';
+    final turun = sesudah < sebelum;
+    final pindahLevel = levelSesudah != levelSebelum;
 
     return Semantics(
       label:
-          'Skor risiko ${hasil.rw ?? 'RW'} turun dari ${formatDesimal(sebelum)} '
-          'ke ${formatDesimal(sesudah)}, level ${levelSesudah.label}',
+          'Risiko $rw ${turun ? 'turun' : 'tetap'} dari ${levelSebelum.label} '
+          'ke ${levelSesudah.label}. Skor ${formatDesimal(sebelum)} menjadi '
+          '${formatDesimal(sesudah)}.',
       excludeSemantics: true,
       child: Card(
         child: Padding(
@@ -554,39 +574,8 @@ class _SkorRw extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Skor risiko ${hasil.rw ?? 'RW'}',
+                turun ? 'Risiko genangan $rw turun' : 'Risiko genangan $rw',
                 style: theme.textTheme.titleMedium,
-              ),
-              const SizedBox(height: Space.md),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  AnimatedScore(
-                    from: sebelum,
-                    value: sesudah,
-                    style: theme.textTheme.headlineMedium?.copyWith(height: 1),
-                    color: warna.fg,
-                  ),
-                  const SizedBox(width: Space.sm),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 3),
-                    child: Text(
-                      'dari ${formatDesimal(sebelum)}',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                        decoration: TextDecoration.lineThrough,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: Space.sm),
-              AnimatedBar(
-                from: sebelum,
-                value: sesudah,
-                color: warna.fg,
-                background: warna.bg,
-                height: 10,
               ),
               const SizedBox(height: Space.md),
               Row(
@@ -603,13 +592,17 @@ class _SkorRw extends StatelessWidget {
                   RisikoChip(level: levelSesudah),
                 ],
               ),
+              const SizedBox(height: Space.lg),
+              RiskMeter(dari: sebelum, skor: sesudah),
               const SizedBox(height: Space.md),
               Text(
-                'Sumbatan turun, jadi skor ikut turun '
-                '(0,4 × hujan + 0,4 × sumbatan + 0,2 × kerentanan).',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: scheme.onSurfaceVariant,
-                ),
+                pindahLevel
+                    ? 'Karena saluran ini sudah bersih, $rw sekarang '
+                          '${levelSesudah.label.toLowerCase()}. Warga yang '
+                          'melapor ikut melihat hasilnya.'
+                    : 'Saluran ini sudah bersih, jadi kemungkinan genangan '
+                          'di $rw berkurang.',
+                style: theme.textTheme.bodyMedium,
               ),
             ],
           ),

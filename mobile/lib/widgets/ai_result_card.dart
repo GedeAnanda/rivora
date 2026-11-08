@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import '../models/ai_result.dart';
 import '../theme/app_theme.dart';
 import '../utils/format.dart';
-import 'motion.dart';
+import '../theme/rivora_icons.dart';
 import 'sumbatan_style.dart';
+import 'sumbatan_visual.dart';
 
-/// Ringkasan hasil analisis AI (Lampiran C): kelas, skor, penyebab,
-/// keyakinan (selalu tampil, Tabel 8), dan catatan.
+/// Ringkasan hasil analisis AI (Lampiran C) untuk warga: gambar tingkat
+/// sumbatan + kalimat, penyebab, keyakinan dalam kata (selalu tampil,
+/// Tabel 8), dan catatan. Skor 0–1 hanya untuk pembaca layar.
 class AiResultCard extends StatelessWidget {
   const AiResultCard({super.key, required this.ai});
 
@@ -30,53 +32,67 @@ class AiResultCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    'Analisis AI',
+                    'Hasil pemeriksaan AI',
                     style: theme.textTheme.titleMedium,
                   ),
                 ),
-                _Keyakinan(keyakinan: ai.keyakinan),
+                KeyakinanAi(keyakinan: ai.keyakinan),
               ],
             ),
-            const SizedBox(height: Space.md),
-            SumbatanBadge(kelas: ai.kelas),
-            if (skor != null) ...[
-              const SizedBox(height: Space.lg),
-              Semantics(
-                label: 'Skor sumbatan ${formatDesimal(skor)} dari 1',
-                excludeSemantics: true,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+            const SizedBox(height: Space.lg),
+            // Kondisi dalam gambar + kalimat, bukan angka 0–1.
+            Semantics(
+              label:
+                  '${ai.kelas.label}. ${kataSumbatan(ai.kelas)}'
+                  '${skor == null ? '' : '. Skor ${formatDesimal(skor)} dari 1'}',
+              excludeSemantics: true,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SumbatanVisual(kelas: ai.kelas),
+                  const SizedBox(width: Space.lg),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        AnimatedScore(
-                          value: skor,
-                          style: theme.textTheme.headlineMedium?.copyWith(
-                            height: 1,
+                        Text(
+                          ai.kelas.label,
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            color: warna.fg,
                           ),
-                          color: warna.fg,
                         ),
-                        const SizedBox(width: Space.sm),
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 2),
-                          child: Text(
-                            'skor sumbatan (0–1)',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: scheme.onSurfaceVariant,
-                            ),
-                          ),
+                        const SizedBox(height: Space.xs),
+                        Text(
+                          kataSumbatan(ai.kelas),
+                          style: theme.textTheme.bodyMedium,
                         ),
                       ],
                     ),
-                    const SizedBox(height: Space.sm),
-                    AnimatedBar(
-                      value: skor,
-                      color: warna.fg,
-                      background: warna.bg,
+                  ),
+                ],
+              ),
+            ),
+            if (ai.keyakinan != 'tinggi' ||
+                ai.kelas == KelasSumbatan.tidakTerlihat) ...[
+              const SizedBox(height: Space.md),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    RIcons.petugas,
+                    size: 18,
+                    color: scheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: Space.sm),
+                  Expanded(
+                    child: Text(
+                      'Petugas kelurahan akan memastikan langsung di lokasi.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ],
             const SizedBox(height: Space.lg),
@@ -138,8 +154,9 @@ class AiResultCard extends StatelessWidget {
   }
 }
 
-class _Keyakinan extends StatelessWidget {
-  const _Keyakinan({required this.keyakinan});
+/// Keyakinan AI: tiga batang + kata ("AI yakin").
+class KeyakinanAi extends StatelessWidget {
+  const KeyakinanAi({super.key, required this.keyakinan});
 
   final String keyakinan;
 
@@ -151,11 +168,7 @@ class _Keyakinan extends StatelessWidget {
       'sedang' => 2,
       _ => 1,
     };
-    final label = switch (keyakinan) {
-      'tinggi' => 'Keyakinan tinggi',
-      'sedang' => 'Keyakinan sedang',
-      _ => 'Keyakinan rendah',
-    };
+    final label = kataKeyakinan(keyakinan);
     return Semantics(
       label: label,
       excludeSemantics: true,
