@@ -365,17 +365,27 @@ class _Legenda extends StatelessWidget {
     final theme = Theme.of(context);
     // Sama dengan warna penanda (selalu versi pekat).
     const rv = RivoraColors.light;
-    Widget titik(Color c, String t, {bool kotak = false}) => Row(
+    // area = contoh lingkaran risiko RW (gradasi radial, sama dengan peta).
+    Widget titik(Color c, String t, {bool area = false}) => Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 10,
-          height: 10,
+          width: area ? 14 : 10,
+          height: area ? 14 : 10,
           decoration: BoxDecoration(
-            color: kotak ? c.withValues(alpha: 0.25) : c,
-            border: kotak ? Border.all(color: c, width: 1.5) : null,
-            shape: kotak ? BoxShape.rectangle : BoxShape.circle,
-            borderRadius: kotak ? BorderRadius.circular(2) : null,
+            color: area ? null : c,
+            gradient: area
+                ? RadialGradient(
+                    colors: [
+                      c.withValues(alpha: 0.5),
+                      c.withValues(alpha: 0.12),
+                    ],
+                  )
+                : null,
+            border: area
+                ? Border.all(color: c.withValues(alpha: 0.6), width: 1.2)
+                : null,
+            shape: BoxShape.circle,
           ),
         ),
         const SizedBox(width: Space.xs + 2),
@@ -408,7 +418,7 @@ class _Legenda extends StatelessWidget {
               runSpacing: Space.xs,
               children: [
                 for (final l in LevelRisiko.values)
-                  titik(rv.risiko(l).fg, l.label, kotak: true),
+                  titik(context.rivora.risiko(l).fg, l.label, area: true),
               ],
             ),
           ],

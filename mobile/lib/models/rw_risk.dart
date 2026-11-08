@@ -54,29 +54,46 @@ class RwRisk {
   /// Cincin luar poligon RW. GeoJSON memakai urutan `[lng, lat]`.
   final List<LatLng> polygon;
 
-  /// Posisi label nama RW: dari titik paling utara 35 % ke arah pusat.
-  /// Badan pin menjulur ke atas dari titiknya, jadi label di sisi utara
-  /// jarang tertimpa pin yang berada di tengah RW.
-  LatLng? get titikLabel {
+  List<LatLng> get _sudut => polygon.length > 3 && polygon.first == polygon.last
+      ? polygon.sublist(0, polygon.length - 1)
+      : polygon;
+
+  /// Pusat RW (rata-rata titik sudut). Peta menggambar risiko RW sebagai
+  /// lingkaran lembut di titik ini, bukan kotak batas wilayah.
+  LatLng? get pusat {
     if (polygon.length < 3) return null;
-    final titik = polygon.length > 3 && polygon.first == polygon.last
-        ? polygon.sublist(0, polygon.length - 1)
-        : polygon;
+    final titik = _sudut;
     var lat = 0.0;
     var lng = 0.0;
-    var utara = titik.first;
     for (final t in titik) {
       lat += t.latitude;
       lng += t.longitude;
-      if (t.latitude > utara.latitude) utara = t;
     }
-    lat /= titik.length;
-    lng /= titik.length;
-    const k = 0.35;
-    return LatLng(
-      utara.latitude + (lat - utara.latitude) * k,
-      utara.longitude + (lng - utara.longitude) * k,
-    );
+    return LatLng(lat / titik.length, lng / titik.length);
+  }
+
+  /// Jari-jari lingkaran risiko dalam meter: 0,62 × jarak rata-rata pusat
+  /// ke sudut. Untuk RW persegi ±0,44 × lebarnya, jadi ada celah tipis antar
+  /// lingkaran RW tetangga dan label tidak tertimpa lingkaran lain.
+  double get radiusMeter {
+    final p = pusat;
+    if (p == null) return 0;
+    const jarak = Distance(roundResult: false);
+    final titik = _sudut;
+    var total = 0.0;
+    for (final t in titik) {
+      total += jarak(p, t);
+    }
+    return total / titik.length * 0.62;
+  }
+
+  /// Posisi label nama RW: di tepi selatan lingkaran. Badan pin menjulur
+  /// ke atas dari titiknya, jadi label di bawah tidak tertimpa pin saluran
+  /// yang berada di dalam RW.
+  LatLng? get titikLabel {
+    final p = pusat;
+    if (p == null) return null;
+    return const Distance().offset(p, radiusMeter, 180);
   }
 
   /// Titik di dalam poligon? (ray casting).
