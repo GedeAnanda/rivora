@@ -42,6 +42,7 @@ class ReportDetailScreen extends StatelessWidget {
                       file: local,
                       url: report.fotoUrl,
                       height: 180,
+                      width: double.infinity,
                       semanticLabel: 'Foto saluran sebelum dibersihkan',
                     ),
                   ),
@@ -51,8 +52,10 @@ class ReportDetailScreen extends StatelessWidget {
                   child: _LabeledPhoto(
                     label: 'Sesudah',
                     child: ReportPhoto(
+                      file: reportRepository.localSesudah(report.id),
                       url: report.fotoSesudahUrl,
                       height: 180,
+                      width: double.infinity,
                       semanticLabel: 'Foto bukti saluran sesudah dibersihkan',
                     ),
                   ),
@@ -64,6 +67,7 @@ class ReportDetailScreen extends StatelessWidget {
               file: local,
               url: report.fotoUrl,
               height: 220,
+              width: double.infinity,
               radius: Radii.lg,
               semanticLabel: 'Foto ${report.jenisSaluran.label}',
             ),

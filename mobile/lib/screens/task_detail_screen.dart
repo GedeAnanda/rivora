@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
 import '../models/task.dart';
+import '../services/repositories.dart';
 import '../theme/app_theme.dart';
 import '../utils/format.dart';
 import '../utils/maps.dart';
@@ -9,9 +10,10 @@ import '../widgets/ai_result_card.dart';
 import '../widgets/common.dart';
 import '../widgets/report_photo.dart';
 import '../widgets/status_chip.dart';
+import 'lapor_flow.dart';
 
-/// Detail tugas pembersihan untuk petugas.
-/// Foto sesudah (verifikasi) ditambahkan di tahap 03.
+/// Detail tugas pembersihan untuk petugas: menuju lokasi, lalu foto sesudah
+/// dibersihkan untuk verifikasi (proposal 3.2 langkah 3–4).
 class TaskDetailScreen extends StatelessWidget {
   const TaskDetailScreen({super.key, required this.task, this.posisi});
 
@@ -20,19 +22,29 @@ class TaskDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: taskRepository,
+      builder: (context, _) =>
+          _build(context, taskRepository.byId(task.id) ?? task),
+    );
+  }
+
+  Widget _build(BuildContext context, Task t) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final selesai = context.rivora.bersih;
     final jarak = posisi == null
         ? null
         : Geolocator.distanceBetween(
             posisi!.latitude,
             posisi!.longitude,
-            task.lat,
-            task.lng,
+            t.lat,
+            t.lng,
           );
+    final laporanId = t.laporanId;
 
     return Scaffold(
-      appBar: AppBar(title: Text(task.rw ?? 'Detail tugas')),
+      appBar: AppBar(title: Text(t.rw ?? 'Detail tugas')),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(
           Space.lg,
@@ -41,11 +53,40 @@ class TaskDetailScreen extends StatelessWidget {
           Space.xl,
         ),
         children: [
+          if (t.selesai) ...[
+            Container(
+              padding: const EdgeInsets.all(Space.md),
+              decoration: BoxDecoration(
+                color: selesai.bg,
+                borderRadius: BorderRadius.circular(Radii.md),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.verified_rounded, color: selesai.fg),
+                  const SizedBox(width: Space.sm),
+                  Expanded(
+                    child: Text(
+                      'Selesai dan sudah diverifikasi AI',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        color: selesai.fg,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: Space.md),
+          ],
           ReportPhoto(
-            url: task.fotoUrl,
+            file: laporanId == null
+                ? null
+                : reportRepository.localPhoto(laporanId),
+            url: t.fotoUrl,
             height: 220,
+            width: double.infinity,
             radius: Radii.lg,
-            semanticLabel: 'Foto laporan ${task.jenisSaluran.label}',
+            semanticLabel: 'Foto laporan ${t.jenisSaluran.label}',
           ),
           const SizedBox(height: Space.lg),
           Card(
@@ -55,16 +96,16 @@ class TaskDetailScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SectionTitle(
-                    task.jenisSaluran.label,
-                    trailing: TugasStatusChip(status: task.status),
+                    t.jenisSaluran.label,
+                    trailing: TugasStatusChip(status: t.status),
                   ),
-                  if (task.skorPrioritas != null) ...[
+                  if (t.skorPrioritas != null) ...[
                     const SizedBox(height: Space.xs),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          formatDesimal(task.skorPrioritas!),
+                          formatDesimal(t.skorPrioritas!),
                           style: theme.textTheme.headlineMedium?.copyWith(
                             height: 1,
                           ),
@@ -91,7 +132,7 @@ class TaskDetailScreen extends StatelessWidget {
                   ],
                   const SizedBox(height: Space.lg),
                   Text(
-                    'Ditugaskan ${formatRelatif(task.createdAt)}',
+                    'Ditugaskan ${formatRelatif(t.createdAt)}',
                     style: theme.textTheme.bodyMedium,
                   ),
                 ],
@@ -99,7 +140,7 @@ class TaskDetailScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: Space.lg),
-          AiResultCard(ai: task.ai),
+          AiResultCard(ai: t.ai),
           const SizedBox(height: Space.lg),
           Card(
             child: Padding(
@@ -118,7 +159,7 @@ class TaskDetailScreen extends StatelessWidget {
                       const SizedBox(width: Space.sm),
                       Expanded(
                         child: Text(
-                          formatKoordinat(task.lat, task.lng),
+                          formatKoordinat(t.lat, t.lng),
                           style: theme.textTheme.bodyMedium,
                         ),
                       ),
@@ -135,7 +176,7 @@ class TaskDetailScreen extends StatelessWidget {
           ),
         ],
       ),
-      bottomNavigationBar: task.selesai
+      bottomNavigationBar: t.selesai
           ? null
           : SafeArea(
               child: Padding(
@@ -145,10 +186,26 @@ class TaskDetailScreen extends StatelessWidget {
                   Space.lg,
                   Space.lg,
                 ),
-                child: FilledButton.icon(
-                  onPressed: () => bukaPeta(task.lat, task.lng, arah: true),
-                  icon: const Icon(Icons.directions_walk_rounded),
-                  label: const Text('Arahkan ke lokasi'),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: OutlinedButton.icon(
+                        onPressed: () => bukaPeta(t.lat, t.lng, arah: true),
+                        icon: const Icon(Icons.directions_walk_rounded),
+                        label: const Text('Arahkan'),
+                      ),
+                    ),
+                    const SizedBox(width: Space.md),
+                    Expanded(
+                      flex: 3,
+                      child: FilledButton.icon(
+                        onPressed: () => mulaiVerifikasi(context, t),
+                        icon: const Icon(Icons.photo_camera_rounded),
+                        label: const Text('Foto sesudah'),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
