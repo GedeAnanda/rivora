@@ -14,7 +14,7 @@ Aplikasi pelapor untuk petugas kebersihan, siskamling, dan warga: foto saluran l
 | 00b | [00b-logo-ikon-aplikasi.md](00b-logo-ikon-aplikasi.md) | Logo "Mata Air" + ikon launcher Android (adaptive, themed). Panduan merek: [../BRAND.md](../BRAND.md) | – | Ikon terpasang, lolos `aapt2`; belum dicek di emulator |
 | 01 | [01-alur-lapor.md](01-alur-lapor.md) | Kamera, GPS, jenis saluran, kirim, hasil AI | 1–5 | Selesai, teruji di emulator (mode contoh). Tampilan didesain ulang di 02 |
 | 02 | [02-status-dan-tugas.md](02-status-dan-tugas.md) | Login + peran, navigasi bawah, Beranda baru, Laporan saya + timeline, tab Tugas | 5–8 | Selesai, teruji di emulator (mode contoh) |
-| 03 | _belum_ | Notifikasi FCM + foto sesudah (verifikasi) | 8–10 | – |
+| 03 | [03-verifikasi-dan-notifikasi.md](03-verifikasi-dan-notifikasi.md) | Foto sesudah + verifikasi AI + skor RW turun, notifikasi tugas (cek berkala + FCM), logo Mata Air di app, motion | 8–10 | Selesai, teruji di emulator (mode contoh). FCM aktif setelah `google-services.json` dipasang |
 
 Setiap tahap baru ditambah satu file `NN-nama-tahap.md` dan satu baris di tabel ini.
 
@@ -35,12 +35,14 @@ flutter pub get
 - `10.0.2.2` = alamat laptop dari dalam emulator Android.
 - `ALLOW_MOCK_LOCATION=true` hanya untuk emulator. Di HP asli jangan dipakai, karena pemeriksaan lokasi palsu adalah bagian dari pencegahan laporan palsu (Tabel 3).
 - Build APK untuk demo: `flutter build apk --release --dart-define=API_URL=https://<domain-backend>`
+- Push FCM: taruh `google-services.json` di `mobile/android/app/` (jangan di-commit). Tanpa file ini app tetap jalan dengan cek tugas berkala. Langkah lengkap: [03-verifikasi-dan-notifikasi.md](03-verifikasi-dan-notifikasi.md#menyalakan-fcm).
 
 ## Struktur `mobile/lib`
 
 ```
 lib/
 ├── main.dart                     # MaterialApp, tema light/dark, login vs shell
+├── app_keys.dart                 # navigatorKey, messengerKey, layarFokus
 ├── config.dart                   # API_URL, ALLOW_MOCK_LOCATION (--dart-define)
 ├── theme/
 │   └── app_theme.dart            # Token desain (lihat 00-design-system.md)
@@ -49,12 +51,15 @@ lib/
 │   ├── jenis_saluran.dart        # terbuka | gorong_gorong | inlet_jalan
 │   ├── report.dart               # Laporan + timeline status
 │   ├── session.dart              # Sesi login + peran
-│   └── task.dart                 # Tugas petugas
+│   ├── task.dart                 # Tugas petugas
+│   └── verification.dart         # Hasil verifikasi + level risiko RW
 ├── services/
 │   ├── api_client.dart           # HttpApiClient + MockApiClient
 │   ├── location_service.dart     # Izin + posisi GPS
-│   ├── repositories.dart         # Daftar laporan & tugas
-│   └── session_store.dart        # Simpan/muat sesi
+│   ├── repositories.dart         # Daftar laporan & tugas, deteksi tugas baru
+│   ├── session_store.dart        # Simpan/muat sesi
+│   ├── task_watcher.dart         # Cek tugas berkala (notifikasi)
+│   └── push_service.dart         # Push FCM (opsional)
 ├── screens/
 │   ├── login_screen.dart         # Masuk
 │   ├── app_shell.dart            # Navigasi bawah
@@ -66,7 +71,8 @@ lib/
 │   ├── reports_screen.dart       # Laporan saya
 │   ├── report_detail_screen.dart # Detail + timeline
 │   ├── tasks_screen.dart         # Tugas (petugas)
-│   └── task_detail_screen.dart   # Detail tugas
+│   ├── task_detail_screen.dart   # Detail tugas
+│   └── verify_screen.dart        # Verifikasi foto sesudah
 ├── widgets/                      # Komponen bersama
 └── utils/
     ├── format.dart               # Waktu, koordinat, desimal, jarak

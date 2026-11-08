@@ -116,6 +116,18 @@ Satu keluarga: Material Icons varian **rounded**. Tab tidak aktif memakai varian
 | `go_router` (pedoman stack Flutter) | Hanya ±10 layar dan tanpa deep link; `Navigator` cukup untuk 12 jam. Bisa dipindah saat notifikasi FCM perlu membuka layar tertentu (tahap 03) |
 | Animasi scroll reveal (hasil design system) | Untuk web; di app cukup transisi bawaan Material dan umpan balik tekan |
 
+## Tambahan tahap 03
+
+| Item | Isi |
+|---|---|
+| Tanda merek | `RivoraMark` = ikon aplikasi **Mata Air** (`widgets/rivora_mark.dart`), digambar dari `brand/logo/rivora-mark.svg`. Panduan: [../BRAND.md](../BRAND.md) |
+| Warna `waspada` | Light `#8A4A00` / `#FCEFD6` (6,03:1) · Dark `#F2C16B` / `#362607` (8,78:1). Dipakai level risiko RW bersama `bersih` (aman) dan `berat` (risiko tinggi) |
+| Token `Motion` | `fast` 150 ms · `normal` 250 ms · `reveal` 700 ms · masuk `easeOutCubic` · keluar `easeInCubic`. `Motion.of()` mengembalikan 0 kalau "Hapus animasi" aktif |
+| Komponen gerak | `AnimatedScore`, `AnimatedBar`, `ScanOverlay` (garis pindai warna Bening `#5FC3CF`), `Skeleton`, `SkeletonList` (`widgets/motion.dart`) |
+| `BeforeAfterCompare` | Geser, ketuk, atau aksi slider TalkBack (naik/turun 10%) |
+| `RisikoChip` | Aman / Waspada / Risiko tinggi, ikon + teks + warna |
+| Tombol | Padding horizontal 16 (bukan 24) supaya dua tombol berdampingan tidak memotong label |
+
 ## Checklist pra-rilis (pro-rules)
 
 | Item | Status |
@@ -130,5 +142,7 @@ Satu keluarga: Material Icons varian **rounded**. Tab tidak aktif memakai varian
 | Safe area untuk tombol bawah | ✅ |
 | Dark mode diuji terpisah | ✅ (emulator) |
 | Teks besar tanpa terpotong | ✅ (skala 130%) |
+| Animasi mati saat "Hapus animasi" | ✅ (lewat `Motion.of`) |
+| Pemberitahuan tidak menutupi aksi utama | ✅ (ditunda saat kamera/verifikasi terbuka) |
 | Diuji TalkBack | ❌ belum |
 | Diuji tablet / landscape | ❌ belum |
