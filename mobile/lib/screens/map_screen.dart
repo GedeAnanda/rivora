@@ -3,15 +3,18 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:latlong2/latlong.dart' show LatLng;
 
 import '../models/report.dart';
+import '../models/rw_risk.dart';
 import '../models/task.dart';
+import '../models/verification.dart';
 import '../services/location_service.dart';
 import '../services/repositories.dart';
 import '../services/session_store.dart';
 import '../services/weather_service.dart';
 import '../theme/app_theme.dart';
+import '../theme/rivora_icons.dart';
 import '../utils/format.dart';
 import '../utils/maps.dart';
 import '../widgets/report_photo.dart';
@@ -24,8 +27,8 @@ import 'task_detail_screen.dart';
 
 enum _Lapisan { semua, laporan, tugas }
 
-/// Peta laporan dan tugas di sekitar pengguna (proposal Tabel 3: peta
-/// risiko; di app mobile versi lapangan untuk petugas dan warga).
+/// Peta saluran: poligon risiko RW (proposal Tabel 3: peta risiko),
+/// laporan dari HP ini, dan tugas petugas.
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
 
@@ -52,19 +55,7 @@ class _MapScreenState extends State<MapScreen> {
   LatLng? get _saya =>
       _posisi == null ? null : LatLng(_posisi!.latitude, _posisi!.longitude);
 
-  LatLng _awal() {
-    final saya = _saya;
-    if (saya != null) return saya;
-    if (_petugas && taskRepository.items.isNotEmpty) {
-      final t = taskRepository.items.first;
-      return LatLng(t.lat, t.lng);
-    }
-    if (reportRepository.items.isNotEmpty) {
-      final r = reportRepository.items.first;
-      return LatLng(r.lat, r.lng);
-    }
-    return const LatLng(WeatherService.pilotLat, WeatherService.pilotLng);
-  }
+  LatLng _awal() => _saya ?? pusatRingkas(petugas: _petugas);
 
   void _pilihItem(Object item, LatLng titik) {
     setState(() => _pilih = item);
@@ -103,15 +94,16 @@ class _MapScreenState extends State<MapScreen> {
         markers.add(
           Marker(
             point: LatLng(r.lat, r.lng),
-            width: 36,
-            height: 36,
+            width: LaporanPin.ukuran.width,
+            height: LaporanPin.ukuran.height,
+            alignment: Alignment.topCenter,
             child: GestureDetector(
               onTap: () => _pilihItem(r, LatLng(r.lat, r.lng)),
               child: LaporanPin(
-                kelas: r.ai.kelas,
+                kelas: r.kelasKini,
                 terpilih: identical(_pilih, r),
                 label:
-                    'Laporan ${r.jenisSaluran.label}, ${r.ai.kelas.label}, '
+                    'Laporan ${r.jenisSaluran.label}, ${r.kelasKini.label}, '
                     '${labelStatusLaporan[r.status] ?? r.status}',
               ),
             ),
@@ -126,18 +118,19 @@ class _MapScreenState extends State<MapScreen> {
         markers.add(
           Marker(
             point: LatLng(t.lat, t.lng),
-            width: 38,
-            height: 38,
+            width: TugasPin.ukuran.width,
+            height: TugasPin.ukuran.height,
+            alignment: Alignment.topCenter,
             child: GestureDetector(
               onTap: () => _pilihItem(t, LatLng(t.lat, t.lng)),
               child: TugasPin(
-                kelas: t.ai.kelas,
+                kelas: t.kelasSebelum,
                 urutan: urutan,
                 selesai: t.selesai,
                 terpilih: identical(_pilih, t),
                 label: t.selesai
                     ? 'Tugas selesai ${t.rw ?? ''}'
-                    : 'Tugas prioritas $urutan ${t.rw ?? ''}, ${t.ai.kelas.label}',
+                    : 'Tugas nomor $urutan ${t.rw ?? ''}, ${t.kelasSebelum.label}',
               ),
             ),
           ),
@@ -150,13 +143,17 @@ class _MapScreenState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: Listenable.merge([reportRepository, taskRepository]),
+      listenable: Listenable.merge([
+        reportRepository,
+        taskRepository,
+        riskRepository,
+      ]),
       builder: (context, _) {
         final pilih = _pilih;
-        // Item terpilih bisa berubah di repositori (mis. tugas selesai).
         final tugasTerpilih = pilih is Task
             ? taskRepository.byId(pilih.id) ?? pilih
             : null;
+        final rw = riskRepository.data?.rw ?? const <RwRisk>[];
         return Scaffold(
           body: Stack(
             children: [
@@ -165,6 +162,7 @@ class _MapScreenState extends State<MapScreen> {
                   controller: _peta,
                   center: _awal(),
                   markers: _markers(),
+                  rw: rw,
                   posisiSaya: _saya,
                   onTapPeta: () => setState(() => _pilih = null),
                 ),
@@ -187,7 +185,13 @@ class _MapScreenState extends State<MapScreen> {
               Align(
                 alignment: Alignment.bottomCenter,
                 child: Padding(
-                  padding: const EdgeInsets.all(Space.lg),
+                  // Ruang 24 px di bawah untuk atribusi OpenStreetMap.
+                  padding: const EdgeInsets.fromLTRB(
+                    Space.lg,
+                    Space.lg,
+                    Space.lg,
+                    Space.lg + 12,
+                  ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -196,7 +200,7 @@ class _MapScreenState extends State<MapScreen> {
                         heroTag: 'peta-posisi-saya',
                         tooltip: 'Ke posisimu',
                         onPressed: _kePosisiSaya,
-                        child: const Icon(Icons.my_location_rounded),
+                        child: const Icon(RIcons.posisiSaya),
                       ),
                       const SizedBox(height: Space.md),
                       AnimatedSwitcher(
@@ -230,6 +234,7 @@ class _MapScreenState extends State<MapScreen> {
                           _ => _Legenda(
                             key: const ValueKey('legenda'),
                             petugas: _petugas,
+                            adaRw: rw.isNotEmpty,
                           ),
                         },
                       ),
@@ -266,11 +271,9 @@ class _BarAtas extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _Kaca(
+        _Panel(
           child: Row(
             children: [
-              Icon(Icons.map_rounded, color: theme.colorScheme.primary),
-              const SizedBox(width: Space.sm),
               Expanded(
                 child: Semantics(
                   header: true,
@@ -293,7 +296,7 @@ class _BarAtas extends StatelessWidget {
         ),
         if (petugas) ...[
           const SizedBox(height: Space.sm),
-          _Kaca(
+          _Panel(
             padding: const EdgeInsets.all(Space.xs),
             child: SegmentedButton<_Lapisan>(
               showSelectedIcon: false,
@@ -317,8 +320,8 @@ class _BarAtas extends StatelessWidget {
 }
 
 /// Panel melayang di atas peta.
-class _Kaca extends StatelessWidget {
-  const _Kaca({
+class _Panel extends StatelessWidget {
+  const _Panel({
     required this.child,
     this.padding = const EdgeInsets.symmetric(
       horizontal: Space.lg,
@@ -335,7 +338,7 @@ class _Kaca extends StatelessWidget {
     return Container(
       padding: padding,
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerLowest.withValues(alpha: 0.96),
+        color: scheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(Radii.lg),
         boxShadow: const [
           BoxShadow(
@@ -351,57 +354,72 @@ class _Kaca extends StatelessWidget {
 }
 
 class _Legenda extends StatelessWidget {
-  const _Legenda({super.key, required this.petugas});
+  const _Legenda({super.key, required this.petugas, required this.adaRw});
 
   final bool petugas;
+  final bool adaRw;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     // Sama dengan warna penanda (selalu versi pekat).
     const rv = RivoraColors.light;
-    Widget item(Color c, String t, {bool kotak = false}) => Row(
+    Widget titik(Color c, String t, {bool kotak = false}) => Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 12,
-          height: 12,
+          width: 10,
+          height: 10,
           decoration: BoxDecoration(
-            color: c,
+            color: kotak ? c.withValues(alpha: 0.25) : c,
+            border: kotak ? Border.all(color: c, width: 1.5) : null,
             shape: kotak ? BoxShape.rectangle : BoxShape.circle,
-            borderRadius: kotak ? BorderRadius.circular(3) : null,
+            borderRadius: kotak ? BorderRadius.circular(2) : null,
           ),
         ),
         const SizedBox(width: Space.xs + 2),
         Text(t, style: theme.textTheme.labelMedium),
       ],
     );
-    return _Kaca(
+    return _Panel(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Ketuk penanda untuk melihat detail',
-            style: theme.textTheme.labelLarge,
-          ),
-          const SizedBox(height: Space.sm),
+          Text('Kondisi saluran', style: theme.textTheme.labelLarge),
+          const SizedBox(height: Space.xs + 2),
           Wrap(
             spacing: Space.md,
             runSpacing: Space.xs,
             children: [
-              item(rv.berat.fg, 'Berat'),
-              item(rv.sedang.fg, 'Sedang'),
-              item(rv.ringan.fg, 'Ringan'),
-              item(rv.bersih.fg, 'Bersih'),
-              item(rv.tidakTerlihat.fg, 'Tidak terlihat'),
-              if (petugas)
-                item(
-                  theme.colorScheme.onSurfaceVariant,
-                  'Tugas (nomor = prioritas)',
-                  kotak: true,
-                ),
+              titik(rv.berat.fg, 'Berat'),
+              titik(rv.sedang.fg, 'Sedang'),
+              titik(rv.ringan.fg, 'Ringan'),
+              titik(rv.bersih.fg, 'Bersih'),
+              titik(rv.tidakTerlihat.fg, 'Tidak terlihat'),
             ],
           ),
+          if (adaRw) ...[
+            const SizedBox(height: Space.sm),
+            Text('Risiko RW', style: theme.textTheme.labelLarge),
+            const SizedBox(height: Space.xs + 2),
+            Wrap(
+              spacing: Space.md,
+              runSpacing: Space.xs,
+              children: [
+                for (final l in LevelRisiko.values)
+                  titik(rv.risiko(l).fg, l.label, kotak: true),
+              ],
+            ),
+          ],
+          if (petugas) ...[
+            const SizedBox(height: Space.sm),
+            Text(
+              'Pin bernomor = tugas, urut sumbatan terparah.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -421,7 +439,7 @@ class _KartuLaporan extends StatelessWidget {
         builder: (_) => ReportDetailScreen(report: report),
       ),
     );
-    return _Kaca(
+    return _Panel(
       padding: const EdgeInsets.all(Space.md),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -458,10 +476,11 @@ class _KartuLaporan extends StatelessWidget {
                       ),
                       const SizedBox(height: Space.xs + 2),
                       Wrap(
-                        spacing: Space.sm,
+                        spacing: Space.md,
                         runSpacing: Space.xs,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
-                          SumbatanBadge(kelas: report.ai.kelas, compact: true),
+                          SumbatanBadge(kelas: report.kelasKini, compact: true),
                           LaporanStatusChip(status: report.status),
                         ],
                       ),
@@ -478,7 +497,7 @@ class _KartuLaporan extends StatelessWidget {
                 flex: 2,
                 child: OutlinedButton.icon(
                   onPressed: () => bukaPeta(report.lat, report.lng),
-                  icon: const Icon(Icons.map_outlined),
+                  icon: const Icon(RIcons.bukaPeta, size: 18),
                   label: const Text('Maps'),
                 ),
               ),
@@ -519,23 +538,25 @@ class _KartuTugas extends StatelessWidget {
     void buka() => Navigator.of(context).push(
       MaterialPageRoute<void>(builder: (_) => TaskDetailScreen(task: task)),
     );
-    return _Kaca(
+    return _Panel(
       padding: const EdgeInsets.all(Space.md),
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           InkWell(
             onTap: buka,
             borderRadius: BorderRadius.circular(Radii.md),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox.square(
-                  dimension: 44,
+                SizedBox.fromSize(
+                  size: TugasPin.ukuran,
                   child: TugasPin(
-                    kelas: task.ai.kelas,
+                    kelas: task.kelasSebelum,
                     urutan: urutan,
                     selesai: task.selesai,
-                    label: 'Urutan prioritas ${urutan ?? '-'}',
+                    label: 'Tugas nomor ${urutan ?? '-'}',
                   ),
                 ),
                 const SizedBox(width: Space.md),
@@ -549,22 +570,28 @@ class _KartuTugas extends StatelessWidget {
                       ),
                       const SizedBox(height: Space.xs),
                       Wrap(
-                        spacing: Space.sm,
+                        spacing: Space.md,
                         runSpacing: Space.xs,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
-                          SumbatanBadge(kelas: task.ai.kelas, compact: true),
+                          SumbatanBadge(
+                            kelas: task.kelasSebelum,
+                            compact: true,
+                          ),
                           TugasStatusChip(status: task.status),
+                          if (jarak != null)
+                            Text(formatJarak(jarak!), style: muted),
                         ],
                       ),
-                      const SizedBox(height: Space.xs),
-                      Text(
-                        [
-                          if (task.skorPrioritas != null)
-                            'Prioritas ${formatDesimal(task.skorPrioritas!)}',
-                          if (jarak != null) formatJarak(jarak!),
-                        ].join(' · '),
-                        style: muted,
-                      ),
+                      if (task.catatanLurah != null) ...[
+                        const SizedBox(height: Space.xs + 2),
+                        Text(
+                          task.catatanLurah!,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall,
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -573,7 +600,13 @@ class _KartuTugas extends StatelessWidget {
           ),
           const SizedBox(height: Space.md),
           if (task.selesai)
-            FilledButton(onPressed: buka, child: const Text('Lihat detail'))
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: buka,
+                child: const Text('Lihat detail'),
+              ),
+            )
           else
             Row(
               children: [
@@ -581,7 +614,7 @@ class _KartuTugas extends StatelessWidget {
                   flex: 2,
                   child: OutlinedButton.icon(
                     onPressed: () => bukaPeta(task.lat, task.lng, arah: true),
-                    icon: const Icon(Icons.directions_walk_rounded),
+                    icon: const Icon(RIcons.arahkan, size: 18),
                     label: const Text('Arahkan'),
                   ),
                 ),
@@ -590,7 +623,7 @@ class _KartuTugas extends StatelessWidget {
                   flex: 3,
                   child: FilledButton.icon(
                     onPressed: () => mulaiVerifikasi(context, task),
-                    icon: const Icon(Icons.photo_camera_rounded),
+                    icon: const Icon(RIcons.kamera, size: 18),
                     label: const Text('Foto sesudah'),
                   ),
                 ),
@@ -608,9 +641,10 @@ List<Marker> penandaRingkas(BuildContext context, {required bool petugas}) {
     for (final r in reportRepository.items)
       Marker(
         point: LatLng(r.lat, r.lng),
-        width: 28,
-        height: 28,
-        child: LaporanPin(kelas: r.ai.kelas, label: r.jenisSaluran.label),
+        width: LaporanPin.ukuran.width,
+        height: LaporanPin.ukuran.height,
+        alignment: Alignment.topCenter,
+        child: LaporanPin(kelas: r.kelasKini, label: r.jenisSaluran.label),
       ),
   ];
   if (petugas) {
@@ -619,10 +653,11 @@ List<Marker> penandaRingkas(BuildContext context, {required bool petugas}) {
       markers.add(
         Marker(
           point: LatLng(t.lat, t.lng),
-          width: 30,
-          height: 30,
+          width: TugasPin.ukuran.width,
+          height: TugasPin.ukuran.height,
+          alignment: Alignment.topCenter,
           child: TugasPin(
-            kelas: t.ai.kelas,
+            kelas: t.kelasSebelum,
             urutan: aktif.indexOf(t) + 1,
             label: t.rw ?? '',
           ),
