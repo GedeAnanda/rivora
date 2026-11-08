@@ -15,6 +15,7 @@ node_modules/
 dist/
 build/
 *.log
+backend/uploads/
 
 # --- Flutter / Dart (mobile) ---
 .dart_tool/

@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>RIVORA · Contoh UI (referensi Notion)</title>
+<!-- Contoh statis untuk memilih arah tampilan. Data di sini karangan, bukan dari backend. -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;1,400&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="leaflet.css" />
+<style>
+  :root {
+    --kanvas: #f6f5f4;
+    --kartu: #ffffff;
+    --garis: rgba(0, 0, 0, 0.08);
+    --tinta: #000;
+    --teks: rgba(0, 0, 0, 0.92);
+    --teks-2: #615d59;
+    --teks-3: #757575;
+    --teal: #127a6c;
+    --teal-muda: #e3f2ef;
+    --biru: #0075de;
+    --biru-muda: #e6f3fe;
+    --peach: #f6d5b8;
+    --midnight: #02093a;
+    /* SRS bagian 8 */
+    --aman: #43a047;
+    --waspada: #f57c00;
+    --tinggi: #d32f2f;
+    --abu: #9e9e9e;
+    --k-bersih: #43a047;
+    --k-ringan: #9e9d24;
+    --k-sedang: #f57c00;
+    --k-berat: #d32f2f;
+    --k-tt: #607d8b;
+    --serif: 'Source Serif 4', Georgia, serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--kanvas); color: var(--teks); }
+  body { font: 15px/1.5 Inter, system-ui, 'Segoe UI', sans-serif; font-feature-settings: 'lnum'; }
+  h1, h2, h3, p { margin: 0; }
+  button { font: inherit; cursor: pointer; }
+
+  .app { display: grid; grid-template-columns: 236px 1fr; min-height: 100vh; }
+
+  /* ---------- Sidebar seperti daftar halaman ---------- */
+  .sidebar { position: sticky; top: 0; height: 100vh; padding: 14px 10px; border-right: 1px solid var(--garis); background: #fbfbfa; display: flex; flex-direction: column; gap: 2px; }
+  .ws { display: flex; align-items: center; gap: 10px; padding: 6px 8px 14px; }
+  .ws-logo { width: 28px; height: 28px; border-radius: 7px; background: var(--teal); display: grid; place-items: center; color: #fff; }
+  .ws-nama { font-weight: 700; font-size: 14px; letter-spacing: 0.02em; }
+  .ws-sub { font-size: 12px; color: var(--teks-3); }
+  .nav { display: flex; align-items: center; gap: 10px; padding: 6px 10px; border-radius: 6px; color: rgba(0,0,0,.6); font-weight: 500; font-size: 14px; text-decoration: none; }
+  .nav:hover { background: rgba(0,0,0,.04); color: var(--tinta); }
+  .nav.aktif { background: rgba(0,0,0,.05); color: var(--tinta); }
+  .nav .jml { margin-left: auto; font-size: 12px; color: var(--teks-3); }
+  .nav-judul { font-size: 11.5px; font-weight: 600; color: var(--teks-3); padding: 14px 10px 4px; }
+  .sidebar-bawah { margin-top: auto; padding: 10px; font-size: 12px; color: var(--teks-3); }
+
+  /* ---------- Halaman ---------- */
+  main { padding: 28px 48px 64px; max-width: 1240px; width: 100%; }
+  .bar-atas { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; font-size: 13px; color: var(--teks-3); }
+  .bar-atas .kanan { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 9999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .pill-demo { background: var(--biru-muda); color: #0b5cad; }
+  .pill-lebat { background: var(--tinggi); color: #fff; }
+
+  .judul { font-size: 48px; line-height: 1.06; font-weight: 700; letter-spacing: -0.035em; color: var(--tinta); max-width: 820px; }
+  .sorot { background: var(--peach); border-radius: 9999px; padding: 0 18px; display: inline-block; line-height: 1.25; }
+  .lead { font-family: var(--serif); font-size: 19px; line-height: 1.55; color: var(--teks-2); margin-top: 14px; max-width: 700px; }
+
+  .callout { display: flex; gap: 14px; align-items: flex-start; margin-top: 26px; padding: 16px 18px; border-radius: 12px; background: #fff4e5; }
+  .callout .ikon { font-size: 22px; line-height: 1; }
+  .callout b { color: var(--tinta); }
+  .callout .kecil { font-size: 13px; color: var(--teks-2); margin-top: 2px; }
+  .callout .aksi { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+
+  .btn { border: 0; border-radius: 8px; padding: 7px 15px; font-weight: 500; font-size: 14px; }
+  .btn-utama { background: var(--teal); color: #fff; }
+  .btn-hantu { background: var(--teal-muda); color: var(--teal); }
+  .btn-teks { background: transparent; color: rgba(0,0,0,.9); }
+  .btn-garis { background: transparent; border: 1px solid rgba(0,0,0,.2); border-radius: 4px; padding: 4px 10px; font-size: 13px; }
+
+  section { margin-top: 44px; }
+  .sec-kepala { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; }
+  .sec-kepala h2 { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; color: var(--tinta); }
+  .sec-kepala .ket { color: var(--teks-3); font-size: 14px; }
+  .sec-kepala .kanan { margin-left: auto; }
+
+  /* Kartu aksen = warna level RW (SRS), seperti kartu fitur berwarna di referensi */
+  .ringkas { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .aksen { border-radius: 12px; padding: 20px 22px; min-height: 132px; display: flex; flex-direction: column; justify-content: space-between; }
+  .aksen .angka { font-size: 54px; line-height: 1; font-weight: 700; letter-spacing: -0.04em; }
+  .aksen .label { font-weight: 600; font-size: 15px; display: flex; align-items: center; gap: 6px; }
+  .aksen .sub { font-size: 13px; opacity: .85; }
+  .a-tinggi { background: var(--tinggi); color: #fff; }
+  .a-waspada { background: #ffb110; color: #000; }
+  .a-aman { background: #d9efda; color: #1b4d1d; }
+  .a-gelap { background: var(--midnight); color: #fff; }
+
+  .kartu { background: var(--kartu); border: 1px solid var(--garis); border-radius: 12px; }
+  .peta-wrap { display: grid; grid-template-columns: 1fr 340px; gap: 14px; }
+  #peta-map { height: 420px; border-radius: 12px; border: 1px solid var(--garis); }
+  .kenapa { padding: 22px; }
+  .kenapa .kecil-atas { font-size: 12px; color: var(--teks-3); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+  .kenapa h3 { font-size: 22px; letter-spacing: -0.011em; margin: 4px 0 2px; color: var(--tinta); }
+  .baris { display: grid; grid-template-columns: 76px 1fr 118px; gap: 10px; align-items: center; margin-top: 14px; font-size: 13.5px; }
+  .meter { height: 8px; border-radius: 9999px; background: rgba(0,0,0,.07); overflow: hidden; }
+  .meter i { display: block; height: 100%; border-radius: 9999px; background: var(--tinta); }
+  .rumus { white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; color: var(--teks-2); }
+  .alasan { margin-top: 18px; font-family: var(--serif); font-size: 16px; line-height: 1.55; color: var(--teks-2); border-left: 3px solid var(--tinggi); padding-left: 12px; }
+
+  /* Tabel bergaya database */
+  .db { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .db th { text-align: left; font-weight: 500; color: var(--teks-3); font-size: 13px; padding: 8px 12px; border-bottom: 1px solid var(--garis); }
+  .db td { padding: 11px 12px; border-bottom: 1px solid var(--garis); vertical-align: middle; }
+  .db tr:last-child td { border-bottom: 0; }
+  .db tr:hover td { background: #fbfbfa; }
+  .no { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--tinta); color: #fff; font-size: 12px; font-weight: 700; }
+  .kelas { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 9999px; font-size: 12.5px; font-weight: 600; }
+  .kelas::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+  .kl-berat { background: #fdecea; color: var(--k-berat); }
+  .kl-sedang { background: #fff1e3; color: #c25e00; }
+  .kl-ringan { background: #f3f3dd; color: #6f6e14; }
+  .skor { font-weight: 700; font-variant-numeric: tabular-nums; font-size: 16px; }
+  .yakin { font-size: 13px; color: var(--teks-2); }
+  .orang { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--biru); font-weight: 500; }
+  .avatar { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--biru); display: grid; place-items: center; font-size: 10px; font-weight: 700; background: #fff; }
+
+  /* Papan kanban */
+  .kanban { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .kolom { background: rgba(0,0,0,.025); border-radius: 12px; padding: 12px; }
+  .kolom h4 { margin: 2px 4px 10px; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+  .st { padding: 1px 9px; border-radius: 9999px; font-size: 12px; font-weight: 600; }
+  .st-baru { background: var(--biru-muda); color: #0b5cad; }
+  .st-kerja { background: #fff1e3; color: #c25e00; }
+  .st-selesai { background: #e5f3e6; color: #2e7d32; }
+  .tugas { background: #fff; border: 1px solid var(--garis); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; font-size: 13.5px; }
+  .tugas b { font-weight: 600; color: var(--tinta); }
+  .tugas .meta { color: var(--teks-3); font-size: 12px; margin-top: 4px; display: flex; gap: 8px; align-items: center; }
+  .foto2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
+  .foto2 div { aspect-ratio: 4/3; border-radius: 6px; display: grid; place-items: end start; padding: 4px 6px; font-size: 11px; font-weight: 600; color: #fff; }
+  .f-sblm { background: linear-gradient(#0000 40%, #0007), #8d7b62; }
+  .f-ssdh { background: linear-gradient(#0000 40%, #0007), #6f8f86; }
+
+  .kaki { margin-top: 48px; font-family: var(--serif); font-size: 15px; color: var(--teks-3); }
+  .catatan-contoh { position: fixed; right: 16px; bottom: 16px; background: var(--midnight); color: #fff; border-radius: 12px; padding: 10px 14px; font-size: 12.5px; max-width: 280px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="ws">
+      <div class="ws-logo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3.5s-6 6.6-6 10.7a6 6 0 0 0 12 0C18 10.1 12 3.5 12 3.5z"/></svg></div>
+      <div><div class="ws-nama">RIVORA</div><div class="ws-sub">Kel. Rancabolang</div></div>
+    </div>
+    <a class="nav aktif" href="#">Sebelum hujan</a>
+    <a class="nav" href="#peta">Peta risiko</a>
+    <a class="nav" href="#prioritas">Prioritas <span class="jml">14</span></a>
+    <a class="nav" href="#tugas">Tugas <span class="jml">2</span></a>
+    <a class="nav" href="#">Cek manual <span class="jml">2</span></a>
+    <div class="nav-judul">Demo</div>
+    <a class="nav" href="#">Simulasi hujan</a>
+    <div class="sidebar-bawah">Lurah Rancabolang · Keluar</div>
+  </aside>
+
+  <main>
+    <div class="bar-atas">
+      Rancabolang / Sebelum hujan
+      <div class="kanan"><span class="pill pill-demo">Data contoh</span> <span>Diperbarui 10.54 WIB</span></div>
+    </div>
+
+    <h1 class="judul"><span class="sorot">Bersihkan</span> 14 saluran sebelum hujan sore ini.</h1>
+    <p class="lead">Skor tiap RW menggabungkan prakiraan hujan, kondisi saluran dari foto petugas, dan kerentanan lokasi. Mulai dari yang paling atas.</p>
+
+    <div class="callout">
+      <div>
+        <b>Hujan 62 mm dalam 24 jam</b> <span class="pill pill-lebat">Hujan lebat diprediksi</span>
+        <div class="kecil">Open-Meteo · diambil 10.31 WIB · puncak sekitar 15.00 sampai 18.00</div>
+      </div>
+      <div class="aksi"><button class="btn btn-hantu">Simulasi 80 mm</button></div>
+    </div>
+
+    <section>
+      <div class="ringkas">
+        <div class="aksen a-tinggi"><div class="label">Risiko tinggi</div><div><div class="angka">2</div><div class="sub">RW 11, RW 12</div></div></div>
+        <div class="aksen a-waspada"><div class="label">Waspada</div><div><div class="angka">7</div><div class="sub">RW yang perlu dipantau</div></div></div>
+        <div class="aksen a-aman"><div class="label">Aman</div><div><div class="angka">3</div><div class="sub">tetap dicek rutin</div></div></div>
+        <div class="aksen a-gelap"><div class="label">Tugas berjalan</div><div><div class="angka">2</div><div class="sub">1 selesai hari ini</div></div></div>
+      </div>
+    </section>
+
+    <section id="peta">
+      <div class="sec-kepala"><h2>Peta risiko per RW</h2><span class="ket">klik wilayah untuk melihat alasannya</span></div>
+      <div class="peta-wrap">
+        <div id="peta-map"></div>
+        <div class="kartu kenapa">
+          <div class="kecil-atas">Kenapa skor ini?</div>
+          <h3>RW 12 · 0,78</h3>
+          <span class="pill" style="background:#fdecea;color:var(--tinggi)">Risiko tinggi</span>
+          <div class="baris"><span>Hujan</span><div class="meter"><i style="width:62%"></i></div><span class="rumus">0,62 × 0,4 = 0,25</span></div>
+          <div class="baris"><span>Sumbatan</span><div class="meter"><i style="width:85%"></i></div><span class="rumus">0,85 × 0,4 = 0,34</span></div>
+          <div class="baris"><span>Kerentanan</span><div class="meter"><i style="width:96%"></i></div><span class="rumus">0,96 × 0,2 = 0,19</span></div>
+          <p class="alasan">Risiko tinggi: hujan 62 mm dalam 24 jam, 1 dari 1 saluran tersumbat berat, lokasi rendah dan 120 m dari titik genangan Jl. Rancabolang.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="prioritas">
+      <div class="sec-kepala"><h2>Prioritas</h2><span class="ket">urut dari skor tertinggi</span><span class="kanan"><button class="btn-garis">Lihat semua</button></span></div>
+      <div class="kartu">
+        <table class="db">
+          <thead><tr><th></th><th>Saluran</th><th>Kondisi</th><th>Keyakinan AI</th><th>Dilaporkan</th><th>Skor</th><th>Tugas</th></tr></thead>
+          <tbody>
+            <tr><td><div class="no">1</div></td><td><b>Saluran terbuka</b> · RW 12</td><td><span class="kelas kl-berat">Sumbatan berat</span></td><td class="yakin">Tinggi</td><td class="yakin">16 jam lalu</td><td class="skor">0,78</td><td><button class="btn btn-utama">Tugaskan</button></td></tr>
+            <tr><td><div class="no">2</div></td><td><b>Saluran terbuka</b> · RW 11</td><td><span class="kelas kl-berat">Sumbatan berat</span></td><td class="yakin">Sedang</td><td class="yakin">5 hari lalu</td><td class="skor">0,70</td><td><span class="orang"><span class="avatar">AS</span>Asep · Baru</span></td></tr>
+            <tr><td><div class="no">3</div></td><td><b>Gorong-gorong</b> · RW 07</td><td><span class="kelas kl-sedang">Sumbatan sedang</span></td><td class="yakin">Tinggi</td><td class="yakin">3 hari lalu</td><td class="skor">0,68</td><td><button class="btn btn-teks">Tugaskan</button></td></tr>
+            <tr><td><div class="no">4</div></td><td><b>Inlet jalan</b> · RW 09</td><td><span class="kelas kl-ringan">Sumbatan ringan</span></td><td class="yakin">Rendah · perlu dikonfirmasi</td><td class="yakin">6 hari lalu</td><td class="skor">0,52</td><td><button class="btn btn-teks">Tugaskan</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="tugas">
+      <div class="sec-kepala"><h2>Tugas petugas</h2><span class="ket">bukti foto sebelum dan sesudah</span></div>
+      <div class="kanban">
+        <div class="kolom"><h4><span class="st st-baru">Baru</span> 1</h4>
+          <div class="tugas"><b>Saluran terbuka · RW 11</b><div class="meta"><span class="avatar">AS</span> Asep Saepudin · 10.40 WIB</div></div>
+        </div>
+        <div class="kolom"><h4><span class="st st-kerja">Dikerjakan</span> 1</h4>
+          <div class="tugas"><b>Saluran terbuka · RW 07</b><div class="meta"><span class="avatar" style="border-color:#f64932">DK</span> Dedi Kurniawan · 07.32 WIB</div><div class="meta">"Prioritas sebelum hujan sore"</div></div>
+        </div>
+        <div class="kolom"><h4><span class="st st-selesai">Selesai</span> 1</h4>
+          <div class="tugas"><b>Saluran terbuka · RW 05</b><div class="meta">✓ Terverifikasi AI · keyakinan tinggi</div>
+            <div class="foto2"><div class="f-sblm">Sebelum · 0,85</div><div class="f-ssdh">Sesudah · 0,08</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <p class="kaki">Skor dihitung per RW, bukan per ruas jalan. Bobot 0,4 / 0,4 / 0,2 adalah asumsi awal dan akan dikalibrasi saat pilot.</p>
+  </main>
+</div>
+
+<div class="catatan-contoh">Contoh tampilan statis untuk memilih arah UI. Data karangan.</div>
+
+<script src="leaflet.js"></script>
+<script>
+  const peta = L.map("peta-map", { zoomControl: true, scrollWheelZoom: false }).setView([-6.9455, 107.6905], 15)
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors' }).addTo(peta)
+  const W = { aman: '#43a047', waspada: '#f57c00', tinggi: '#d32f2f' }
+  const lv = [['aman', 'waspada', 'waspada', 'waspada'], ['aman', 'waspada', 'waspada', 'tinggi'], ['aman', 'waspada', 'waspada', 'tinggi']]
+  const s = 0.0042
+  lv.forEach((baris, b) => baris.forEach((l, k) => {
+    const lat = -6.9455 + (1.5 - b) * s, lng = 107.6905 + (k - 2) * s
+    L.polygon([[lat, lng], [lat, lng + s], [lat - s, lng + s], [lat - s, lng]], { color: W[l], weight: 2, fillColor: W[l], fillOpacity: l === 'tinggi' ? 0.4 : 0.3 })
+      .bindTooltip(`RW ${String(b * 4 + k + 1).padStart(2, '0')}`).addTo(peta)
+  }))
+  ;[[-6.950, 107.6965, '#d32f2f'], [-6.9475, 107.691, '#f57c00'], [-6.941, 107.684, '#43a047'], [-6.946, 107.6885, '#9e9d24']].forEach(([a, b, c]) =>
+    L.circleMarker([a, b], { radius: 7, color: '#fff', weight: 2, fillColor: c, fillOpacity: 1 }).addTo(peta))
+</script>
+</body>
+</html>
