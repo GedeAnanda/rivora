@@ -20,6 +20,7 @@ Aplikasi pelapor untuk petugas kebersihan, siskamling, dan warga: foto saluran l
 | 06 | [06-ramah-warga.md](06-ramah-warga.md) | Tampilan ramah warga: kalimat kesimpulan + saran, meteran risiko tiga warna, gambar tingkat sumbatan, keyakinan AI dalam kata, peta kecil pengganti koordinat; angka dan rumus pindah ke lembar "Cara RIVORA menilai" | – | Selesai, 44 tes lulus, teruji di emulator light/dark |
 | 07 | [07-fcm-dan-lokasi-demo.md](07-fcm-dan-lokasi-demo.md) | Langkah membuat Firebase (package `id.rivora.rivora`), payload notifikasi `type`/`jenis` diterima, build `LOKASI_DEMO=true` untuk demo di luar wilayah pilot | – | Selesai, 48 tes lulus. FCM menunggu `google-services.json` |
 | 08 | [08-qa-rebrand-biru.md](08-qa-rebrand-biru.md) | QA rebrand biru (logo Ombak): kontras palet, splash Android 12+ biru, garis tepi logo header, baris README ganda dihapus | – | Selesai, 48 tes lulus, teruji di emulator light/dark |
+| 09 | [09-responsif-dan-performa.md](09-responsif-dan-performa.md) | Uji HP kecil 360 dp + huruf 130%: 1 overflow + 7 tampilan terpotong diperbaiki (`TombolBerpasangan`, `layarSempit`); APK arm64 19,9 MB, buka ~2,1 dtk (release) | – | Selesai, 56 tes lulus |
 
 Setiap tahap baru ditambah satu file `NN-nama-tahap.md` dan satu baris di tabel ini.
 
@@ -40,7 +41,7 @@ flutter pub get
 
 - `10.0.2.2` = alamat laptop dari dalam emulator Android.
 - `ALLOW_MOCK_LOCATION=true` hanya untuk emulator. Di HP asli jangan dipakai, karena pemeriksaan lokasi palsu adalah bagian dari pencegahan laporan palsu (Tabel 3).
-- Build APK untuk demo: `flutter build apk --release --dart-define=API_URL=https://<domain-backend>`
+- Build APK untuk demo: `flutter build apk --release --split-per-abi --dart-define=API_URL=https://<domain-backend>` → pakai `app-arm64-v8a-release.apk` (±20 MB)
 - Push FCM: buat proyek Firebase dengan package `id.rivora.rivora` ([07](07-fcm-dan-lokasi-demo.md)), taruh `google-services.json` di `mobile/android/app/` (jangan di-commit). Tanpa file ini app tetap jalan dengan cek tugas berkala. Langkah lengkap: [03-verifikasi-dan-notifikasi.md](03-verifikasi-dan-notifikasi.md#menyalakan-fcm).
 
 ## Struktur `mobile/lib`
