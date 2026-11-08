@@ -2,6 +2,7 @@
 
 **Pemilik:** A · Mobile developer · **Branch:** `feature/mobile`
 **Kode:** `mobile/` (Flutter, Android) · **Acuan:** proposal 3.1–3.4, Tabel 3, 12, 13, 14
+**Kebutuhan (PRD & SRS):** [SRS.md](SRS.md)
 
 Aplikasi pelapor untuk petugas kebersihan, siskamling, dan warga: foto saluran langsung dari kamera, GPS dan waktu tercatat otomatis, lalu hasil analisis AI ditampilkan.
 
@@ -9,8 +10,10 @@ Aplikasi pelapor untuk petugas kebersihan, siskamling, dan warga: foto saluran l
 
 | No | Dokumen | Isi | Jam (Tabel 14) | Status |
 |---|---|---|---|---|
-| 01 | [01-alur-lapor.md](01-alur-lapor.md) | Kamera, GPS, jenis saluran, kirim, hasil AI | 1–5 | Selesai, teruji di emulator (mode contoh) |
-| 02 | _belum_ | Status laporan + tab Tugas | 5–8 | – |
+| 00 | [00-design-system.md](00-design-system.md) | Warna light/dark + rasio kontras, font, spasi, komponen, checklist | – | Dipakai semua layar |
+| 00b | [00b-logo-ikon-aplikasi.md](00b-logo-ikon-aplikasi.md) | Logo "Mata Air" + ikon launcher Android (adaptive, themed). Panduan merek: [../BRAND.md](../BRAND.md) | – | Ikon terpasang, lolos `aapt2`; belum dicek di emulator |
+| 01 | [01-alur-lapor.md](01-alur-lapor.md) | Kamera, GPS, jenis saluran, kirim, hasil AI | 1–5 | Selesai, teruji di emulator (mode contoh). Tampilan didesain ulang di 02 |
+| 02 | [02-status-dan-tugas.md](02-status-dan-tugas.md) | Login + peran, navigasi bawah, Beranda baru, Laporan saya + timeline, tab Tugas | 5–8 | Selesai, teruji di emulator (mode contoh) |
 | 03 | _belum_ | Notifikasi FCM + foto sesudah (verifikasi) | 8–10 | – |
 
 Setiap tahap baru ditambah satu file `NN-nama-tahap.md` dan satu baris di tabel ini.
@@ -24,7 +27,7 @@ flutter pub get
 
 | Kondisi | Perintah |
 |---|---|
-| Backend belum ada (mode contoh) | `flutter run` |
+| Backend belum ada (mode contoh, login pakai tombol Petugas / Warga) | `flutter run` |
 | Emulator + backend di laptop | `flutter run --dart-define=API_URL=http://10.0.2.2:3000 --dart-define=ALLOW_MOCK_LOCATION=true` |
 | HP asli + backend di laptop (satu WiFi/hotspot) | `flutter run --dart-define=API_URL=http://<IP-laptop>:3000` |
 | HP asli + backend sudah deploy | `flutter run --dart-define=API_URL=https://<domain-backend>` |
@@ -37,25 +40,40 @@ flutter pub get
 
 ```
 lib/
-├── main.dart                     # MaterialApp + tema
+├── main.dart                     # MaterialApp, tema light/dark, login vs shell
 ├── config.dart                   # API_URL, ALLOW_MOCK_LOCATION (--dart-define)
+├── theme/
+│   └── app_theme.dart            # Token desain (lihat 00-design-system.md)
 ├── models/
 │   ├── ai_result.dart            # Keluaran AI, format Lampiran C
 │   ├── jenis_saluran.dart        # terbuka | gorong_gorong | inlet_jalan
-│   └── report.dart               # Respons POST /reports
+│   ├── report.dart               # Laporan + timeline status
+│   ├── session.dart              # Sesi login + peran
+│   └── task.dart                 # Tugas petugas
 ├── services/
 │   ├── api_client.dart           # HttpApiClient + MockApiClient
-│   └── location_service.dart     # Izin + posisi GPS
+│   ├── location_service.dart     # Izin + posisi GPS
+│   ├── repositories.dart         # Daftar laporan & tugas
+│   └── session_store.dart        # Simpan/muat sesi
 ├── screens/
-│   ├── home_screen.dart          # Beranda, tombol "Lapor saluran"
+│   ├── login_screen.dart         # Masuk
+│   ├── app_shell.dart            # Navigasi bawah
+│   ├── home_screen.dart          # Beranda
+│   ├── lapor_flow.dart           # Izin lokasi → kamera
 │   ├── camera_screen.dart        # Kamera in-app (tanpa galeri)
 │   ├── report_form_screen.dart   # Konfirmasi + pilih jenis saluran
-│   └── result_screen.dart        # Hasil analisis AI
-├── widgets/
-│   └── sumbatan_style.dart       # Warna, ikon, badge kelas sumbatan
+│   ├── result_screen.dart        # Hasil analisis AI
+│   ├── reports_screen.dart       # Laporan saya
+│   ├── report_detail_screen.dart # Detail + timeline
+│   ├── tasks_screen.dart         # Tugas (petugas)
+│   └── task_detail_screen.dart   # Detail tugas
+├── widgets/                      # Komponen bersama
 └── utils/
-    └── format.dart               # Format waktu, koordinat, desimal
+    ├── format.dart               # Waktu, koordinat, desimal, jarak
+    └── maps.dart                 # Buka Google Maps
 ```
+
+Font: `mobile/assets/fonts/` (Atkinson Hyperlegible, OFL).
 
 ## Cek sebelum commit
 
