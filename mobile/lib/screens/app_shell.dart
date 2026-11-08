@@ -9,9 +9,11 @@ import '../services/push_service.dart';
 import '../services/repositories.dart';
 import '../services/session_store.dart';
 import '../services/task_watcher.dart';
+import '../services/weather_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/format.dart';
 import 'home_screen.dart';
+import 'map_screen.dart';
 import 'reports_screen.dart';
 import 'task_detail_screen.dart';
 import 'tasks_screen.dart';
@@ -22,8 +24,9 @@ final shellTab = ValueNotifier<int>(0);
 
 abstract final class Tabs {
   static const beranda = 0;
-  static const laporan = 1;
-  static const tugas = 2;
+  static const peta = 1;
+  static const laporan = 2;
+  static const tugas = 3;
 }
 
 /// Navigasi bawah: Beranda, Laporan, dan Tugas (khusus petugas).
@@ -46,6 +49,7 @@ class _AppShellState extends State<AppShell> {
     super.initState();
     shellTab.value = Tabs.beranda;
     reportRepository.refresh();
+    weatherService.refresh();
     if (_petugas) {
       taskRepository.refresh();
       taskWatcher.start();
@@ -154,6 +158,7 @@ class _AppShellState extends State<AppShell> {
       builder: (context, tab, _) {
         final pages = [
           const HomeScreen(),
+          const MapScreen(),
           const ReportsScreen(),
           if (_petugas) const TasksScreen(),
         ];
@@ -170,6 +175,11 @@ class _AppShellState extends State<AppShell> {
                   icon: Icon(Icons.home_outlined),
                   selectedIcon: Icon(Icons.home_rounded),
                   label: 'Beranda',
+                ),
+                const NavigationDestination(
+                  icon: Icon(Icons.map_outlined),
+                  selectedIcon: Icon(Icons.map_rounded),
+                  label: 'Peta',
                 ),
                 const NavigationDestination(
                   icon: Icon(Icons.receipt_long_outlined),
