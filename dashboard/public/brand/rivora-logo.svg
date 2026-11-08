@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 120" role="img" aria-label="RIVORA">
+  <title>RIVORA</title>
+  <defs><mask id="m"><rect x="-10" y="-10" width="140" height="140" fill="#fff"/><path d="M0 77 C 20 72, 32 82, 50 75 S 82 56, 101 52" fill="none" stroke="#000" stroke-width="6.5" stroke-linecap="round"/><circle cx="58" cy="51" r="15.5" fill="#000"/></mask></defs>
+  <path mask="url(#m)" fill="#0d5e53" d="M6 74 C 18 32, 76 12, 115 42 C 96 92, 30 106, 6 74 Z"/>
+  <path fill="#2fb3c6" d="M58 38.5 C 58 38.5, 66 47.5, 66 53 A8 8 0 0 1 50 53 C 50 47.5, 58 38.5, 58 38.5 Z"/>
+  <g transform="translate(140 37) scale(1.15)" fill="none" stroke="#17324d" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"><path d="M0 40 V0 H14 A11 11 0 0 1 14 22 H0 M13 22 L26 40"/><path d="M42.5 0 V40"/><path d="M59 0 L73 40 L87 0"/><circle cx="123.5" cy="20" r="20"/><path d="M160 40 V0 H174 A11 11 0 0 1 174 22 H160 M173 22 L186 40"/><path d="M202.5 40 L217.5 0 L232.5 40 M208.5 28 H226.5"/></g>
+</svg>
