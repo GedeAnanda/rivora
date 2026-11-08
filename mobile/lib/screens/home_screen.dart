@@ -6,6 +6,7 @@ import '../services/repositories.dart';
 import '../services/session_store.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common.dart';
+import '../widgets/motion.dart';
 import '../widgets/report_tile.dart';
 import '../widgets/sumbatan_style.dart';
 import 'app_shell.dart';
@@ -69,12 +70,7 @@ class HomeScreen extends StatelessWidget {
     final items = reportRepository.items.take(3).toList();
     if (items.isEmpty) {
       if (reportRepository.loading) {
-        return const [
-          Padding(
-            padding: EdgeInsets.all(Space.xl),
-            child: Center(child: CircularProgressIndicator()),
-          ),
-        ];
+        return const [SkeletonList(count: 2, padding: EdgeInsets.zero)];
       }
       return const [
         EmptyState(

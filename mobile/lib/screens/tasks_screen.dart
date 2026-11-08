@@ -9,6 +9,7 @@ import '../utils/format.dart';
 import '../widgets/common.dart';
 import '../widgets/status_chip.dart';
 import '../widgets/sumbatan_style.dart';
+import '../widgets/motion.dart';
 import 'task_detail_screen.dart';
 
 /// Tugas petugas, diurutkan dari prioritas tertinggi (proposal 3.2 langkah 3).
@@ -48,7 +49,7 @@ class _TasksScreenState extends State<TasksScreen> {
         builder: (context, _) {
           final repo = taskRepository;
           if (repo.items.isEmpty && repo.loading) {
-            return const Center(child: CircularProgressIndicator());
+            return const SkeletonList();
           }
           if (repo.items.isEmpty && repo.error != null) {
             return Center(

@@ -10,6 +10,7 @@ import '../services/repositories.dart';
 import '../theme/app_theme.dart';
 import '../utils/format.dart';
 import '../widgets/common.dart';
+import '../widgets/motion.dart';
 import 'camera_screen.dart';
 import 'result_screen.dart';
 
@@ -98,10 +99,23 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
             borderRadius: BorderRadius.circular(Radii.lg),
             child: AspectRatio(
               aspectRatio: 4 / 3,
-              child: Image.file(
-                widget.photo,
-                fit: BoxFit.cover,
-                semanticLabel: 'Foto saluran yang akan dilaporkan',
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.file(
+                    widget.photo,
+                    fit: BoxFit.cover,
+                    semanticLabel: 'Foto saluran yang akan dilaporkan',
+                  ),
+                  AnimatedSwitcher(
+                    duration: Motion.of(context, Motion.normal),
+                    child: _sending
+                        ? const ScanOverlay(
+                            label: 'AI menilai tingkat sumbatan…',
+                          )
+                        : const SizedBox.shrink(),
+                  ),
+                ],
               ),
             ),
           ),

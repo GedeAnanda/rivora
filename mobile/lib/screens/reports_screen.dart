@@ -5,6 +5,7 @@ import '../services/repositories.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common.dart';
 import '../widgets/report_tile.dart';
+import '../widgets/motion.dart';
 import 'lapor_flow.dart';
 
 enum _Filter { semua, diproses, ditangani }
@@ -35,7 +36,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
         builder: (context, _) {
           final repo = reportRepository;
           if (repo.items.isEmpty && repo.loading) {
-            return const Center(child: CircularProgressIndicator());
+            return const SkeletonList();
           }
           if (repo.items.isEmpty && repo.error != null) {
             return Center(
