@@ -55,4 +55,18 @@ Pertanyaan B: nama field flag lokasi palsu. App **tidak mengirim** field ini. Lo
 
 `flutter analyze`: **No issues found**. `flutter test`: **48 tes lulus** (`test/tahap07_test.dart`: payload `type`, payload `jenis`, pesan lain, `tugas_id` kosong). Build `--dart-define=LOKASI_DEMO=true` berhasil dikompilasi.
 
-Belum teruji: notifikasi sungguhan, karena butuh `google-services.json` dari langkah 1 dan backend yang sudah deploy.
+### Firebase terpasang (8 November 2026, 14.04)
+
+Proyek **`rivora-b58f2`** (paket Spark) dibuat; app Android `id.rivora.rivora` terdaftar; `google-services.json` ada di `mobile/android/app/` dan **diabaikan git** (`git check-ignore`: `.gitignore:5:**/google-services.json`).
+
+| Cek di emulator Pixel 8 (mode contoh) | Hasil |
+|---|---|
+| APK membawa konfigurasi Firebase (`google_app_id`, `gcm_defaultSenderId`, `project_id`) | ✅ (`aapt2 dump resources`) |
+| `Firebase.initializeApp()` berhasil setelah petugas masuk | ✅ |
+| Dialog izin notifikasi Android 13+ muncul | ✅ "Allow RIVORA to send you notifications?" |
+| Token FCM terbentuk | ✅ tersimpan di `shared_prefs/com.google.android.gms.appid.xml` (isi tidak dicatat) |
+| Token dikirim ke `POST /devices` | Belum: mode contoh tidak memanggil server. Teruji otomatis begitu `API_URL` backend dipakai |
+
+Belum teruji: menerima notifikasi tugas sungguhan, karena butuh backend yang sudah deploy dengan service account Firebase (B, setelah ditambahkan sebagai Editor).
+
+Setiap anggota tim yang membuild APK butuh salinan `google-services.json` yang sama. Bagikan lewat jalur privat, jangan lewat repo atau kanal Discord publik.
