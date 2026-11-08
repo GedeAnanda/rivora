@@ -24,6 +24,7 @@ Aplikasi pelapor untuk petugas kebersihan, siskamling, dan warga: foto saluran l
 | 10 | [10-uji-backend-asli.md](10-uji-backend-asli.md) | Uji ujung ke ujung ke backend asli (tunnel): login, `POST /devices`, FCM, peta, tugas, lapor, verifikasi `lokasi_demo` → RW 05 0,33 → 0,18; chip level sama dirapikan | – | Selesai. Notifikasi di bilah (app di latar belakang) belum diuji |
 | 11 | [11-uji-sistem-penuh.md](11-uji-sistem-penuh.md) | Uji sistem penuh isi `dev`: dasbor (lurah) → backend lokal + AI asli → HP (petugas) → dasbor; tes otomatis backend 15/15, dasbor build OK, mobile 58/58; 2 perbaikan mobile (Mulai kerjakan 404, Penyebab disembunyikan) | – | Selesai. Menunggu B: `PATCH /tasks/:id` |
 | 12 | [12-ikon-dan-font.md](12-ikon-dan-font.md) | Ikon Phosphor → Lucide (satu keluarga, tab aktif bobot 600, ikon jenis saluran dan cuaca juga Lucide); font Atkinson Hyperlegible → Plus Jakarta Sans (angka 0 tanpa garis miring, angka tabular). Peta RW lingkaran radius sempat dicoba lalu dikembalikan ke poligon | – | Selesai, 62 tes lulus, teruji di emulator light/dark |
+| 13 | [13-perbaikan-audit-alur.md](13-perbaikan-audit-alur.md) | Perbaikan audit alur: layanan petugas ikut sesi (cek berkala tidak mati setelah login; 401 mengosongkan tugas; respons sesi lama dibuang), laporan baru tidak tertimpa refresh, GPS cadangan harus ≤ 2 menit dan ≤ 50 m, ketuk notifikasi menunggu muat, foto server sebagai cadangan, respons 2xx rusak jadi error. #5, #6, #7 (endpoint) untuk B | – | Selesai, 76 tes lulus, tugas masuk lewat cek berkala teruji di emulator |
 
 Setiap tahap baru ditambah satu file `NN-nama-tahap.md` dan satu baris di tabel ini.
 
@@ -69,6 +70,7 @@ lib/
 │   ├── api_client.dart           # HttpApiClient + MockApiClient
 │   ├── location_service.dart     # Izin + posisi GPS
 │   ├── repositories.dart         # Laporan (disimpan di HP), tugas, risiko RW
+│   ├── session_services.dart     # Pemilik layanan petugas (tugas, cek berkala, push) yang ikut sesi
 │   ├── session_store.dart        # Simpan/muat sesi
 │   ├── task_watcher.dart         # Cek tugas berkala (notifikasi)
 │   ├── push_service.dart         # Push FCM (opsional)
