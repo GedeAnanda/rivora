@@ -15,6 +15,7 @@ Aplikasi pelapor untuk petugas kebersihan, siskamling, dan warga: foto saluran l
 | 01 | [01-alur-lapor.md](01-alur-lapor.md) | Kamera, GPS, jenis saluran, kirim, hasil AI | 1–5 | Selesai, teruji di emulator (mode contoh). Tampilan didesain ulang di 02 |
 | 02 | [02-status-dan-tugas.md](02-status-dan-tugas.md) | Login + peran, navigasi bawah, Beranda baru, Laporan saya + timeline, tab Tugas | 5–8 | Selesai, teruji di emulator (mode contoh) |
 | 03 | [03-verifikasi-dan-notifikasi.md](03-verifikasi-dan-notifikasi.md) | Foto sesudah + verifikasi AI + skor RW turun, notifikasi tugas (cek berkala + FCM), logo Mata Air di app, motion | 8–10 | Selesai, teruji di emulator (mode contoh). FCM aktif setelah `google-services.json` dipasang |
+| 04 | [04-redesign-modern.md](04-redesign-modern.md) | Redesign berbasis riset: hero prakiraan hujan Open-Meteo, tab Peta (flutter_map + OSM), beranda baru, large title, indikator langkah | – | Selesai, teruji di emulator light/dark |
 
 Setiap tahap baru ditambah satu file `NN-nama-tahap.md` dan satu baris di tabel ini.
 
@@ -59,11 +60,13 @@ lib/
 │   ├── repositories.dart         # Daftar laporan & tugas, deteksi tugas baru
 │   ├── session_store.dart        # Simpan/muat sesi
 │   ├── task_watcher.dart         # Cek tugas berkala (notifikasi)
-│   └── push_service.dart         # Push FCM (opsional)
+│   ├── push_service.dart         # Push FCM (opsional)
+│   └── weather_service.dart      # Prakiraan hujan Open-Meteo
 ├── screens/
 │   ├── login_screen.dart         # Masuk
 │   ├── app_shell.dart            # Navigasi bawah
-│   ├── home_screen.dart          # Beranda
+│   ├── home_screen.dart          # Beranda (hujan, lapor, tugas terdekat, peta, status)
+│   ├── map_screen.dart           # Tab Peta
 │   ├── lapor_flow.dart           # Izin lokasi → kamera
 │   ├── camera_screen.dart        # Kamera in-app (tanpa galeri)
 │   ├── report_form_screen.dart   # Konfirmasi + pilih jenis saluran

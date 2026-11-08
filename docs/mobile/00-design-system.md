@@ -128,6 +128,20 @@ Satu keluarga: Material Icons varian **rounded**. Tab tidak aktif memakai varian
 | `RisikoChip` | Aman / Waspada / Risiko tinggi, ikon + teks + warna |
 | Tombol | Padding horizontal 16 (bukan 24) supaya dua tombol berdampingan tidak memotong label |
 
+## Tambahan tahap 04
+
+| Item | Isi |
+|---|---|
+| Kartu | Sudut `Radii.xl` = 20. Light: tanpa garis, bayangan lembut (elevasi 1,5, `#0B1F2A` 20%). Dark: garis `outlineVariant` |
+| Hero hujan | Gradien ikut kategori: teal `#0B6E79→#06424A`, cokelat `#7A4300→#4A2800`, merah `#9B1C14→#5E0F0A`. Teks putih ≥ 5,96:1, teks sekunder putih 88% ≥ 5,03:1 |
+| Penanda peta | Selalu warna pekat `RivoraColors.light` di kedua tema (putih di atasnya ≥ 5,89:1). Laporan = bulat + ikon kelas; tugas = kotak membulat + nomor prioritas |
+| Tile peta | OpenStreetMap, saturasi ±30% + sedikit lebih terang; mode gelap memakai filter gelap flutter_map |
+| Large title | `SliverAppBar.large` di Laporan dan Tugas |
+| Indikator langkah | `StepProgress`: 3 segmen 4 dp + label "Langkah n dari 3 · …" |
+| Placeholder foto | Latar warna kelas + tekstur gelombang 10% + ikon jenis saluran |
+
+Detail dan referensi: [04-redesign-modern.md](04-redesign-modern.md).
+
 ## Checklist pra-rilis (pro-rules)
 
 | Item | Status |
