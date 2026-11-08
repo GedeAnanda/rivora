@@ -17,6 +17,7 @@ Aplikasi pelapor untuk petugas kebersihan, siskamling, dan warga: foto saluran l
 | 03 | [03-verifikasi-dan-notifikasi.md](03-verifikasi-dan-notifikasi.md) | Foto sesudah + verifikasi AI + skor RW turun, notifikasi tugas (cek berkala + FCM), logo Mata Air di app, motion | 8–10 | Selesai, teruji di emulator (mode contoh). FCM aktif setelah `google-services.json` dipasang |
 | 04 | [04-redesign-modern.md](04-redesign-modern.md) | Redesign berbasis riset: hero prakiraan hujan Open-Meteo, tab Peta (flutter_map + OSM), beranda baru, large title, indikator langkah | – | Selesai, teruji di emulator light/dark |
 | 05 | [05-audit-qa.md](05-audit-qa.md) | Audit QA: kontrak disamakan dengan backend SRS bagian 7, warga tanpa login + Masuk petugas, laporan disimpan di HP, risiko RW di wilayahmu + poligon peta, Mulai kerjakan, label demo, ikon Phosphor + piktogram saluran | – | Selesai, 39 tes lulus, teruji di emulator light/dark. Belum diuji ke backend asli |
+| 06 | [06-ramah-warga.md](06-ramah-warga.md) | Tampilan ramah warga: kalimat kesimpulan + saran, meteran risiko tiga warna, gambar tingkat sumbatan, keyakinan AI dalam kata, peta kecil pengganti koordinat; angka dan rumus pindah ke lembar "Cara RIVORA menilai" | – | Selesai, 44 tes lulus, teruji di emulator light/dark |
 
 Setiap tahap baru ditambah satu file `NN-nama-tahap.md` dan satu baris di tabel ini.
 
@@ -79,7 +80,7 @@ lib/
 │   ├── tasks_screen.dart         # Tugas (petugas)
 │   ├── task_detail_screen.dart   # Detail tugas
 │   └── verify_screen.dart        # Verifikasi foto sesudah
-├── widgets/                      # Komponen bersama (pictogram, risk_card, rivora_map, …)
+├── widgets/                      # Komponen bersama (risk_card, risk_meter, sumbatan_visual, lokasi_mini, rivora_map, …)
 └── utils/
     ├── format.dart               # Waktu, koordinat, desimal, jarak
     └── maps.dart                 # Buka Google Maps

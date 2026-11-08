@@ -161,6 +161,22 @@ Detail dan referensi: [04-redesign-modern.md](04-redesign-modern.md).
 
 Detail: [05-audit-qa.md](05-audit-qa.md).
 
+## Tambahan tahap 06: bahasa warga
+
+Aturan: **kata dan warna dulu, angka belakangan**. Angka 0–1, mm, rumus, dan koordinat tidak tampil sebagai informasi utama; tetap tersedia lewat `Semantics` dan lembar "Cara RIVORA menilai".
+
+| Item | Isi |
+|---|---|
+| Kartu cuaca | Judul = kalimat kesimpulan (`headlineSmall` putih tebal) + saran (`bodyLarge`) + `CuacaIlustrasi` 72 dp. mm/peluang `bodySmall` 88% putih |
+| `RiskMeter` | 3 segmen 10 dp (lebar 4 : 3 : 3 sesuai ambang), segmen aktif warna `fg`, lainnya `bg`; penanda lingkaran 22 dp, tepi 4 dp warna level, bayangan halus. Label Aman · Waspada · Tinggi di bawah |
+| Kotak saran | Latar `risiko(level).bg`, teks + ikon `fg`, tebal. Satu kalimat tindakan |
+| Baris faktor | Kotak ikon 36 dp (`bg`/`fg` tingkat), kalimat `bodyLarge`, tiga titik 8 dp |
+| `SumbatanVisual` | Penampang 104 × 75 dp: dinding `onSurfaceVariant`, sampah `sumbatan(kelas).fg`, air Bening `#5FC3CF`. Tidak terlihat = garis putus + "?" |
+| Keyakinan | "AI yakin / cukup yakin / kurang yakin" + tiga batang |
+| `LokasiMini` | Ringkas: peta 76 dp di kiri. Penuh: peta 148 dp selebar kartu + pin kondisi. Judul "Di RW 05" |
+
+Detail: [06-ramah-warga.md](06-ramah-warga.md).
+
 ## Checklist pra-rilis (pro-rules)
 
 | Item | Status |
