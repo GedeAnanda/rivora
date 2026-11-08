@@ -83,11 +83,20 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
       appBar: AppBar(
         title: const Text('Kirim laporan'),
         actions: [
-          TextButton.icon(
-            onPressed: _sending ? null : _fotoUlang,
-            icon: const Icon(RIcons.ulang),
-            label: const Text('Foto ulang'),
-          ),
+          // Layar sempit / huruf besar: ikon saja supaya judul tidak
+          // terpotong.
+          if (layarSempit(context))
+            IconButton(
+              tooltip: 'Foto ulang',
+              onPressed: _sending ? null : _fotoUlang,
+              icon: const Icon(RIcons.ulang),
+            )
+          else
+            TextButton.icon(
+              onPressed: _sending ? null : _fotoUlang,
+              icon: const Icon(RIcons.ulang),
+              label: const Text('Foto ulang'),
+            ),
           const SizedBox(width: Space.sm),
         ],
       ),

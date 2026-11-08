@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../models/report.dart';
 import '../theme/app_theme.dart';
 import '../widgets/ai_result_card.dart';
+import '../widgets/common.dart';
 import '../widgets/report_photo.dart';
 import '../widgets/status_chip.dart';
 import 'app_shell.dart';
@@ -126,26 +127,18 @@ class ResultScreen extends StatelessWidget {
             Space.lg,
             Space.lg,
           ),
-          child: Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () => Navigator.of(context).pushReplacement(
-                    MaterialPageRoute<void>(
-                      builder: (_) => const CameraScreen(),
-                    ),
-                  ),
-                  child: const Text('Lapor lagi'),
-                ),
+          child: TombolBerpasangan(
+            rata: true,
+            sekunder: OutlinedButton(
+              onPressed: () => Navigator.of(context).pushReplacement(
+                MaterialPageRoute<void>(builder: (_) => const CameraScreen()),
               ),
-              const SizedBox(width: Space.md),
-              Expanded(
-                child: FilledButton(
-                  onPressed: () => _lihatStatus(context),
-                  child: const Text('Lihat status'),
-                ),
-              ),
-            ],
+              child: const Text('Lapor lagi'),
+            ),
+            utama: FilledButton(
+              onPressed: () => _lihatStatus(context),
+              child: const Text('Lihat status'),
+            ),
           ),
         ),
       ),

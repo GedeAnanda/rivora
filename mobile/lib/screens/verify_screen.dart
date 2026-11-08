@@ -158,7 +158,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
       _Tahap.hasil when hasil!.sudahBersih => 'Verifikasi selesai',
       _Tahap.hasil when !hasil!.dinilai => 'Belum bisa dinilai',
       _Tahap.hasil => 'Belum bersih',
-      _ => 'Verifikasi pembersihan',
+      _ => layarSempit(context) ? 'Verifikasi' : 'Verifikasi pembersihan',
     };
     return PopScope(
       canPop: _tahap != _Tahap.kirim,
@@ -206,55 +206,35 @@ class _VerifyScreenState extends State<VerifyScreen> {
               Space.lg,
             ),
             child: switch (_tahap) {
-              _Tahap.tinjau || _Tahap.kirim => Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: OutlinedButton(
-                      onPressed: _tahap == _Tahap.kirim ? null : _fotoUlang,
-                      child: const Text('Foto ulang'),
-                    ),
+              _Tahap.tinjau || _Tahap.kirim => TombolBerpasangan(
+                sekunder: OutlinedButton(
+                  onPressed: _tahap == _Tahap.kirim ? null : _fotoUlang,
+                  child: const Text('Foto ulang'),
+                ),
+                utama: FilledButton.icon(
+                  onPressed: _tahap == _Tahap.kirim || _diblokir
+                      ? null
+                      : _kirim,
+                  icon: const Icon(RIcons.verifikasi),
+                  label: Text(
+                    _tahap == _Tahap.kirim ? 'Memeriksa…' : 'Kirim verifikasi',
                   ),
-                  const SizedBox(width: Space.md),
-                  Expanded(
-                    flex: 3,
-                    child: FilledButton.icon(
-                      onPressed: _tahap == _Tahap.kirim || _diblokir
-                          ? null
-                          : _kirim,
-                      icon: const Icon(RIcons.verifikasi),
-                      label: Text(
-                        _tahap == _Tahap.kirim
-                            ? 'Memeriksa…'
-                            : 'Kirim verifikasi',
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
               _Tahap.hasil when hasil!.sudahBersih => FilledButton(
                 onPressed: _keDaftarTugas,
                 child: const Text('Kembali ke daftar tugas'),
               ),
-              _Tahap.hasil => Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: OutlinedButton(
-                      onPressed: _keDaftarTugas,
-                      child: const Text('Nanti'),
-                    ),
-                  ),
-                  const SizedBox(width: Space.md),
-                  Expanded(
-                    flex: 3,
-                    child: FilledButton.icon(
-                      onPressed: _fotoUlang,
-                      icon: const Icon(RIcons.kamera),
-                      label: const Text('Foto ulang'),
-                    ),
-                  ),
-                ],
+              _Tahap.hasil => TombolBerpasangan(
+                sekunder: OutlinedButton(
+                  onPressed: _keDaftarTugas,
+                  child: const Text('Nanti'),
+                ),
+                utama: FilledButton.icon(
+                  onPressed: _fotoUlang,
+                  icon: const Icon(RIcons.kamera),
+                  label: const Text('Foto ulang'),
+                ),
               ),
             },
           ),
@@ -317,10 +297,12 @@ class _Tinjau extends StatelessWidget {
           children: [
             Icon(RIcons.ketuk, size: 16, color: scheme.onSurfaceVariant),
             const SizedBox(width: Space.xs + 2),
-            Text(
-              'Geser atau ketuk foto untuk membandingkan.',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: scheme.onSurfaceVariant,
+            Expanded(
+              child: Text(
+                'Geser atau ketuk foto untuk membandingkan.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
               ),
             ),
           ],
@@ -495,9 +477,11 @@ class _Hasil extends StatelessWidget {
             children: [
               Icon(RIcons.contoh, size: 18, color: scheme.onSurfaceVariant),
               const SizedBox(width: Space.sm),
-              Text(
-                'Hasil contoh (mode demo)',
-                style: theme.textTheme.bodyMedium,
+              Expanded(
+                child: Text(
+                  'Hasil contoh (mode demo)',
+                  style: theme.textTheme.bodyMedium,
+                ),
               ),
             ],
           ),
