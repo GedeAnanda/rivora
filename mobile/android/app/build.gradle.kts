@@ -4,6 +4,13 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// FCM aktif hanya kalau android/app/google-services.json ada (file rahasia,
+// tidak di-commit). Tanpa file ini build tetap jalan dan app memakai
+// pengecekan tugas berkala sebagai pengganti push.
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+}
+
 android {
     namespace = "id.rivora.rivora"
     compileSdk = flutter.compileSdkVersion
