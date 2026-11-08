@@ -18,6 +18,7 @@ abstract final class Radii {
   static const double sm = 8;
   static const double md = 12;
   static const double lg = 16;
+  static const double xl = 20;
 }
 
 /// Token gerak. Masuk memakai deselerasi, keluar lebih cepat dari masuk
@@ -192,15 +193,20 @@ ThemeData buildRivoraTheme(Brightness brightness) {
         color: scheme.onSurface,
       ),
     ),
+    // Light: kartu putih tanpa garis dengan bayangan lembut (lebih modern).
+    // Dark: bayangan tidak terlihat, jadi pakai garis tipis.
     cardTheme: CardThemeData(
       color: scheme.surfaceContainerLowest,
       surfaceTintColor: Colors.transparent,
-      elevation: 0,
+      elevation: light ? 1.5 : 0,
+      shadowColor: const Color(0x330B1F2A),
       margin: EdgeInsets.zero,
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(Radii.lg),
-        side: BorderSide(color: scheme.outlineVariant),
+        borderRadius: BorderRadius.circular(Radii.xl),
+        side: light
+            ? BorderSide.none
+            : BorderSide(color: scheme.outlineVariant),
       ),
     ),
     filledButtonTheme: FilledButtonThemeData(

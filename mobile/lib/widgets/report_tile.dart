@@ -36,6 +36,8 @@ class ReportTile extends StatelessWidget {
                 width: 72,
                 height: 72,
                 radius: Radii.sm,
+                kelas: report.ai.kelas,
+                jenis: report.jenisSaluran,
                 semanticLabel: 'Foto ${report.jenisSaluran.label}',
               ),
               const SizedBox(width: Space.md),

@@ -10,6 +10,7 @@ import '../widgets/common.dart';
 import '../widgets/status_chip.dart';
 import '../widgets/sumbatan_style.dart';
 import '../widgets/motion.dart';
+import 'app_shell.dart';
 import 'task_detail_screen.dart';
 
 /// Tugas petugas, diurutkan dari prioritas tertinggi (proposal 3.2 langkah 3).
@@ -43,77 +44,103 @@ class _TasksScreenState extends State<TasksScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Tugas')),
       body: ListenableBuilder(
         listenable: taskRepository,
         builder: (context, _) {
           final repo = taskRepository;
-          if (repo.items.isEmpty && repo.loading) {
-            return const SkeletonList();
-          }
-          if (repo.items.isEmpty && repo.error != null) {
-            return Center(
-              child: EmptyState(
-                icon: Icons.cloud_off_rounded,
-                title: 'Tugas gagal dimuat',
-                message: repo.error!,
-                actionLabel: 'Coba lagi',
-                onAction: repo.refresh,
-              ),
-            );
-          }
-          if (repo.items.isEmpty) {
-            return const Center(
-              child: EmptyState(
-                icon: Icons.assignment_turned_in_outlined,
-                title: 'Belum ada tugas',
-                message:
-                    'Tugas pembersihan dari kelurahan akan muncul di sini, '
-                    'urut dari prioritas tertinggi.',
-              ),
-            );
-          }
           final aktif = repo.aktif;
           final selesai = repo.items.where((t) => t.selesai).toList();
+          final theme = Theme.of(context);
           return RefreshIndicator(
             onRefresh: repo.refresh,
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(
-                Space.lg,
-                Space.sm,
-                Space.lg,
-                Space.xxl,
-              ),
-              children: [
-                SectionTitle(
-                  aktif.isEmpty
-                      ? 'Semua tugas selesai'
-                      : 'Aktif · ${aktif.length}',
-                ),
-                Text(
-                  'Urut dari skor prioritas tertinggi.',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+            edgeOffset: 152,
+            child: CustomScrollView(
+              slivers: [
+                SliverAppBar.large(
+                  title: Text(
+                    aktif.isEmpty ? 'Tugas' : 'Tugas · ${aktif.length} aktif',
                   ),
-                ),
-                const SizedBox(height: Space.md),
-                for (var i = 0; i < aktif.length; i++) ...[
-                  _TaskCard(
-                    task: aktif[i],
-                    rank: i + 1,
-                    jarak: _jarak(aktif[i]),
-                    posisi: _posisi,
-                  ),
-                  const SizedBox(height: Space.sm),
-                ],
-                if (selesai.isNotEmpty) ...[
-                  const SizedBox(height: Space.lg),
-                  SectionTitle('Selesai · ${selesai.length}'),
-                  for (final t in selesai) ...[
-                    _TaskCard(task: t, jarak: _jarak(t), posisi: _posisi),
-                    const SizedBox(height: Space.sm),
+                  actions: [
+                    IconButton(
+                      tooltip: 'Lihat di peta',
+                      onPressed: () => shellTab.value = Tabs.peta,
+                      icon: const Icon(Icons.map_outlined),
+                    ),
+                    const SizedBox(width: Space.sm),
                   ],
-                ],
+                ),
+                if (repo.items.isEmpty && repo.loading)
+                  const SliverToBoxAdapter(child: SkeletonList())
+                else if (repo.items.isEmpty && repo.error != null)
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(
+                      child: EmptyState(
+                        icon: Icons.cloud_off_rounded,
+                        title: 'Tugas gagal dimuat',
+                        message: repo.error!,
+                        actionLabel: 'Coba lagi',
+                        onAction: repo.refresh,
+                      ),
+                    ),
+                  )
+                else if (repo.items.isEmpty)
+                  const SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(
+                      child: EmptyState(
+                        icon: Icons.assignment_turned_in_outlined,
+                        title: 'Belum ada tugas',
+                        message:
+                            'Tugas pembersihan dari kelurahan akan muncul di '
+                            'sini, urut dari prioritas tertinggi.',
+                      ),
+                    ),
+                  )
+                else
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(
+                      Space.lg,
+                      0,
+                      Space.lg,
+                      Space.xxl,
+                    ),
+                    sliver: SliverList.list(
+                      children: [
+                        Text(
+                          aktif.isEmpty
+                              ? 'Semua tugas selesai. Terima kasih!'
+                              : 'Urut dari skor prioritas tertinggi: gabungan '
+                                    'prakiraan hujan, sumbatan, dan kerentanan.',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: Space.lg),
+                        for (var i = 0; i < aktif.length; i++) ...[
+                          _TaskCard(
+                            task: aktif[i],
+                            rank: i + 1,
+                            jarak: _jarak(aktif[i]),
+                            posisi: _posisi,
+                          ),
+                          const SizedBox(height: Space.md),
+                        ],
+                        if (selesai.isNotEmpty) ...[
+                          const SizedBox(height: Space.lg),
+                          SectionTitle('Selesai · ${selesai.length}'),
+                          for (final t in selesai) ...[
+                            _TaskCard(
+                              task: t,
+                              jarak: _jarak(t),
+                              posisi: _posisi,
+                            ),
+                            const SizedBox(height: Space.md),
+                          ],
+                        ],
+                      ],
+                    ),
+                  ),
               ],
             ),
           );

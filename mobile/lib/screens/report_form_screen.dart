@@ -11,6 +11,8 @@ import '../theme/app_theme.dart';
 import '../utils/format.dart';
 import '../widgets/common.dart';
 import '../widgets/motion.dart';
+import '../widgets/step_progress.dart';
+import '../widgets/sumbatan_style.dart';
 import 'camera_screen.dart';
 import 'result_screen.dart';
 
@@ -95,6 +97,8 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
           Space.xl,
         ),
         children: [
+          StepProgress(langkah: _sending ? 3 : 2),
+          const SizedBox(height: Space.md),
           ClipRRect(
             borderRadius: BorderRadius.circular(Radii.lg),
             child: AspectRatio(
@@ -246,11 +250,7 @@ class _JenisOption extends StatelessWidget {
   final bool selected;
   final VoidCallback? onTap;
 
-  IconData get _icon => switch (jenis) {
-    JenisSaluran.terbuka => Icons.water_rounded,
-    JenisSaluran.gorongGorong => Icons.panorama_fish_eye_rounded,
-    JenisSaluran.inletJalan => Icons.grid_4x4_rounded,
-  };
+  IconData get _icon => ikonJenis(jenis);
 
   @override
   Widget build(BuildContext context) {

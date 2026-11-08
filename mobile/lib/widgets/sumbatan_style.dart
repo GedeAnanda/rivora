@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/ai_result.dart';
+import '../models/jenis_saluran.dart';
 import '../theme/app_theme.dart';
 
 IconData ikonSumbatan(KelasSumbatan kelas) => switch (kelas) {
@@ -51,3 +52,9 @@ class SumbatanBadge extends StatelessWidget {
     );
   }
 }
+
+IconData ikonJenis(JenisSaluran jenis) => switch (jenis) {
+  JenisSaluran.terbuka => Icons.water_rounded,
+  JenisSaluran.gorongGorong => Icons.panorama_fish_eye_rounded,
+  JenisSaluran.inletJalan => Icons.grid_4x4_rounded,
+};

@@ -86,6 +86,8 @@ class TaskDetailScreen extends StatelessWidget {
             height: 220,
             width: double.infinity,
             radius: Radii.lg,
+            kelas: t.ai.kelas,
+            jenis: t.jenisSaluran,
             semanticLabel: 'Foto laporan ${t.jenisSaluran.label}',
           ),
           const SizedBox(height: Space.lg),

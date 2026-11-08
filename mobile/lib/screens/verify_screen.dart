@@ -123,6 +123,8 @@ class _VerifyScreenState extends State<VerifyScreen> {
       file: laporanId == null ? null : reportRepository.localPhoto(laporanId),
       url: widget.tugas.fotoUrl,
       radius: 0,
+      kelas: widget.tugas.ai.kelas,
+      jenis: widget.tugas.jenisSaluran,
       semanticLabel: 'Foto sebelum dibersihkan',
     );
   }

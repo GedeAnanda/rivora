@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../models/ai_result.dart';
 import '../models/report.dart';
 import '../services/repositories.dart';
 import '../theme/app_theme.dart';
@@ -43,6 +44,8 @@ class ReportDetailScreen extends StatelessWidget {
                       url: report.fotoUrl,
                       height: 180,
                       width: double.infinity,
+                      kelas: report.ai.kelas,
+                      jenis: report.jenisSaluran,
                       semanticLabel: 'Foto saluran sebelum dibersihkan',
                     ),
                   ),
@@ -56,6 +59,8 @@ class ReportDetailScreen extends StatelessWidget {
                       url: report.fotoSesudahUrl,
                       height: 180,
                       width: double.infinity,
+                      kelas: KelasSumbatan.bersih,
+                      jenis: report.jenisSaluran,
                       semanticLabel: 'Foto bukti saluran sesudah dibersihkan',
                     ),
                   ),
@@ -69,6 +74,8 @@ class ReportDetailScreen extends StatelessWidget {
               height: 220,
               width: double.infinity,
               radius: Radii.lg,
+              kelas: report.ai.kelas,
+              jenis: report.jenisSaluran,
               semanticLabel: 'Foto ${report.jenisSaluran.label}',
             ),
           const SizedBox(height: Space.lg),

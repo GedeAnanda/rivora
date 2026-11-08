@@ -11,6 +11,7 @@ import '../models/task.dart';
 import '../services/location_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/report_photo.dart';
+import '../widgets/step_progress.dart';
 import 'report_form_screen.dart';
 import 'verify_screen.dart';
 
@@ -264,7 +265,15 @@ class _CameraScreenState extends State<CameraScreen>
                         _SebelumThumb(url: tugas.fotoUrl!),
                         const SizedBox(width: Space.sm),
                       ],
-                      const Spacer(),
+                      if (tugas == null)
+                        const Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.only(right: Space.md, top: 2),
+                            child: StepProgress(langkah: 1, diAtasGelap: true),
+                          ),
+                        )
+                      else
+                        const Spacer(),
                       _GpsChip(
                         gps: _gps,
                         akurasi: _posisi?.accuracy,
