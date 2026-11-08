@@ -23,7 +23,7 @@ Aplikasi pelapor untuk petugas kebersihan, siskamling, dan warga: foto saluran l
 | 09 | [09-responsif-dan-performa.md](09-responsif-dan-performa.md) | Uji HP kecil 360 dp + huruf 130%: 1 overflow + 7 tampilan terpotong diperbaiki (`TombolBerpasangan`, `layarSempit`); APK arm64 19,9 MB, buka ~2,1 dtk (release) | – | Selesai, 56 tes lulus |
 | 10 | [10-uji-backend-asli.md](10-uji-backend-asli.md) | Uji ujung ke ujung ke backend asli (tunnel): login, `POST /devices`, FCM, peta, tugas, lapor, verifikasi `lokasi_demo` → RW 05 0,33 → 0,18; chip level sama dirapikan | – | Selesai. Notifikasi di bilah (app di latar belakang) belum diuji |
 | 11 | [11-uji-sistem-penuh.md](11-uji-sistem-penuh.md) | Uji sistem penuh isi `dev`: dasbor (lurah) → backend lokal + AI asli → HP (petugas) → dasbor; tes otomatis backend 15/15, dasbor build OK, mobile 58/58; 2 perbaikan mobile (Mulai kerjakan 404, Penyebab disembunyikan) | – | Selesai. Menunggu B: `PATCH /tasks/:id` |
-| 12 | [12-ikon-font-peta-radius.md](12-ikon-font-peta-radius.md) | Ikon Phosphor → Lucide (satu keluarga, tab aktif bobot 600, ikon jenis saluran dan cuaca juga Lucide); font Atkinson Hyperlegible → Plus Jakarta Sans (angka 0 tanpa garis miring, angka tabular); area RW di peta dari kotak → lingkaran radius bergradasi + label kapsul | – | Selesai, 65 tes lulus, teruji di emulator light/dark |
+| 12 | [12-ikon-dan-font.md](12-ikon-dan-font.md) | Ikon Phosphor → Lucide (satu keluarga, tab aktif bobot 600, ikon jenis saluran dan cuaca juga Lucide); font Atkinson Hyperlegible → Plus Jakarta Sans (angka 0 tanpa garis miring, angka tabular). Peta RW lingkaran radius sempat dicoba lalu dikembalikan ke poligon | – | Selesai, 62 tes lulus, teruji di emulator light/dark |
 
 Setiap tahap baru ditambah satu file `NN-nama-tahap.md` dan satu baris di tabel ini.
 
@@ -61,7 +61,7 @@ lib/
 │   ├── ai_result.dart            # Keluaran AI, format Lampiran C
 │   ├── jenis_saluran.dart        # terbuka | gorong_gorong | inlet_jalan
 │   ├── report.dart               # Laporan (backend 7.2/7.3: tugas, bukti)
-│   ├── rw_risk.dart              # Risiko RW dari GET /rw/risk + titik di poligon + pusat/jari-jari lingkaran peta
+│   ├── rw_risk.dart              # Risiko RW dari GET /rw/risk + titik di poligon
 │   ├── session.dart              # Sesi petugas (pengguna bersarang)
 │   ├── task.dart                 # Tugas petugas (backend 7.9)
 │   └── verification.dart         # Hasil verifikasi + level risiko RW
