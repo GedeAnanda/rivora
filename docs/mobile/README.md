@@ -22,6 +22,7 @@ Aplikasi pelapor untuk petugas kebersihan, siskamling, dan warga: foto saluran l
 | 08 | [08-qa-rebrand-biru.md](08-qa-rebrand-biru.md) | QA rebrand biru (logo Ombak): kontras palet, splash Android 12+ biru, garis tepi logo header, baris README ganda dihapus | – | Selesai, 48 tes lulus, teruji di emulator light/dark |
 | 09 | [09-responsif-dan-performa.md](09-responsif-dan-performa.md) | Uji HP kecil 360 dp + huruf 130%: 1 overflow + 7 tampilan terpotong diperbaiki (`TombolBerpasangan`, `layarSempit`); APK arm64 19,9 MB, buka ~2,1 dtk (release) | – | Selesai, 56 tes lulus |
 | 10 | [10-uji-backend-asli.md](10-uji-backend-asli.md) | Uji ujung ke ujung ke backend asli (tunnel): login, `POST /devices`, FCM, peta, tugas, lapor, verifikasi `lokasi_demo` → RW 05 0,33 → 0,18; chip level sama dirapikan | – | Selesai. Notifikasi di bilah (app di latar belakang) belum diuji |
+| 11 | [11-uji-sistem-penuh.md](11-uji-sistem-penuh.md) | Uji sistem penuh isi `dev`: dasbor (lurah) → backend lokal + AI asli → HP (petugas) → dasbor; tes otomatis backend 15/15, dasbor build OK, mobile 58/58; 2 perbaikan mobile (Mulai kerjakan 404, Penyebab disembunyikan) | – | Selesai. Menunggu B: `PATCH /tasks/:id` |
 
 Setiap tahap baru ditambah satu file `NN-nama-tahap.md` dan satu baris di tabel ini.
 
