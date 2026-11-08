@@ -1,4 +1,7 @@
-const { Pool } = require('pg');
+const { Pool, types } = require('pg');
+
+// NUMERIC (oid 1700) dikembalikan pg sebagai string → ubah ke number agar JSON berisi angka.
+types.setTypeParser(1700, (v) => (v === null ? null : parseFloat(v)));
 
 // DB_SSL=1 untuk Supabase/cloud (sertifikat pooler tidak diverifikasi), kosong/0 untuk Postgres lokal.
 const pool = new Pool({

@@ -5,6 +5,7 @@ const cors = require('cors');
 const db = require('./db');
 
 const app = express();
+app.set('trust proxy', 1); // foto_url pakai https saat di belakang proxy (deploy)
 app.use(cors());
 app.use(express.json());
 
@@ -33,6 +34,10 @@ app.get('/health', async (req, res) => {
     db: dbStatus,
   });
 });
+
+app.use('/reports', require('./routes/reports')); // FR-BE-02
+app.use('/rw', require('./routes/rw')); // FR-BE-09
+app.use('/saluran', require('./routes/saluran')); // FR-BE-10
 
 // 404
 app.use((req, res) => {
