@@ -80,9 +80,11 @@ class _CameraScreenState extends State<CameraScreen>
     try {
       final p = await locationService.currentPosition();
       if (!mounted) return;
+      final sekarang = DateTime.now();
       setState(() {
         _posisi = p;
-        _posisiAt = DateTime.now();
+        // Waktu posisi itu didapat GPS, bukan waktu diterima app.
+        _posisiAt = p.timestamp.isBefore(sekarang) ? p.timestamp : sekarang;
         _gps = _Gps.siap;
       });
     } on LocationException {
