@@ -8,6 +8,7 @@ import '../utils/format.dart';
 import 'report_photo.dart';
 import 'status_chip.dart';
 import 'sumbatan_style.dart';
+import '../theme/rivora_icons.dart';
 
 /// Satu baris laporan di daftar: foto, jenis + waktu, kelas, status.
 class ReportTile extends StatelessWidget {
@@ -36,7 +37,7 @@ class ReportTile extends StatelessWidget {
                 width: 72,
                 height: 72,
                 radius: Radii.sm,
-                kelas: report.ai.kelas,
+                kelas: report.kelasKini,
                 jenis: report.jenisSaluran,
                 semanticLabel: 'Foto ${report.jenisSaluran.label}',
               ),
@@ -64,17 +65,14 @@ class ReportTile extends StatelessWidget {
                       spacing: Space.sm,
                       runSpacing: Space.xs,
                       children: [
-                        SumbatanBadge(kelas: report.ai.kelas, compact: true),
+                        SumbatanBadge(kelas: report.kelasKini, compact: true),
                         LaporanStatusChip(status: report.status),
                       ],
                     ),
                   ],
                 ),
               ),
-              Icon(
-                Icons.chevron_right_rounded,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
+              Icon(RIcons.chevron, color: theme.colorScheme.onSurfaceVariant),
             ],
           ),
         ),

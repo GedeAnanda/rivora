@@ -3,16 +3,18 @@ import 'package:flutter/material.dart';
 import '../models/ai_result.dart';
 import '../models/jenis_saluran.dart';
 import '../theme/app_theme.dart';
+import '../theme/rivora_icons.dart';
 
 IconData ikonSumbatan(KelasSumbatan kelas) => switch (kelas) {
-  KelasSumbatan.bersih => Icons.check_circle_rounded,
-  KelasSumbatan.ringan => Icons.info_rounded,
-  KelasSumbatan.sedang => Icons.warning_rounded,
-  KelasSumbatan.berat => Icons.error_rounded,
-  KelasSumbatan.tidakTerlihat => Icons.visibility_off_rounded,
+  KelasSumbatan.bersih => RIcons.selesai,
+  KelasSumbatan.ringan => RIcons.info,
+  KelasSumbatan.sedang => RIcons.peringatan,
+  KelasSumbatan.berat => RIcons.bahaya,
+  KelasSumbatan.tidakTerlihat => RIcons.tidakTerlihat,
 };
 
-/// Label kelas sumbatan: ikon + teks + warna (tidak hanya warna).
+/// Label kelas sumbatan: teks tebal di atas latar berwarna. Warna + teks
+/// (tidak hanya warna); tanpa ikon dekoratif supaya kartu tidak ramai.
 class SumbatanBadge extends StatelessWidget {
   const SumbatanBadge({super.key, required this.kelas, this.compact = false});
 
@@ -26,35 +28,30 @@ class SumbatanBadge extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: compact ? Space.sm : Space.md,
-        vertical: compact ? 2 : Space.xs + 2,
+        vertical: compact ? 2 : Space.xs + 1,
       ),
       decoration: BoxDecoration(
         color: color.bg,
-        borderRadius: BorderRadius.circular(Radii.sm),
+        borderRadius: BorderRadius.circular(6),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(ikonSumbatan(kelas), size: compact ? 14 : 18, color: color.fg),
-          SizedBox(width: compact ? Space.xs : 6),
-          Flexible(
-            child: Text(
-              kelas.label,
-              overflow: TextOverflow.ellipsis,
-              style: (compact ? text.labelMedium : text.labelLarge)?.copyWith(
-                color: color.fg,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
+      child: Text(
+        compact ? _pendek(kelas) : kelas.label,
+        style: (compact ? text.labelMedium : text.labelLarge)?.copyWith(
+          color: color.fg,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }
+
+  static String _pendek(KelasSumbatan k) => switch (k) {
+    KelasSumbatan.bersih => 'Bersih',
+    KelasSumbatan.ringan => 'Ringan',
+    KelasSumbatan.sedang => 'Sedang',
+    KelasSumbatan.berat => 'Berat',
+    KelasSumbatan.tidakTerlihat => 'Tidak terlihat',
+  };
 }
 
-IconData ikonJenis(JenisSaluran jenis) => switch (jenis) {
-  JenisSaluran.terbuka => Icons.water_rounded,
-  JenisSaluran.gorongGorong => Icons.panorama_fish_eye_rounded,
-  JenisSaluran.inletJalan => Icons.grid_4x4_rounded,
-};
+/// Nama jenis saluran untuk aksesibilitas/ringkasan.
+String namaJenis(JenisSaluran j) => j.label;

@@ -5,44 +5,39 @@ import '../models/task.dart';
 import '../models/verification.dart';
 import '../theme/app_theme.dart';
 
-class _Chip extends StatelessWidget {
-  const _Chip({
-    required this.icon,
-    required this.label,
-    required this.fg,
-    required this.bg,
-  });
+/// Status ringan: titik berwarna + teks. Tidak berupa pil berikon, supaya
+/// status tidak bersaing dengan kelas sumbatan di kartu yang sama.
+class _Status extends StatelessWidget {
+  const _Status({required this.label, required this.dot});
 
-  final IconData icon;
   final String label;
-  final Color fg;
-  final Color bg;
+  final Color dot;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: Space.sm, vertical: 3),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: fg),
-          const SizedBox(width: Space.xs),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelMedium
-                ?.copyWith(color: fg, fontWeight: FontWeight.w700),
+    final theme = Theme.of(context);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: theme.textTheme.labelMedium?.copyWith(
+            color: theme.colorScheme.onSurface,
+            fontWeight: FontWeight.w700,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
 
-/// Status laporan warga/petugas: dikirim → ditugaskan → ditangani.
+/// Status laporan: dikirim → ditugaskan → ditangani (atau cek manual).
 class LaporanStatusChip extends StatelessWidget {
   const LaporanStatusChip({super.key, required this.status});
 
@@ -52,33 +47,15 @@ class LaporanStatusChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final rv = context.rivora;
-    final label = labelStatusLaporan[status] ?? status;
-    return switch (status) {
-      'ditangani' => _Chip(
-        icon: Icons.task_alt_rounded,
-        label: label,
-        fg: rv.bersih.fg,
-        bg: rv.bersih.bg,
-      ),
-      'ditugaskan' => _Chip(
-        icon: Icons.engineering_rounded,
-        label: label,
-        fg: scheme.onSurface,
-        bg: scheme.surfaceContainerHighest,
-      ),
-      'cek_manual' => _Chip(
-        icon: Icons.visibility_off_rounded,
-        label: label,
-        fg: rv.tidakTerlihat.fg,
-        bg: rv.tidakTerlihat.bg,
-      ),
-      _ => _Chip(
-        icon: Icons.send_rounded,
-        label: label,
-        fg: scheme.onPrimaryContainer,
-        bg: scheme.primaryContainer,
-      ),
-    };
+    return _Status(
+      label: labelStatusLaporan[status] ?? status,
+      dot: switch (status) {
+        'ditangani' => rv.bersih.fg,
+        'ditugaskan' => rv.waspada.fg,
+        'cek_manual' => rv.tidakTerlihat.fg,
+        _ => scheme.primary,
+      },
+    );
   }
 }
 
@@ -91,27 +68,14 @@ class TugasStatusChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final rv = context.rivora;
-    final label = labelStatusTugas[status] ?? status;
-    return switch (status) {
-      'selesai' => _Chip(
-        icon: Icons.task_alt_rounded,
-        label: label,
-        fg: rv.bersih.fg,
-        bg: rv.bersih.bg,
-      ),
-      'dikerjakan' => _Chip(
-        icon: Icons.cleaning_services_rounded,
-        label: label,
-        fg: scheme.onSurface,
-        bg: scheme.surfaceContainerHighest,
-      ),
-      _ => _Chip(
-        icon: Icons.schedule_rounded,
-        label: label,
-        fg: scheme.onPrimaryContainer,
-        bg: scheme.primaryContainer,
-      ),
-    };
+    return _Status(
+      label: labelStatusTugas[status] ?? status,
+      dot: switch (status) {
+        'selesai' => rv.bersih.fg,
+        'dikerjakan' => rv.waspada.fg,
+        _ => scheme.primary,
+      },
+    );
   }
 }
 
@@ -124,15 +88,17 @@ class RisikoChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.rivora.risiko(level);
-    return _Chip(
-      icon: switch (level) {
-        LevelRisiko.aman => Icons.shield_outlined,
-        LevelRisiko.waspada => Icons.warning_amber_rounded,
-        LevelRisiko.risikoTinggi => Icons.flood_outlined,
-      },
-      label: level.label,
-      fg: c.fg,
-      bg: c.bg,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: Space.sm, vertical: 3),
+      decoration: BoxDecoration(
+        color: c.bg,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        level.label,
+        style: Theme.of(context).textTheme.labelMedium
+            ?.copyWith(color: c.fg, fontWeight: FontWeight.w700),
+      ),
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../services/weather_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/format.dart';
+import '../theme/rivora_icons.dart';
 import 'motion.dart';
 
 String _jam(DateTime t) => '${t.hour.toString().padLeft(2, '0')}.00';
@@ -20,7 +21,7 @@ class RainCard extends StatelessWidget {
       builder: (context, _) {
         final data = weatherService.data;
         if (data == null && weatherService.loading) {
-          return const Skeleton(height: 252, radius: 24);
+          return const Skeleton(height: 240, radius: 24);
         }
         if (data == null) {
           return _Gagal(
@@ -38,11 +39,12 @@ class _Isi extends StatelessWidget {
 
   final PrakiraanHujan data;
 
-  static List<Color> _gradien(KategoriHujan k) => switch (k) {
-    KategoriHujan.tidak ||
-    KategoriHujan.ringan => const [Color(0xFF0B6E79), Color(0xFF06424A)],
-    KategoriHujan.sedang => const [Color(0xFF7A4300), Color(0xFF4A2800)],
-    _ => const [Color(0xFF9B1C14), Color(0xFF5E0F0A)],
+  /// Satu warna datar per kategori (tanpa gradien); teks putih tetap
+  /// kontras >= 4.5:1 di ketiganya.
+  static Color _latar(KategoriHujan k) => switch (k) {
+    KategoriHujan.tidak || KategoriHujan.ringan => const Color(0xFF0A5C66),
+    KategoriHujan.sedang => const Color(0xFF6B3B00),
+    _ => const Color(0xFF8A1A12),
   };
 
   String get _peluang {
@@ -88,24 +90,14 @@ class _Isi extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: _gradien(k),
-          ),
+          color: _latar(k),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(
-                  k.perluBertindak
-                      ? Icons.thunderstorm_rounded
-                      : Icons.water_drop_rounded,
-                  size: 18,
-                  color: putih,
-                ),
+                const Icon(RIcons.hujan, size: 18, color: putih),
                 const SizedBox(width: Space.sm),
                 Expanded(
                   child: Text(
@@ -188,7 +180,7 @@ class _Isi extends StatelessWidget {
 
 /// Batang hujan per jam, 24 jam ke depan, di atas latar gelap.
 class RainChart extends StatelessWidget {
-  const RainChart({super.key, required this.jam, this.height = 64});
+  const RainChart({super.key, required this.jam, this.height = 52});
 
   final List<HujanPerJam> jam;
   final double height;
@@ -290,10 +282,7 @@ class _Gagal extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.cloud_off_rounded,
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
+          Icon(RIcons.offline, color: theme.colorScheme.onSurfaceVariant),
           const SizedBox(width: Space.md),
           Expanded(child: Text(pesan, style: theme.textTheme.bodyMedium)),
           TextButton(
