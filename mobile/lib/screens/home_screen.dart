@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:latlong2/latlong.dart' show LatLng;
 
 import '../config.dart';
 import '../models/session.dart';
@@ -10,21 +10,25 @@ import '../services/repositories.dart';
 import '../services/session_store.dart';
 import '../services/weather_service.dart';
 import '../theme/app_theme.dart';
+import '../theme/rivora_icons.dart';
 import '../utils/format.dart';
 import '../widgets/common.dart';
 import '../widgets/motion.dart';
+import '../widgets/pictogram.dart';
 import '../widgets/rain_card.dart';
 import '../widgets/report_tile.dart';
+import '../widgets/risk_card.dart';
 import '../widgets/rivora_map.dart';
+import '../widgets/status_chip.dart';
 import '../widgets/sumbatan_style.dart';
 import 'app_shell.dart';
 import 'lapor_flow.dart';
+import 'login_screen.dart';
 import 'map_screen.dart';
 import 'task_detail_screen.dart';
 
-/// Beranda: kondisi hujan → aksi lapor → tugas terdekat → peta → status.
-/// Urutannya mengikuti siklus proposal 3.2 (Prediksi, Lapor, Bertindak,
-/// Verifikasi) dari sudut pandang pengguna di lapangan.
+/// Beranda: Prediksi (hujan + risiko RW) → Lapor → Bertindak (tugas
+/// terdekat, petugas) → peta → status laporan. Urutan siklus proposal 3.2.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -45,11 +49,15 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  LatLng? get _titik =>
+      _posisi == null ? null : LatLng(_posisi!.latitude, _posisi!.longitude);
+
   Future<void> _refresh() async {
     await Future.wait([
       reportRepository.refresh(),
       if (_petugas) taskRepository.refresh(),
       weatherService.refresh(paksa: true),
+      riskRepository.refresh(),
     ]);
   }
 
@@ -82,6 +90,9 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 _Header(session: session),
                 const SizedBox(height: Space.lg),
+                // Urutan: kenapa bertindak (hujan) → aksi utama (lapor) →
+                // pekerjaan petugas → risiko wilayah → peta → laporan.
+                // Tombol lapor harus terlihat tanpa menggulir.
                 const RainCard(),
                 const SizedBox(height: Space.md),
                 _LaporCta(onTap: () => mulaiLapor(context)),
@@ -97,6 +108,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   _TugasTerdekat(jarak: _jarak),
                 ],
                 const SizedBox(height: Space.xl),
+                RiskCard(posisi: _titik),
+                const SizedBox(height: Space.xl),
                 SectionTitle(
                   'Peta sekitarmu',
                   trailing: TextButton(
@@ -104,15 +117,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: const Text('Buka peta'),
                   ),
                 ),
-                _PratinjauPeta(
-                  petugas: _petugas,
-                  posisi: _posisi == null
-                      ? null
-                      : LatLng(_posisi!.latitude, _posisi!.longitude),
-                ),
+                _PratinjauPeta(petugas: _petugas, posisi: _titik),
                 const SizedBox(height: Space.xl),
                 SectionTitle(
-                  'Laporanmu',
+                  'Laporan dari HP ini',
                   trailing: TextButton(
                     onPressed: () => shellTab.value = Tabs.laporan,
                     child: const Text('Lihat semua'),
@@ -132,15 +140,16 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Widget> _terbaru() {
     final items = reportRepository.items.take(3).toList();
     if (items.isEmpty) {
-      if (reportRepository.loading) {
+      if (reportRepository.loading || !reportRepository.loaded) {
         return const [SkeletonList(count: 2, padding: EdgeInsets.zero)];
       }
       return const [
         EmptyState(
-          icon: Icons.photo_camera_outlined,
+          icon: RIcons.kamera,
           title: 'Belum ada laporan',
           message:
-              'Saluran yang kamu foto akan muncul di sini beserta statusnya.',
+              'Saluran yang kamu foto akan muncul di sini beserta statusnya, '
+              'tanpa perlu login.',
         ),
       ];
     }
@@ -169,6 +178,7 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final petugas = session?.isPetugas ?? false;
     return Row(
       children: [
         const RivoraMark(size: 44),
@@ -178,24 +188,33 @@ class _Header extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '${_salam(DateTime.now())},',
+                _salam(DateTime.now()),
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
               Text(
-                session?.nama ?? '',
+                petugas ? session!.nama : 'Warga',
                 style: theme.textTheme.titleLarge,
                 overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
         ),
-        IconButton.filledTonal(
-          tooltip: 'Akun',
-          onPressed: () => _tampilkanAkun(context),
-          icon: const Icon(Icons.person_rounded),
-        ),
+        if (petugas)
+          IconButton(
+            tooltip: 'Akun petugas',
+            onPressed: () => _tampilkanAkun(context),
+            icon: const Icon(RIcons.akun),
+          )
+        else
+          TextButton.icon(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const LoginScreen()),
+            ),
+            icon: const Icon(RIcons.petugas, size: 18),
+            label: const Text('Masuk petugas'),
+          ),
       ],
     );
   }
@@ -223,9 +242,7 @@ class _Header extends StatelessWidget {
               Row(
                 children: [
                   Icon(
-                    AppConfig.useMockApi
-                        ? Icons.science_outlined
-                        : Icons.cloud_done_outlined,
+                    AppConfig.useMockApi ? RIcons.contoh : RIcons.server,
                     size: 18,
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -247,8 +264,8 @@ class _Header extends StatelessWidget {
                   Navigator.of(sheetContext).pop();
                   keluar();
                 },
-                icon: const Icon(Icons.logout_rounded),
-                label: const Text('Keluar'),
+                icon: const Icon(RIcons.keluar),
+                label: const Text('Keluar dari akun petugas'),
               ),
             ],
           ),
@@ -273,28 +290,20 @@ class _LaporCta extends StatelessWidget {
       label: 'Lapor saluran tersumbat. Foto, pilih jenis, kirim.',
       excludeSemantics: true,
       child: Material(
-        color: scheme.primaryContainer,
-        borderRadius: BorderRadius.circular(20),
+        color: scheme.primary,
+        borderRadius: BorderRadius.circular(Radii.xl),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.all(Space.lg),
+            padding: const EdgeInsets.fromLTRB(
+              Space.xl,
+              Space.lg,
+              Space.lg,
+              Space.lg,
+            ),
             child: Row(
               children: [
-                Container(
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    color: scheme.primary,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.photo_camera_rounded,
-                    color: scheme.onPrimary,
-                  ),
-                ),
-                const SizedBox(width: Space.lg),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -302,23 +311,21 @@ class _LaporCta extends StatelessWidget {
                       Text(
                         'Lapor saluran tersumbat',
                         style: theme.textTheme.titleMedium?.copyWith(
-                          color: scheme.onPrimaryContainer,
+                          color: scheme.onPrimary,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Foto · pilih jenis · kirim. Lokasi otomatis.',
+                        'Foto, pilih jenis, kirim. Lokasi tercatat otomatis.',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: scheme.onPrimaryContainer,
+                          color: scheme.onPrimary,
                         ),
                       ),
                     ],
                   ),
                 ),
-                Icon(
-                  Icons.arrow_forward_rounded,
-                  color: scheme.onPrimaryContainer,
-                ),
+                const SizedBox(width: Space.md),
+                Icon(RIcons.kamera, size: 28, color: scheme.onPrimary),
               ],
             ),
           ),
@@ -328,7 +335,8 @@ class _LaporCta extends StatelessWidget {
   }
 }
 
-/// Carousel tugas aktif, terdekat dulu (prioritas kalau posisi belum ada).
+/// Carousel tugas aktif, terdekat dulu (urutan sumbatan kalau posisi
+/// belum diketahui).
 class _TugasTerdekat extends StatelessWidget {
   const _TugasTerdekat({required this.jarak});
 
@@ -343,7 +351,7 @@ class _TugasTerdekat extends StatelessWidget {
           padding: const EdgeInsets.all(Space.lg),
           child: Row(
             children: [
-              Icon(Icons.task_alt_rounded, color: context.rivora.bersih.fg),
+              Icon(RIcons.selesai, color: context.rivora.bersih.fg),
               const SizedBox(width: Space.md),
               Text(
                 taskRepository.loading
@@ -364,35 +372,35 @@ class _TugasTerdekat extends StatelessWidget {
         return aktif.indexOf(a).compareTo(aktif.indexOf(b));
       });
     return SizedBox(
-      height: 148,
+      height: 156,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         clipBehavior: Clip.none,
         itemCount: urut.length,
         separatorBuilder: (_, _) => const SizedBox(width: Space.md),
-        itemBuilder: (context, i) => _TugasMini(
-          task: urut[i],
-          urutan: aktif.indexOf(urut[i]) + 1,
-          jarak: jarak(urut[i]),
-        ),
+        itemBuilder: (context, i) =>
+            _TugasMini(task: urut[i], jarak: jarak(urut[i])),
       ),
     );
   }
 }
 
 class _TugasMini extends StatelessWidget {
-  const _TugasMini({required this.task, required this.urutan, this.jarak});
+  const _TugasMini({required this.task, this.jarak});
 
   final Task task;
-  final int urutan;
   final double? jarak;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final c = context.rivora.sumbatan(task.ai.kelas);
+    final scheme = theme.colorScheme;
+    final c = context.rivora.sumbatan(task.kelasSebelum);
+    final muted = theme.textTheme.bodySmall?.copyWith(
+      color: scheme.onSurfaceVariant,
+    );
     return SizedBox(
-      width: 272,
+      width: 288,
       child: Card(
         child: InkWell(
           onTap: () => Navigator.of(context).push(
@@ -400,90 +408,71 @@ class _TugasMini extends StatelessWidget {
               builder: (_) => TaskDetailScreen(task: task),
             ),
           ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Container(width: 6, color: c.fg),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(Space.md),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 26,
-                            height: 26,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: urutan == 1
-                                  ? theme.colorScheme.primary
-                                  : theme.colorScheme.surfaceContainerHigh,
-                              borderRadius: BorderRadius.circular(Radii.sm),
-                            ),
-                            child: Text(
-                              '$urutan',
-                              style: theme.textTheme.labelLarge?.copyWith(
-                                color: urutan == 1
-                                    ? theme.colorScheme.onPrimary
-                                    : theme.colorScheme.onSurface,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: Space.sm),
-                          Expanded(
-                            child: Text(
-                              [?task.rw, task.jenisSaluran.label].join(' · '),
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w700,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
+          child: Padding(
+            padding: const EdgeInsets.all(Space.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: c.bg,
+                        borderRadius: BorderRadius.circular(Radii.sm),
                       ),
-                      if (task.ai.catatan.isNotEmpty) ...[
-                        const SizedBox(height: Space.xs + 2),
-                        Text(
-                          task.ai.catatan,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                      const Spacer(),
-                      SumbatanBadge(kelas: task.ai.kelas, compact: true),
-                      const SizedBox(height: Space.sm),
-                      Row(
+                      alignment: Alignment.center,
+                      child: JenisPictogram(
+                        jenis: task.jenisSaluran,
+                        size: 26,
+                        color: c.fg,
+                      ),
+                    ),
+                    const SizedBox(width: Space.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(
-                            Icons.near_me_rounded,
-                            size: 16,
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                          const SizedBox(width: Space.xs),
                           Text(
-                            jarak == null ? 'Jarak –' : formatJarak(jarak!),
-                            style: theme.textTheme.labelMedium,
-                          ),
-                          const Spacer(),
-                          if (task.skorPrioritas != null)
-                            Text(
-                              'Prioritas ${formatDesimal(task.skorPrioritas!)}',
-                              style: theme.textTheme.labelMedium?.copyWith(
-                                fontWeight: FontWeight.w700,
-                              ),
+                            task.rw ?? task.jenisSaluran.label,
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w700,
                             ),
+                          ),
+                          Text(task.jenisSaluran.label, style: muted),
                         ],
                       ),
-                    ],
+                    ),
+                    SumbatanBadge(kelas: task.kelasSebelum, compact: true),
+                  ],
+                ),
+                const SizedBox(height: Space.sm),
+                Expanded(
+                  child: Text(
+                    task.catatanLurah ??
+                        'Ditugaskan ${formatRelatif(task.createdAt)}.',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: task.catatanLurah == null
+                          ? theme.colorScheme.onSurfaceVariant
+                          : null,
+                    ),
                   ),
                 ),
-              ),
-            ],
+                Row(
+                  children: [
+                    TugasStatusChip(status: task.status),
+                    const Spacer(),
+                    Text(
+                      jarak == null ? '' : formatJarak(jarak!),
+                      style: theme.textTheme.labelMedium,
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -509,18 +498,22 @@ class _PratinjauPeta extends StatelessWidget {
       label: 'Buka peta. $jumlah penanda di sekitarmu.',
       excludeSemantics: true,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(Radii.xl),
         child: SizedBox(
           height: 176,
           child: Stack(
             children: [
               Positioned.fill(
-                child: RivoraMap(
-                  center: pusatRingkas(petugas: petugas),
-                  zoom: 14.6,
-                  markers: penandaRingkas(context, petugas: petugas),
-                  posisiSaya: posisi,
-                  interaktif: false,
+                child: ListenableBuilder(
+                  listenable: riskRepository,
+                  builder: (context, _) => RivoraMap(
+                    center: pusatRingkas(petugas: petugas),
+                    zoom: 14.6,
+                    markers: penandaRingkas(context, petugas: petugas),
+                    rw: riskRepository.data?.rw ?? const [],
+                    posisiSaya: posisi,
+                    interaktif: false,
+                  ),
                 ),
               ),
               Positioned(
@@ -534,24 +527,10 @@ class _PratinjauPeta extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: theme.colorScheme.surfaceContainerLowest,
                     borderRadius: BorderRadius.circular(999),
-                    boxShadow: const [
-                      BoxShadow(color: Color(0x260B1F2A), blurRadius: 8),
-                    ],
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.place_rounded,
-                        size: 16,
-                        color: theme.colorScheme.primary,
-                      ),
-                      const SizedBox(width: Space.xs),
-                      Text(
-                        '$jumlah penanda',
-                        style: theme.textTheme.labelLarge,
-                      ),
-                    ],
+                  child: Text(
+                    '$jumlah penanda · ketuk untuk membuka',
+                    style: theme.textTheme.labelMedium,
                   ),
                 ),
               ),
@@ -581,41 +560,32 @@ class _PelacakStatus extends StatelessWidget {
   Widget _build(BuildContext context, Widget? _) {
     final r = reportRepository;
     final kolom = [
-      (
-        Icons.send_rounded,
-        'Dikirim',
-        r.count('dikirim') + r.count('cek_manual'),
-      ),
-      (Icons.engineering_rounded, 'Ditugaskan', r.count('ditugaskan')),
-      (Icons.task_alt_rounded, 'Ditangani', r.count('ditangani')),
+      ('Dikirim', r.count('dikirim') + r.count('cek_manual')),
+      ('Ditugaskan', r.count('ditugaskan')),
+      ('Ditangani', r.count('ditangani')),
     ];
     final theme = Theme.of(context);
     return Card(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: Space.lg),
+        padding: const EdgeInsets.symmetric(
+          vertical: Space.lg,
+          horizontal: Space.sm,
+        ),
         child: Row(
           children: [
             for (var i = 0; i < kolom.length; i++) ...[
               Expanded(
                 child: Semantics(
-                  label: '${kolom[i].$2}: ${kolom[i].$3} laporan',
+                  label: '${kolom[i].$1}: ${kolom[i].$2} laporan',
                   excludeSemantics: true,
                   child: Column(
                     children: [
-                      Icon(
+                      Text(
+                        '${kolom[i].$2}',
+                        style: theme.textTheme.headlineMedium,
+                      ),
+                      Text(
                         kolom[i].$1,
-                        size: 20,
-                        color: i == 2
-                            ? context.rivora.bersih.fg
-                            : theme.colorScheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(height: Space.xs),
-                      Text(
-                        '${kolom[i].$3}',
-                        style: theme.textTheme.headlineSmall,
-                      ),
-                      Text(
-                        kolom[i].$2,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -625,8 +595,9 @@ class _PelacakStatus extends StatelessWidget {
                 ),
               ),
               if (i < kolom.length - 1)
-                Icon(
-                  Icons.chevron_right_rounded,
+                Container(
+                  width: 1,
+                  height: 36,
                   color: theme.colorScheme.outlineVariant,
                 ),
             ],

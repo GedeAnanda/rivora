@@ -14,6 +14,7 @@ import '../widgets/report_photo.dart';
 import '../widgets/step_progress.dart';
 import 'report_form_screen.dart';
 import 'verify_screen.dart';
+import '../theme/rivora_icons.dart';
 
 enum _Gps { mencari, siap, gagal }
 
@@ -385,18 +386,14 @@ class _GpsChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (icon, label, color) = switch (gps) {
-      _Gps.mencari => (
-        Icons.gps_not_fixed_rounded,
-        'Mencari GPS…',
-        Colors.white,
-      ),
+      _Gps.mencari => (RIcons.gpsCari, 'Mencari GPS…', Colors.white),
       _Gps.siap => (
-        Icons.gps_fixed_rounded,
+        RIcons.gps,
         'GPS siap · ±${akurasi?.round() ?? '-'} m',
         const Color(0xFF7BD8A6),
       ),
       _Gps.gagal => (
-        Icons.gps_off_rounded,
+        RIcons.gpsMati,
         'GPS belum didapat · coba lagi',
         const Color(0xFFF2C16B),
       ),
@@ -607,11 +604,7 @@ class _ErrorView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
-              Icons.no_photography_outlined,
-              color: Colors.white70,
-              size: 48,
-            ),
+            const Icon(RIcons.kamera, color: Colors.white70, size: 48),
             const SizedBox(height: Space.md),
             Text(
               message,

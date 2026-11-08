@@ -11,10 +11,11 @@ import '../theme/app_theme.dart';
 import '../utils/format.dart';
 import '../widgets/common.dart';
 import '../widgets/motion.dart';
+import '../widgets/pictogram.dart';
 import '../widgets/step_progress.dart';
-import '../widgets/sumbatan_style.dart';
 import 'camera_screen.dart';
 import 'result_screen.dart';
+import '../theme/rivora_icons.dart';
 
 /// Konfirmasi laporan: foto, lokasi & waktu otomatis, pilih jenis saluran.
 class ReportFormScreen extends StatefulWidget {
@@ -83,7 +84,7 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
         actions: [
           TextButton.icon(
             onPressed: _sending ? null : _fotoUlang,
-            icon: const Icon(Icons.replay_rounded),
+            icon: const Icon(RIcons.ulang),
             label: const Text('Foto ulang'),
           ),
           const SizedBox(width: Space.sm),
@@ -136,13 +137,13 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
             child: Column(
               children: [
                 _Meta(
-                  icon: Icons.place_outlined,
+                  icon: RIcons.lokasi,
                   text: formatKoordinat(pos.latitude, pos.longitude),
                   trailing: '±${pos.accuracy.round()} m',
                 ),
                 const SizedBox(height: Space.sm),
                 _Meta(
-                  icon: Icons.schedule_rounded,
+                  icon: RIcons.waktu,
                   text: formatWaktu(widget.capturedAt),
                   trailing: 'otomatis',
                 ),
@@ -151,22 +152,26 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
           ),
           const SizedBox(height: Space.xl),
           const SectionTitle('Jenis saluran'),
-          Row(
-            children: [
-              for (final jenis in JenisSaluran.values) ...[
-                Expanded(
-                  child: _JenisOption(
-                    jenis: jenis,
-                    selected: _jenis == jenis,
-                    onTap: _sending
-                        ? null
-                        : () => setState(() => _jenis = jenis),
+          // Tinggi ketiga kartu disamakan walau label ada yang dua baris.
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (final jenis in JenisSaluran.values) ...[
+                  Expanded(
+                    child: _JenisOption(
+                      jenis: jenis,
+                      selected: _jenis == jenis,
+                      onTap: _sending
+                          ? null
+                          : () => setState(() => _jenis = jenis),
+                    ),
                   ),
-                ),
-                if (jenis != JenisSaluran.values.last)
-                  const SizedBox(width: Space.sm),
+                  if (jenis != JenisSaluran.values.last)
+                    const SizedBox(width: Space.sm),
+                ],
               ],
-            ],
+            ),
           ),
         ],
       ),
@@ -201,7 +206,7 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
                           color: scheme.onSurfaceVariant,
                         ),
                       )
-                    : const Icon(Icons.send_rounded),
+                    : const Icon(RIcons.kirim),
                 label: Text(
                   _sending ? 'AI sedang menganalisis…' : 'Kirim laporan',
                 ),
@@ -250,8 +255,6 @@ class _JenisOption extends StatelessWidget {
   final bool selected;
   final VoidCallback? onTap;
 
-  IconData get _icon => ikonJenis(jenis);
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -282,11 +285,11 @@ class _JenisOption extends StatelessWidget {
               vertical: Space.md,
             ),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Icon(
-                  _icon,
-                  size: 28,
+                JenisPictogram(
+                  jenis: jenis,
+                  size: 40,
                   color: selected
                       ? scheme.onPrimaryContainer
                       : scheme.onSurfaceVariant,

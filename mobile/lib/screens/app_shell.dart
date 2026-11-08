@@ -11,12 +11,12 @@ import '../services/session_store.dart';
 import '../services/task_watcher.dart';
 import '../services/weather_service.dart';
 import '../theme/app_theme.dart';
-import '../utils/format.dart';
 import 'home_screen.dart';
 import 'map_screen.dart';
 import 'reports_screen.dart';
 import 'task_detail_screen.dart';
 import 'tasks_screen.dart';
+import '../theme/rivora_icons.dart';
 
 /// Tab aktif. Bisa diganti dari layar mana saja, mis. tombol
 /// "Lihat status laporan" di layar hasil.
@@ -50,16 +50,29 @@ class _AppShellState extends State<AppShell> {
     shellTab.value = Tabs.beranda;
     reportRepository.refresh();
     weatherService.refresh();
+    riskRepository.refresh();
     if (_petugas) {
       taskRepository.refresh();
       taskWatcher.start();
       _tugasMasuk = taskRepository.tugasMasuk.listen(_terimaTugasBaru);
       layarFokus.addListener(_tampilkanTertunda);
+      // Push hanya untuk petugas, setelah login (mobile SRS FR-MB-09).
+      pushService.onOpenTask = _bukaTugasDariNotifikasi;
+      pushService.onForegroundMessage = _beriTahuPesan;
+      pushService.start();
     }
-    pushService.onOpenTasks = () =>
-        shellTab.value = _petugas ? Tabs.tugas : Tabs.laporan;
-    pushService.onForegroundMessage = _beriTahuPesan;
-    pushService.start();
+  }
+
+  /// Ketuk notifikasi → buka detail tugas (mobile SRS FR-MB-09).
+  Future<void> _bukaTugasDariNotifikasi(String? tugasId) async {
+    shellTab.value = Tabs.tugas;
+    if (tugasId == null) return;
+    await taskRepository.refresh(silent: true);
+    final t = taskRepository.byId(tugasId);
+    if (t == null) return;
+    await navigatorKey.currentState?.push(
+      MaterialPageRoute<void>(builder: (_) => TaskDetailScreen(task: t)),
+    );
   }
 
   @override
@@ -105,7 +118,7 @@ class _AppShellState extends State<AppShell> {
           showCloseIcon: true,
           content: Row(
             children: [
-              Icon(Icons.assignment_late_rounded, color: fg),
+              Icon(RIcons.notifikasi, color: fg),
               const SizedBox(width: Space.md),
               Expanded(
                 child: Column(
@@ -122,10 +135,11 @@ class _AppShellState extends State<AppShell> {
                     Text(
                       [
                         ?t.rw,
-                        t.ai.kelas.label,
-                        if (t.skorPrioritas != null)
-                          'prioritas ${formatDesimal(t.skorPrioritas!)}',
+                        t.kelasSebelum.label,
+                        ?t.catatanLurah,
                       ].join(' · '),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodySmall?.copyWith(color: fg),
                     ),
                   ],
@@ -172,18 +186,18 @@ class _AppShellState extends State<AppShell> {
               onDestinationSelected: (i) => shellTab.value = i,
               destinations: [
                 const NavigationDestination(
-                  icon: Icon(Icons.home_outlined),
-                  selectedIcon: Icon(Icons.home_rounded),
+                  icon: Icon(RIcons.beranda),
+                  selectedIcon: Icon(RIcons.berandaAktif),
                   label: 'Beranda',
                 ),
                 const NavigationDestination(
-                  icon: Icon(Icons.map_outlined),
-                  selectedIcon: Icon(Icons.map_rounded),
+                  icon: Icon(RIcons.peta),
+                  selectedIcon: Icon(RIcons.petaAktif),
                   label: 'Peta',
                 ),
                 const NavigationDestination(
-                  icon: Icon(Icons.receipt_long_outlined),
-                  selectedIcon: Icon(Icons.receipt_long_rounded),
+                  icon: Icon(RIcons.laporan),
+                  selectedIcon: Icon(RIcons.laporanAktif),
                   label: 'Laporan',
                 ),
                 if (_petugas)
@@ -191,12 +205,12 @@ class _AppShellState extends State<AppShell> {
                     icon: Badge.count(
                       count: taskRepository.aktif.length,
                       isLabelVisible: taskRepository.aktif.isNotEmpty,
-                      child: const Icon(Icons.assignment_outlined),
+                      child: const Icon(RIcons.tugas),
                     ),
                     selectedIcon: Badge.count(
                       count: taskRepository.aktif.length,
                       isLabelVisible: taskRepository.aktif.isNotEmpty,
-                      child: const Icon(Icons.assignment_rounded),
+                      child: const Icon(RIcons.tugasAktif),
                     ),
                     label: 'Tugas',
                     tooltip: '${taskRepository.aktif.length} tugas aktif',
@@ -210,11 +224,12 @@ class _AppShellState extends State<AppShell> {
   }
 }
 
+/// Keluar dari akun petugas → kembali sebagai warga. Laporan saya tetap
+/// tersimpan di HP (dilacak per perangkat, mobile SRS FR-MB-06).
 Future<void> keluar() async {
   await pushService.stop();
   taskWatcher.stop();
   await sessionStore.logout();
-  reportRepository.clear();
   taskRepository.clear();
   shellTab.value = Tabs.beranda;
 }

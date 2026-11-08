@@ -7,6 +7,7 @@ import '../widgets/common.dart';
 import '../widgets/motion.dart';
 import '../widgets/report_tile.dart';
 import 'lapor_flow.dart';
+import '../theme/rivora_icons.dart';
 
 enum _Filter { semua, diproses, ditangani }
 
@@ -33,7 +34,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'laporan-baru',
         onPressed: () => mulaiLapor(context),
-        icon: const Icon(Icons.photo_camera_rounded),
+        icon: const Icon(RIcons.kamera),
         label: const Text('Lapor'),
       ),
       body: ListenableBuilder(
@@ -43,10 +44,10 @@ class _ReportsScreenState extends State<ReportsScreen> {
           final items = _filtered(repo.items);
           return RefreshIndicator(
             onRefresh: repo.refresh,
-            edgeOffset: 152,
+            edgeOffset: 112,
             child: CustomScrollView(
               slivers: [
-                SliverAppBar.large(
+                SliverAppBar.medium(
                   title: Text(
                     repo.items.isEmpty
                         ? 'Laporan saya'
@@ -60,7 +61,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                     hasScrollBody: false,
                     child: Center(
                       child: EmptyState(
-                        icon: Icons.cloud_off_rounded,
+                        icon: RIcons.offline,
                         title: 'Laporan gagal dimuat',
                         message: repo.error!,
                         actionLabel: 'Coba lagi',
@@ -73,7 +74,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                     hasScrollBody: false,
                     child: Center(
                       child: EmptyState(
-                        icon: Icons.receipt_long_outlined,
+                        icon: RIcons.laporan,
                         title: 'Belum ada laporan',
                         message:
                             'Laporan yang kamu kirim akan muncul di sini, '
@@ -117,7 +118,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                         const SizedBox(height: Space.lg),
                         if (items.isEmpty)
                           const EmptyState(
-                            icon: Icons.filter_list_off_rounded,
+                            icon: RIcons.kosong,
                             title: 'Tidak ada laporan di sini',
                             message: 'Coba pilih filter lain.',
                           )

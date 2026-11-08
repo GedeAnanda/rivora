@@ -10,16 +10,37 @@ import '../widgets/ai_result_card.dart';
 import '../widgets/common.dart';
 import '../widgets/report_photo.dart';
 import '../widgets/status_chip.dart';
+import '../theme/rivora_icons.dart';
 
 /// Detail laporan: foto sebelum/sesudah, timeline status, hasil AI, lokasi.
 /// Status "sudah ditangani" + foto bukti kembali ke pelapor (proposal Tabel 8).
-class ReportDetailScreen extends StatelessWidget {
+class ReportDetailScreen extends StatefulWidget {
   const ReportDetailScreen({super.key, required this.report});
 
   final Report report;
 
   @override
-  Widget build(BuildContext context) {
+  State<ReportDetailScreen> createState() => _ReportDetailScreenState();
+}
+
+class _ReportDetailScreenState extends State<ReportDetailScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Status terbaru dari backend (mobile SRS FR-MB-06).
+    reportRepository.refreshOne(widget.report.id);
+  }
+
+  @override
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: reportRepository,
+    builder: (context, _) => _build(
+      context,
+      reportRepository.byId(widget.report.id) ?? widget.report,
+    ),
+  );
+
+  Widget _build(BuildContext context, Report report) {
     final local = reportRepository.localPhoto(report.id);
     final adaSesudah = report.sudahDitangani;
 
@@ -33,6 +54,10 @@ class ReportDetailScreen extends StatelessWidget {
           Space.xxl,
         ),
         children: [
+          if (report.hasilDemo || report.lokasiDemo || report.digabung) ...[
+            LabelLaporan(report: report),
+            const SizedBox(height: Space.md),
+          ],
           if (adaSesudah)
             Row(
               children: [
@@ -106,7 +131,7 @@ class ReportDetailScreen extends StatelessWidget {
                 children: [
                   const SectionTitle('Lokasi'),
                   _InfoRow(
-                    icon: Icons.place_outlined,
+                    icon: RIcons.lokasi,
                     text: [
                       ?report.rw,
                       formatKoordinat(report.lat, report.lng),
@@ -114,13 +139,13 @@ class ReportDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: Space.sm),
                   _InfoRow(
-                    icon: Icons.schedule_rounded,
+                    icon: RIcons.waktu,
                     text: 'Difoto ${formatWaktu(report.capturedAt)}',
                   ),
                   const SizedBox(height: Space.lg),
                   OutlinedButton.icon(
                     onPressed: () => bukaPeta(report.lat, report.lng),
-                    icon: const Icon(Icons.map_outlined),
+                    icon: const Icon(RIcons.peta),
                     label: const Text('Buka di Maps'),
                   ),
                 ],
@@ -199,16 +224,15 @@ class _Timeline extends StatelessWidget {
         const _Step('Ditangani', null, done: false),
       ];
     }
-    final ditugaskan = r.status == 'ditugaskan' || r.sudahDitangani;
+    final ditugaskan = r.ditugaskan || r.sudahDitangani;
     return [
       _Step('Dikirim', formatWaktu(r.capturedAt), done: true),
       _Step(
         'Ditugaskan',
         ditugaskan
-            ? [
-                if (r.petugasNama != null) 'ke ${r.petugasNama}',
-                if (r.ditugaskanAt != null) formatWaktu(r.ditugaskanAt!),
-              ].join(' · ')
+            ? (r.petugasNama == null
+                  ? 'Petugas sudah ditugaskan'
+                  : 'ke ${r.petugasNama}')
             : 'Menunggu kelurahan menugaskan petugas',
         done: ditugaskan,
       ),
@@ -217,6 +241,8 @@ class _Timeline extends StatelessWidget {
         r.sudahDitangani
             ? [
                 if (r.ditanganiAt != null) formatWaktu(r.ditanganiAt!),
+                if (r.kelasSesudah != null)
+                  'sesudah: ${r.kelasSesudah!.label.toLowerCase()}',
                 if (r.fotoSesudahUrl != null) 'foto bukti tersedia',
               ].join(' · ')
             : null,
@@ -271,7 +297,7 @@ class _StepRow extends StatelessWidget {
                     ),
                     child: step.done
                         ? Icon(
-                            Icons.check_rounded,
+                            RIcons.centang,
                             size: 14,
                             color: scheme.onPrimary,
                           )
@@ -317,6 +343,52 @@ class _StepRow extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Label kejujuran untuk juri dan pengguna (mobile SRS 6.3) dan info laporan
+/// yang digabung (proposal Tabel 8).
+class LabelLaporan extends StatelessWidget {
+  const LabelLaporan({super.key, required this.report});
+
+  final Report report;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final baris = <(IconData, String)>[
+      if (report.hasilDemo) (RIcons.contoh, 'Hasil contoh (mode demo)'),
+      if (report.lokasiDemo)
+        (RIcons.lokasi, 'Lokasi dipetakan ke saluran contoh'),
+      if (report.digabung)
+        (RIcons.info, 'Digabung dengan laporan lain di saluran yang sama'),
+    ];
+    return Container(
+      padding: const EdgeInsets.all(Space.md),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(Radii.md),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final (ikon, teks) in baris)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2),
+              child: Row(
+                children: [
+                  Icon(ikon, size: 18, color: scheme.onSurfaceVariant),
+                  const SizedBox(width: Space.sm),
+                  Expanded(
+                    child: Text(teks, style: theme.textTheme.bodyMedium),
+                  ),
+                ],
+              ),
+            ),
+        ],
       ),
     );
   }

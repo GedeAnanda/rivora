@@ -9,6 +9,8 @@ import '../widgets/report_photo.dart';
 import '../widgets/status_chip.dart';
 import 'app_shell.dart';
 import 'camera_screen.dart';
+import 'report_detail_screen.dart';
+import '../theme/rivora_icons.dart';
 
 /// Hasil analisis AI untuk laporan yang baru dikirim.
 class ResultScreen extends StatelessWidget {
@@ -36,7 +38,7 @@ class ResultScreen extends StatelessWidget {
         title: const Text('Laporan terkirim'),
         leading: IconButton(
           tooltip: 'Tutup',
-          icon: const Icon(Icons.close_rounded),
+          icon: const Icon(RIcons.tutup),
           onPressed: () => Navigator.of(context).popUntil((r) => r.isFirst),
         ),
       ),
@@ -72,9 +74,7 @@ class ResultScreen extends StatelessWidget {
                       Row(
                         children: [
                           Icon(
-                            cekManual
-                                ? Icons.visibility_off_rounded
-                                : Icons.check_circle_rounded,
+                            cekManual ? RIcons.tidakTerlihat : RIcons.selesai,
                             size: 20,
                             color: accent.fg,
                           ),
@@ -111,6 +111,10 @@ class ResultScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: Space.lg),
+          if (report.hasilDemo || report.lokasiDemo || report.digabung) ...[
+            LabelLaporan(report: report),
+            const SizedBox(height: Space.lg),
+          ],
           AiResultCard(ai: report.ai),
         ],
       ),
