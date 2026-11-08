@@ -46,7 +46,7 @@ async function kirimTugasBaru(petugasId, tugas) {
         body: `Bersihkan saluran ${s.jenis.replace('_', ' ')} di ${s.rw_nama || 'luar wilayah RW'}`,
       },
       data: {
-        jenis: 'tugas_baru',
+        type: 'tugas_baru', // SRS bagian 11
         tugas_id: String(tugas.id),
         saluran_id: String(s.id),
         lat: String(s.lat),

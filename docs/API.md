@@ -225,7 +225,7 @@ Sama dengan 7.2, ditambah:
 { "tugas": { "…": "…" }, "notifikasi": "terkirim" }
 ```
 
-`notifikasi`: `terkirim` · `gagal` · `tanpa_token` (petugas belum `POST /devices`) · `nonaktif` (Firebase belum disetel) **[ASUMSI]**. Data FCM (semua string): `jenis: "tugas_baru"`, `tugas_id`, `saluran_id`, `lat`, `lng`. 409 bila saluran sudah punya tugas belum selesai. `GET /tasks`: petugas = tugas miliknya, lurah = semua; filter opsional `?status=`.
+`notifikasi`: `terkirim` · `gagal` · `tanpa_token` (petugas belum `POST /devices`) · `nonaktif` (Firebase belum disetel) **[ASUMSI]**. Data FCM (semua string): `type: "tugas_baru"` (SRS bag. 11), `tugas_id`, `saluran_id`, `lat`, `lng`. 409 bila saluran sudah punya tugas belum selesai. `GET /tasks`: petugas = tugas miliknya, lurah = semua; filter opsional `?status=`.
 
 ### 7.10 `POST /tasks/:id/verify` → 200
 
