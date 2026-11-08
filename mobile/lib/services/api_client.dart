@@ -478,6 +478,24 @@ class MockApiClient implements ApiClient {
     final percobaan = (_percobaanVerifikasi[taskId] ?? 0) + 1;
     _percobaanVerifikasi[taskId] = percobaan;
 
+    // Tugas t5 (tugas baru) di percobaan pertama: AI gagal menilai, dengan
+    // bentuk respons backend routes/tasks.js (ai_sumber "gagal" + objek
+    // cadangan). Tugas tetap dikerjakan; petugas diminta foto ulang.
+    if (taskId == 't5' && percobaan == 1) {
+      task['status'] = 'dikerjakan';
+      return VerificationResult.fromJson({
+        'tugas': task,
+        'verifikasi': {
+          'sudah_bersih': false,
+          'kelas_sesudah': 'tidak_terlihat',
+          'skor_sumbatan_sesudah': null,
+          'keyakinan': 'rendah',
+          'catatan': 'Penilaian AI gagal, perlu dicek manual oleh lurah',
+        },
+        'ai_sumber': 'gagal',
+      });
+    }
+
     // Tugas t3 sengaja gagal di percobaan pertama supaya tampilan
     // "masih ada sumbatan" ikut teruji.
     final bersih = !(taskId == 't3' && percobaan == 1);

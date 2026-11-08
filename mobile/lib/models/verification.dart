@@ -48,23 +48,43 @@ class VerificationResult {
     this.skorRwSesudah,
   });
 
+  /// Tiga bentuk "AI tidak bisa menilai" diterima:
+  /// - `verifikasi: null` (backend SRS 7.10),
+  /// - `ai_sumber: "gagal"` + objek verifikasi cadangan (implementasi
+  ///   backend `routes/tasks.js`),
+  /// - `kelas_sesudah: "tidak_terlihat"` (foto tidak memperlihatkan saluran).
+  /// Semuanya ditampilkan "Belum bisa dinilai" + Foto ulang, bukan
+  /// "Masih ada sumbatan".
   factory VerificationResult.fromJson(Map<String, dynamic> json) {
     final v = json['verifikasi'] as Map<String, dynamic>?;
     final tugas = json['tugas'] as Map<String, dynamic>?;
+    final aiSumber = json['ai_sumber'] as String?;
+    final kelas = KelasSumbatan.fromApi(v?['kelas_sesudah'] as String?);
+    final dinilai =
+        v != null &&
+        aiSumber != 'gagal' &&
+        kelas != KelasSumbatan.tidakTerlihat;
+    final catatan = v?['catatan'] as String? ?? '';
     return VerificationResult(
-      dinilai: v != null,
-      pesan: json['pesan'] as String?,
-      sudahBersih: v?['sudah_bersih'] as bool? ?? false,
-      kelasSesudah: KelasSumbatan.fromApi(v?['kelas_sesudah'] as String?),
+      dinilai: dinilai,
+      // Catatan AI menjelaskan kenapa saluran tidak terlihat; catatan
+      // cadangan "gagal" ditujukan ke lurah, jadi tidak dipakai di sini.
+      pesan:
+          json['pesan'] as String? ??
+          (!dinilai && aiSumber != 'gagal' && catatan.isNotEmpty
+              ? catatan
+              : null),
+      sudahBersih: dinilai && (v['sudah_bersih'] as bool? ?? false),
+      kelasSesudah: kelas,
       skorSumbatanSesudah: (v?['skor_sumbatan_sesudah'] as num?)?.toDouble(),
       keyakinan: v?['keyakinan'] as String? ?? 'rendah',
-      catatan: v?['catatan'] as String? ?? '',
-      aiSumber: json['ai_sumber'] as String?,
+      catatan: catatan,
+      aiSumber: aiSumber,
       tugas: tugas == null ? null : Task.fromJson(tugas),
     );
   }
 
-  /// `false` kalau AI tidak memberi penilaian (`verifikasi: null`).
+  /// `false` kalau AI tidak memberi penilaian (lihat [VerificationResult.fromJson]).
   final bool dinilai;
   final String? pesan;
   final bool sudahBersih;
