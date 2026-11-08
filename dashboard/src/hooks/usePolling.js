@@ -13,13 +13,20 @@ export function usePolling(muat, jeda) {
     muatRef.current = muat
   }, [muat])
 
+  const urutan = useRef(0)
+
   const muatUlang = useCallback(async () => {
+    // Polling yang masih jalan saat muat ulang manual (mis. sesudah POST /tasks) bisa selesai belakangan
+    // dan menimpa data baru dengan data lama. Hanya hasil permintaan terbaru yang dipakai.
+    const ke = ++urutan.current
     try {
       const hasil = await muatRef.current()
+      if (ke !== urutan.current) return
       setData(hasil)
       setGalat(null)
       setTerakhirOk(new Date().toISOString())
     } catch (e) {
+      if (ke !== urutan.current) return
       setGalat(e)
     }
   }, [])
