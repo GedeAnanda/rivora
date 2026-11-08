@@ -9,7 +9,7 @@ app.set('trust proxy', 1); // foto_url pakai https saat di belakang proxy (deplo
 app.use(cors());
 app.use(express.json());
 
-app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+app.use('/uploads', express.static(require('./routes/reports').UPLOAD_DIR));
 
 // FR-BE-22 · SRS 7.11: { ok, demo_mode, ai_siap, db }
 app.get('/health', async (req, res) => {
@@ -42,6 +42,8 @@ app.use('/reports', require('./routes/reports')); // FR-BE-02/03/07
 app.use('/rw', require('./routes/rw')); // FR-BE-09
 app.use('/saluran', require('./routes/saluran')); // FR-BE-10/11
 app.use('/priorities', require('./routes/priorities')); // FR-BE-12
+app.use('/tasks', require('./routes/tasks')); // FR-BE-14/15/17
+app.use(require('./routes/lainnya')); // FR-BE-13 /petugas, FR-BE-16 /devices, FR-BE-20 /demo/hujan
 
 // 404
 app.use((req, res) => {

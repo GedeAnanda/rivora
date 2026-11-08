@@ -8,11 +8,19 @@ const multer = require('multer');
 const db = require('../db');
 const { httpError, ambilId } = require('../errors');
 const { cariAtauBuatSaluran } = require('../saluran');
+const { lokasiDemoDiminta, saluranDemo, cadanganDemo } = require('../demo');
 
 const router = express.Router();
 
-const UPLOAD_DIR = path.join(__dirname, '..', '..', 'uploads');
+// UPLOAD_DIR bisa diarahkan ke volume persisten saat deploy (mis. /data/uploads).
+const UPLOAD_DIR = process.env.UPLOAD_DIR
+  ? path.resolve(process.env.UPLOAD_DIR)
+  : path.join(__dirname, '..', '..', 'uploads');
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+// Foto contoh seed (backend/assets/contoh.jpg, di-commit) disalin ke uploads/ bila belum ada.
+const CONTOH_ASET = path.join(__dirname, '..', '..', 'assets', 'contoh.jpg');
+const CONTOH_TUJUAN = path.join(UPLOAD_DIR, 'contoh.jpg');
+if (!fs.existsSync(CONTOH_TUJUAN) && fs.existsSync(CONTOH_ASET)) fs.copyFileSync(CONTOH_ASET, CONTOH_TUJUAN);
 
 const JENIS = ['terbuka', 'gorong_gorong', 'inlet_jalan'];
 const KELAS = ['bersih', 'ringan', 'sedang', 'berat', 'tidak_terlihat'];
@@ -58,13 +66,15 @@ async function nilaiFoto(filePath, mimeType, jenisSaluran) {
     return stubAi();
   }
   if (typeof ai.analyzeReport !== 'function') return stubAi();
+  let hasil;
   try {
     const foto = await fs.promises.readFile(filePath);
-    return await ai.analyzeReport({ foto, mimeType, jenisSaluran });
+    hasil = await ai.analyzeReport({ foto, mimeType, jenisSaluran });
   } catch (err) {
     console.error('AI error:', err.message);
-    return { ok: false, alasan: 'error' };
+    hasil = { ok: false, alasan: 'error' };
   }
+  return cadanganDemo(hasil, jenisSaluran); // FR-BE-19
 }
 
 // Hasil AI → kolom laporan. AI gagal → laporan tetap disimpan, status cek_manual.
@@ -156,6 +166,11 @@ const angka = (v) => (v == null || String(v).trim() === '' ? NaN : Number(v));
 
 function cekInput(body) {
   if (!JENIS.includes(body.jenis_saluran)) return 'jenis_saluran harus terbuka, gorong_gorong, atau inlet_jalan';
+  return cekLokasiWaktu(body);
+}
+
+// Dipakai juga oleh POST /tasks/:id/verify
+function cekLokasiWaktu(body) {
   const lat = angka(body.lat);
   const lng = angka(body.lng);
   if (!Number.isFinite(lat) || lat < -90 || lat > 90 || !Number.isFinite(lng) || lng < -180 || lng > 180) {
@@ -189,18 +204,22 @@ router.post('/', terimaFoto, async (req, res) => {
   const lng = Number(req.body.lng);
   const capturedAt = new Date(req.body.captured_at);
 
+  // FR-BE-21 [DEMO]: pasang ke saluran DEMO_SALURAN_ID, posisi asli HP tetap disimpan
+  const lokasiDemo = lokasiDemoDiminta(req.body);
   const ai = dariHasilAi(await nilaiFoto(req.file.path, req.file.mimetype, jenis));
-  const saluran = await cariAtauBuatSaluran({ lat, lng, jenis });
+  const saluran = lokasiDemo
+    ? { id: await saluranDemo(), baru: false }
+    : await cariAtauBuatSaluran({ lat, lng, jenis });
   const fotoUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
   const pelaporId = req.user ? req.user.id : null; // token opsional (FR-BE-01)
 
   const { rows } = await db.query(
     `INSERT INTO laporan (saluran_id, pelapor_id, jenis_saluran, foto_url, geom, captured_at,
-       ai_json, ai_sumber, kelas, skor_sumbatan, keyakinan, status)
-     VALUES ($1, $2, $3, $4, ST_SetSRID(ST_MakePoint($5, $6), 4326)::geography, $7, $8, $9, $10, $11, $12, $13)
+       ai_json, ai_sumber, kelas, skor_sumbatan, keyakinan, status, lokasi_demo)
+     VALUES ($1, $2, $3, $4, ST_SetSRID(ST_MakePoint($5, $6), 4326)::geography, $7, $8, $9, $10, $11, $12, $13, $14)
      RETURNING id`,
     [saluran.id, pelaporId, jenis, fotoUrl, lng, lat, capturedAt.toISOString(),
-      ai.ai_json, ai.ai_sumber, ai.kelas, ai.skor_sumbatan, ai.keyakinan, ai.status]
+      ai.ai_json, ai.ai_sumber, ai.kelas, ai.skor_sumbatan, ai.keyakinan, ai.status, lokasiDemo]
   );
 
   const laporan = await ambilLaporan(rows[0].id);
@@ -237,3 +256,7 @@ router.get('/:id', async (req, res) => {
 });
 
 module.exports = router;
+// Helper untuk POST /tasks/:id/verify (routes/tasks.js)
+module.exports.terimaFoto = terimaFoto;
+module.exports.cekLokasiWaktu = cekLokasiWaktu;
+module.exports.UPLOAD_DIR = UPLOAD_DIR;

@@ -225,9 +225,11 @@ Sama dengan 7.2, ditambah:
 { "tugas": { "…": "…" }, "notifikasi": "terkirim" }
 ```
 
+`notifikasi`: `terkirim` · `gagal` · `tanpa_token` (petugas belum `POST /devices`) · `nonaktif` (Firebase belum disetel) **[ASUMSI]**. Data FCM (semua string): `jenis: "tugas_baru"`, `tugas_id`, `saluran_id`, `lat`, `lng`. 409 bila saluran sudah punya tugas belum selesai. `GET /tasks`: petugas = tugas miliknya, lurah = semua; filter opsional `?status=`.
+
 ### 7.10 `POST /tasks/:id/verify` → 200
 
-Request: multipart `foto` (sesudah).
+Request: multipart `foto` (sesudah), `lat`, `lng`, `captured_at` (wajib, aturan sama dengan 7.2; posisi maks 30 m dari saluran). Token petugas pemilik tugas. Opsional `lokasi_demo=true` [DEMO] → radius dilewati bila `DEMO_MODE=1`. `sudah_bersih: false` atau AI gagal → tugas tetap `dikerjakan`, boleh verifikasi ulang **[ASUMSI]**.
 
 ```json
 {

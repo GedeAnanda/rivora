@@ -6,7 +6,9 @@ const db = require('./db');
 const { skorK, bulat2 } = require('./risk/score');
 
 const PASSWORD = process.env.SEED_PASSWORD;
-const FOTO_CONTOH = `http://localhost:${process.env.PORT || 3000}/uploads/contoh.jpg`;
+// PUBLIC_URL = alamat API yang dipakai klien (mis. URL HTTPS deploy). Kosong → localhost.
+const BASE_URL = (process.env.PUBLIC_URL || `http://localhost:${process.env.PORT || 3000}`).replace(/\/+$/, '');
+const FOTO_CONTOH = `${BASE_URL}/uploads/contoh.jpg`;
 
 // Grid 3 kolom × 2 baris, sel ±440 m. RW 01–03 baris atas, RW 04–06 baris bawah (lebih rendah).
 const LNG0 = 107.684;
