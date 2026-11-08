@@ -198,7 +198,7 @@ export default function Dashboard({ onKeluar }) {
 
         <aside className="sisi">
           {rwAktif || saluranTerpilih ? (
-            <div className="sisi-detail">
+            <div className="sisi-detail" key={saluranTerpilih ?? rwAktif?.rw_id}>
               <button className="tombol-kembali" onClick={tutupDetail}>
                 <Ikon nama="kembali" ukuran={20} /> Kembali ke daftar
               </button>
@@ -226,7 +226,7 @@ export default function Dashboard({ onKeluar }) {
             ))}
           </div>
 
-          <div className="sisi-daftar">
+          <div className="sisi-daftar" key={tab}>
             {tab === 'prioritas' && (
               <PriorityList data={data?.prioritas} saluranTerpilih={saluranTerpilih} onPilih={pilihSaluran} onTugaskan={setTugaskan} />
             )}

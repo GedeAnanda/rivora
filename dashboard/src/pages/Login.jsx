@@ -44,6 +44,13 @@ export default function Login({ onMasuk }) {
     }
   }
 
+  // Gulir halus ke atas lalu fokus ke username. focus() biasa melompat seketika.
+  function keFormulir() {
+    const pelan = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    inputPertama.current?.closest('.hero')?.scrollIntoView({ behavior: pelan ? 'smooth' : 'auto', block: 'start' })
+    inputPertama.current?.focus({ preventScroll: true })
+  }
+
   return (
     <div className="halaman-login">
       <section className="hero">
@@ -111,7 +118,7 @@ export default function Login({ onMasuk }) {
 
       <section className="login-ajak">
         <h2>Saluran lancar, genangan berkurang.</h2>
-        <button className="tombol tombol-pill" onClick={() => inputPertama.current?.focus()}>
+        <button className="tombol tombol-pill" onClick={keFormulir}>
           Masuk ke dasbor
         </button>
       </section>
@@ -140,7 +147,7 @@ export default function Login({ onMasuk }) {
             <span>Wildan Panji Maulana</span>
           </div>
         </div>
-        <div className="kaki-bawah">© RIVORA 2026 · Telkom University · CR YOUTH 2026 Hackathon</div>
+        <div className="kaki-bawah">© RIVORA 2026 · Telkom University</div>
         <div className="kaki-kredit">
           Foto dari Wikimedia Commons:{' '}
           {KREDIT_FOTO.map(([nama, file, lisensi], i) => (

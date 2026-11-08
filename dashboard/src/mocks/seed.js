@@ -85,12 +85,21 @@ const RENCANA = [
 const RENTANG = { bersih: [0.03, 0.12], ringan: [0.18, 0.36], sedang: [0.45, 0.66], berat: [0.74, 0.92] }
 const CATATAN = {
   bersih: 'Aliran terlihat lancar, tidak ada sampah berarti',
-  ringan: 'Rumput dan daun tumbuh di dasar saluran, aliran masih bisa lewat',
+  ringan: 'Ada sedikit sampah atau tumbuhan di saluran, aliran masih lancar',
   sedang: 'Sampah menutupi sekitar separuh lebar saluran',
   berat: 'Sampah menutupi sebagian besar lebar saluran',
-  tidak_terlihat: 'Pandangan kamera terhalang, kondisi saluran tidak terlihat jelas',
+  tidak_terlihat: 'Isi saluran tidak terlihat jelas di foto, perlu dicek langsung',
 }
 const PENYEBAB = { bersih: [], ringan: ['daun_ranting'], sedang: ['plastik'], berat: ['plastik', 'sedimen'], tidak_terlihat: [] }
+
+// Foto contoh di public/contoh-saluran: tiap laporan dapat foto sendiri, urut per kelas (kredit di KREDIT.md).
+// shortcut: lebih dari JUMLAH_FOTO laporan sekelas -> foto berulang; tambah foto bila RENCANA diperbesar.
+const JUMLAH_FOTO = { bersih: 5, ringan: 6, sedang: 8, berat: 8, tidak_terlihat: 2 }
+const urutFoto = {}
+export function fotoContoh(kelas) {
+  urutFoto[kelas] = (urutFoto[kelas] ?? 0) + 1
+  return `/contoh-saluran/${kelas}-${((urutFoto[kelas] - 1) % JUMLAH_FOTO[kelas]) + 1}.jpg`
+}
 
 export const PETUGAS = [
   { id: 2, nama: 'Asep Saepudin' },
@@ -144,7 +153,7 @@ export function buatSeed() {
             keyakinan: !terlihat ? 'rendah' : r() < 0.7 ? 'tinggi' : r() < 0.6 ? 'sedang' : 'rendah',
             penyebab: PENYEBAB[kelas],
             catatan: CATATAN[kelas],
-            foto_url: `/contoh-saluran/${kelas}.jpg`,
+            foto_url: fotoContoh(kelas),
             captured_at: lalu(jam),
             ai_sumber: 'model',
             lokasi_demo: false,
@@ -187,6 +196,7 @@ export function buatSeed() {
     keyakinan: 'tinggi',
     catatan: 'Sampah plastik sudah terangkat, aliran terlihat lancar',
   }
+  const fotoSesudah = fotoContoh('bersih')
   laporan.push({
     id: idLaporan++,
     saluran_id: salSelesai.id,
@@ -197,7 +207,7 @@ export function buatSeed() {
     keyakinan: 'tinggi',
     penyebab: [],
     catatan: verifikasi.catatan,
-    foto_url: '/contoh-saluran/bersih.jpg',
+    foto_url: fotoSesudah,
     captured_at: lalu(0.5),
     ai_sumber: 'model',
     lokasi_demo: false,
@@ -210,7 +220,7 @@ export function buatSeed() {
     petugas_id: 3,
     status: 'selesai',
     catatan: null,
-    foto_sesudah_url: '/contoh-saluran/bersih.jpg',
+    foto_sesudah_url: fotoSesudah,
     verifikasi,
     dibuat_at: lalu(5),
     selesai_at: lalu(0.5),
