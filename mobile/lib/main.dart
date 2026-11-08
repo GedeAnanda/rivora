@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'app_keys.dart';
 import 'models/session.dart';
 import 'screens/app_shell.dart';
 import 'screens/login_screen.dart';
@@ -20,6 +21,8 @@ class RivoraApp extends StatelessWidget {
     return MaterialApp(
       title: 'RIVORA',
       debugShowCheckedModeBanner: false,
+      navigatorKey: navigatorKey,
+      scaffoldMessengerKey: messengerKey,
       theme: buildRivoraTheme(Brightness.light),
       darkTheme: buildRivoraTheme(Brightness.dark),
       home: ValueListenableBuilder<Session?>(
