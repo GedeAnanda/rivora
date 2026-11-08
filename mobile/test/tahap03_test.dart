@@ -17,9 +17,24 @@ void main() {
     });
   });
 
-  group('VerificationResult', () {
-    test('membaca respons lengkap: verifikasi, tugas, skor RW', () {
-      final r = VerificationResult.fromJson({
+  group('VerificationResult (backend SRS 7.10)', () {
+    final tugas = {
+      'id': 7,
+      'status': 'selesai',
+      'saluran': {
+        'id': 31,
+        'jenis': 'terbuka',
+        'rw_nama': 'RW 05',
+        'lat': -6.94,
+        'lng': 107.69,
+      },
+      'kelas_sebelum': 'berat',
+      'dibuat_at': '2026-11-08T02:30:00Z',
+    };
+
+    test('membaca verifikasi + tugas, skor RW ditambahkan app', () {
+      final mentah = VerificationResult.fromJson({
+        'tugas': tugas,
         'verifikasi': {
           'sudah_bersih': true,
           'kelas_sesudah': 'bersih',
@@ -27,37 +42,43 @@ void main() {
           'keyakinan': 'tinggi',
           'catatan': 'Bersih',
         },
-        'tugas': {
-          'id': 7,
-          'status': 'selesai',
-          'created_at': '2026-11-08T02:30:00Z',
-          'saluran': {'jenis_saluran': 'terbuka', 'lat': -6.94, 'lng': 107.69},
-          'laporan': {
-            'id': 42,
-            'ai': {'kelas_sumbatan': 'berat', 'saluran_terlihat': true},
-          },
-        },
-        'rw': {'nama': 'RW 05', 'skor_sebelum': 0.78, 'skor_sesudah': 0.41},
-        'foto_sesudah_url': 'https://contoh/7.jpg',
+        'ai_sumber': 'model',
       });
-      expect(r.sudahBersih, isTrue);
-      expect(r.kelasSesudah, KelasSumbatan.bersih);
-      expect(r.tugas!.selesai, isTrue);
+      expect(mentah.dinilai, isTrue);
+      expect(mentah.sudahBersih, isTrue);
+      expect(mentah.kelasSesudah, KelasSumbatan.bersih);
+      expect(mentah.tugas!.selesai, isTrue);
+      expect(mentah.hasilDemo, isFalse);
+      expect(mentah.adaPerubahanSkor, isFalse);
+
+      final r = mentah.denganSkorRw('RW 05', 0.78, 0.41);
+      expect(r.rw, 'RW 05');
       expect(r.adaPerubahanSkor, isTrue);
+      expect(r.sudahBersih, isTrue);
       expect(LevelRisiko.dariSkor(r.skorRwSebelum!), LevelRisiko.risikoTinggi);
       expect(LevelRisiko.dariSkor(r.skorRwSesudah!), LevelRisiko.waspada);
     });
 
-    test('respons datar tanpa pembungkus "verifikasi" juga diterima', () {
+    test('verifikasi null: belum dinilai, tugas tidak selesai', () {
       final r = VerificationResult.fromJson({
-        'sudah_bersih': false,
-        'kelas_sesudah': 'sedang',
-        'keyakinan': 'sedang',
+        'tugas': {...tugas, 'status': 'dikerjakan'},
+        'verifikasi': null,
+        'ai_sumber': 'model',
+        'pesan': 'Foto kurang jelas. Coba foto ulang.',
       });
+      expect(r.dinilai, isFalse);
       expect(r.sudahBersih, isFalse);
-      expect(r.kelasSesudah, KelasSumbatan.sedang);
-      expect(r.adaPerubahanSkor, isFalse);
-      expect(r.tugas, isNull);
+      expect(r.pesan, isNotNull);
+      expect(r.tugas!.selesai, isFalse);
+    });
+
+    test('ai_sumber demo diberi label', () {
+      final r = VerificationResult.fromJson({
+        'tugas': tugas,
+        'verifikasi': {'sudah_bersih': true, 'kelas_sesudah': 'bersih'},
+        'ai_sumber': 'demo',
+      });
+      expect(r.hasilDemo, isTrue);
     });
   });
 
@@ -81,16 +102,19 @@ void main() {
       't2 bersih: tugas selesai, skor RW turun, laporan warga ditangani',
       () async {
         final c = buat();
+        final sebelum = (await c.rwRisk(1)).rwBernama('RW 02')!.skor;
         final hasil = await verifikasi(c, 't2');
+        expect(hasil.dinilai, isTrue);
         expect(hasil.sudahBersih, isTrue);
         expect(hasil.tugas!.selesai, isTrue);
-        expect(hasil.skorRwSesudah!, lessThan(hasil.skorRwSebelum!));
+        final sesudah = (await c.rwRisk(1)).rwBernama('RW 02')!.skor;
+        expect(sesudah, lessThan(sebelum));
 
-        final laporan = (await c.myReports()).firstWhere(
-          (r) => r.id == 'contoh-102',
-        );
+        final laporan = await c.getReport('contoh-102');
         expect(laporan.sudahDitangani, isTrue);
+        expect(laporan.kelasSesudah, KelasSumbatan.bersih);
         expect(laporan.ditanganiAt, isNotNull);
+        expect(laporan.petugasNama, 'Dedi');
       },
     );
 
