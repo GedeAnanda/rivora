@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/ai_result.dart';
+import '../models/verification.dart';
 
 /// Token desain RIVORA. Rasional dan rasio kontras:
 /// docs/mobile/00-design-system.md
@@ -19,9 +20,23 @@ abstract final class Radii {
   static const double lg = 16;
 }
 
+/// Token gerak. Masuk memakai deselerasi, keluar lebih cepat dari masuk
+/// (ui-ux-pro-max: easing, exit-faster-than-enter). Semua animasi
+/// dimatikan kalau pengguna menyalakan "hapus animasi" di Android.
 abstract final class Motion {
   static const Duration fast = Duration(milliseconds: 150);
   static const Duration normal = Duration(milliseconds: 250);
+
+  /// Untuk angka/skor yang "terungkap" (hasil AI, skor RW turun).
+  static const Duration reveal = Duration(milliseconds: 700);
+  static const Curve enter = Curves.easeOutCubic;
+  static const Curve exit = Curves.easeInCubic;
+
+  static bool reduced(BuildContext context) =>
+      MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+
+  static Duration of(BuildContext context, Duration d) =>
+      reduced(context) ? Duration.zero : d;
 }
 
 /// Pasangan warna teks/ikon di atas latar berwarna. Semua pasangan
@@ -43,6 +58,7 @@ class RivoraColors extends ThemeExtension<RivoraColors> {
     required this.sedang,
     required this.berat,
     required this.tidakTerlihat,
+    required this.waspada,
   });
 
   final StatusColor bersih;
@@ -50,6 +66,16 @@ class RivoraColors extends ThemeExtension<RivoraColors> {
   final StatusColor sedang;
   final StatusColor berat;
   final StatusColor tidakTerlihat;
+
+  /// Level risiko RW "waspada" (docs/BRAND.md). Aman memakai warna bersih,
+  /// risiko tinggi memakai warna berat.
+  final StatusColor waspada;
+
+  StatusColor risiko(LevelRisiko level) => switch (level) {
+    LevelRisiko.aman => bersih,
+    LevelRisiko.waspada => waspada,
+    LevelRisiko.risikoTinggi => berat,
+  };
 
   StatusColor sumbatan(KelasSumbatan kelas) => switch (kelas) {
     KelasSumbatan.bersih => bersih,
@@ -65,6 +91,7 @@ class RivoraColors extends ThemeExtension<RivoraColors> {
     sedang: StatusColor(Color(0xFF9A4A06), Color(0xFFFCEBD9)),
     berat: StatusColor(Color(0xFFA51C14), Color(0xFFFBE4E1)),
     tidakTerlihat: StatusColor(Color(0xFF4A5A62), Color(0xFFE7ECEE)),
+    waspada: StatusColor(Color(0xFF8A4A00), Color(0xFFFCEFD6)),
   );
 
   static const dark = RivoraColors(
@@ -73,6 +100,7 @@ class RivoraColors extends ThemeExtension<RivoraColors> {
     sedang: StatusColor(Color(0xFFF5B26B), Color(0xFF3A2410)),
     berat: StatusColor(Color(0xFFFF9A8F), Color(0xFF3D1714)),
     tidakTerlihat: StatusColor(Color(0xFFB4C2C8), Color(0xFF243034)),
+    waspada: StatusColor(Color(0xFFF2C16B), Color(0xFF362607)),
   );
 
   @override
@@ -178,6 +206,7 @@ ThemeData buildRivoraTheme(Brightness brightness) {
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         minimumSize: const Size.fromHeight(52),
+        padding: const EdgeInsets.symmetric(horizontal: Space.lg),
         shape: buttonShape,
         textStyle: buttonText,
       ),
@@ -185,6 +214,7 @@ ThemeData buildRivoraTheme(Brightness brightness) {
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         minimumSize: const Size.fromHeight(52),
+        padding: const EdgeInsets.symmetric(horizontal: Space.lg),
         shape: buttonShape,
         side: BorderSide(color: scheme.outline),
         foregroundColor: scheme.onSurface,

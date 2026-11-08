@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/report.dart';
 import '../models/task.dart';
+import '../models/verification.dart';
 import '../theme/app_theme.dart';
 
 class _Chip extends StatelessWidget {
@@ -111,5 +112,27 @@ class TugasStatusChip extends StatelessWidget {
         bg: scheme.primaryContainer,
       ),
     };
+  }
+}
+
+/// Level risiko RW: Aman / Waspada / Risiko tinggi (proposal 3.2).
+class RisikoChip extends StatelessWidget {
+  const RisikoChip({super.key, required this.level});
+
+  final LevelRisiko level;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.rivora.risiko(level);
+    return _Chip(
+      icon: switch (level) {
+        LevelRisiko.aman => Icons.shield_outlined,
+        LevelRisiko.waspada => Icons.warning_amber_rounded,
+        LevelRisiko.risikoTinggi => Icons.flood_outlined,
+      },
+      label: level.label,
+      fg: c.fg,
+      bg: c.bg,
+    );
   }
 }

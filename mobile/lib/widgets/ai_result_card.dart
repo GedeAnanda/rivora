@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/ai_result.dart';
 import '../theme/app_theme.dart';
 import '../utils/format.dart';
+import 'motion.dart';
 import 'sumbatan_style.dart';
 
 /// Ringkasan hasil analisis AI (Lampiran C): kelas, skor, penyebab,
@@ -40,39 +41,41 @@ class AiResultCard extends StatelessWidget {
             SumbatanBadge(kelas: ai.kelas),
             if (skor != null) ...[
               const SizedBox(height: Space.lg),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    formatDesimal(skor),
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      color: warna.fg,
-                      height: 1,
-                    ),
-                  ),
-                  const SizedBox(width: Space.sm),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 2),
-                    child: Text(
-                      'skor sumbatan (0–1)',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: Space.sm),
               Semantics(
                 label: 'Skor sumbatan ${formatDesimal(skor)} dari 1',
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(999),
-                  child: LinearProgressIndicator(
-                    value: skor.clamp(0, 1),
-                    minHeight: 8,
-                    color: warna.fg,
-                    backgroundColor: warna.bg,
-                  ),
+                excludeSemantics: true,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        AnimatedScore(
+                          value: skor,
+                          style: theme.textTheme.headlineMedium?.copyWith(
+                            height: 1,
+                          ),
+                          color: warna.fg,
+                        ),
+                        const SizedBox(width: Space.sm),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 2),
+                          child: Text(
+                            'skor sumbatan (0–1)',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: scheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: Space.sm),
+                    AnimatedBar(
+                      value: skor,
+                      color: warna.fg,
+                      background: warna.bg,
+                    ),
+                  ],
                 ),
               ),
             ],

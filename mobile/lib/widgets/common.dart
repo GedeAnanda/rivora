@@ -1,32 +1,16 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
+import 'rivora_mark.dart';
 
-/// Tanda merek RIVORA: tetes air di kotak membulat.
+/// Tanda merek RIVORA di dalam aplikasi = ikon aplikasi "Mata Air".
 class RivoraMark extends StatelessWidget {
   const RivoraMark({super.key, this.size = 40});
 
   final double size;
 
   @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return ExcludeSemantics(
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: scheme.primary,
-          borderRadius: BorderRadius.circular(size * 0.3),
-        ),
-        child: Icon(
-          Icons.water_drop_rounded,
-          color: scheme.onPrimary,
-          size: size * 0.58,
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => RivoraAppIcon(size: size);
 }
 
 /// Judul bagian di dalam halaman.
