@@ -35,9 +35,13 @@ app.get('/health', async (req, res) => {
   });
 });
 
-app.use('/reports', require('./routes/reports')); // FR-BE-02
+const auth = require('./auth');
+app.use(auth.bacaToken); // FR-BE-01: req.user bila ada token
+app.use('/auth', auth.router); // POST /auth/login
+app.use('/reports', require('./routes/reports')); // FR-BE-02/03/07
 app.use('/rw', require('./routes/rw')); // FR-BE-09
-app.use('/saluran', require('./routes/saluran')); // FR-BE-10
+app.use('/saluran', require('./routes/saluran')); // FR-BE-10/11
+app.use('/priorities', require('./routes/priorities')); // FR-BE-12
 
 // 404
 app.use((req, res) => {
@@ -46,8 +50,13 @@ app.use((req, res) => {
 
 // Error umum: tanpa stack trace ke klien
 app.use((err, req, res, next) => {
-  console.error(err);
-  res.status(err.status || 500).json({ error: err.publicMessage || 'Terjadi kesalahan pada server' });
+  const status = err.status || err.statusCode || 500;
+  if (status >= 500) console.error(err);
+  let pesan = err.publicMessage;
+  if (!pesan && err.type === 'entity.parse.failed') pesan = 'Body JSON tidak valid';
+  if (!pesan && err.type === 'entity.too.large') pesan = 'Body terlalu besar';
+  if (!pesan) pesan = status < 500 ? 'Permintaan tidak valid' : 'Terjadi kesalahan pada server';
+  res.status(status).json({ error: pesan });
 });
 
 const PORT = process.env.PORT || 3000;

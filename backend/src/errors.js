@@ -13,4 +13,11 @@ function ambilKelurahanId(req) {
   return id;
 }
 
-module.exports = { httpError, ambilKelurahanId };
+// :id di path harus bilangan bulat positif
+function ambilId(req) {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) throw httpError(400, 'id tidak valid');
+  return id;
+}
+
+module.exports = { httpError, ambilKelurahanId, ambilId };

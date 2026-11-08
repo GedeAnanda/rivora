@@ -1,6 +1,8 @@
 // Rumus skor RIVORA (SRS bag. 9). Fungsi murni, tanpa DB. Bobot = [ASUMSI], bukan hasil kalibrasi.
 
 const BOBOT_KEYAKINAN = { tinggi: 1.0, sedang: 0.6, rendah: 0.3 };
+const BOBOT = { hujan: 0.4, sumbatan: 0.4, kerentanan: 0.2 };
+const HUJAN_LEBAT_MM = 50;
 
 const bulat2 = (x) => Math.round(x * 100) / 100;
 const batas01 = (x) => Math.min(Math.max(x, 0), 1);
@@ -54,4 +56,4 @@ function skorPrioritas({ h, skorSumbatan, kRw }) {
   return bulat2(0.4 * h + 0.4 * (Number(skorSumbatan) || 0) + 0.2 * kRw);
 }
 
-module.exports = { BOBOT_KEYAKINAN, bulat2, skorH, skorS, skorK, level, skorRw, skorPrioritas };
+module.exports = { BOBOT_KEYAKINAN, BOBOT, HUJAN_LEBAT_MM, bulat2, skorH, skorS, skorK, level, skorRw, skorPrioritas };

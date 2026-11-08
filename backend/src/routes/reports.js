@@ -1,12 +1,12 @@
-// FR-BE-02: POST /reports (multipart: foto, jenis_saluran, lat, lng, captured_at). Token opsional (FR-BE-01 menyusul).
-// Validasi lengkap (umur foto, lokasi palsu) = FR-BE-03, menyusul.
+// FR-BE-02 · API 7.2: POST /reports (multipart: foto, jenis_saluran, lat, lng, captured_at). Token opsional.
+// FR-BE-03: validasi input. FR-BE-07 · API 7.3: GET /reports/:id.
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const express = require('express');
 const multer = require('multer');
 const db = require('../db');
-const { httpError } = require('../errors');
+const { httpError, ambilId } = require('../errors');
 const { cariAtauBuatSaluran } = require('../saluran');
 
 const router = express.Router();
@@ -17,6 +17,7 @@ fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 const JENIS = ['terbuka', 'gorong_gorong', 'inlet_jalan'];
 const KELAS = ['bersih', 'ringan', 'sedang', 'berat', 'tidak_terlihat'];
 const KEYAKINAN = ['rendah', 'sedang', 'tinggi'];
+const PENYEBAB = ['plastik', 'sedimen', 'daun_ranting', 'puing'];
 const EKSTENSI = { 'image/jpeg': '.jpg', 'image/png': '.png' };
 
 const upload = multer({
@@ -98,55 +99,140 @@ function dariHasilAi(hasil) {
   };
 }
 
+// ---------- Bentuk respons API 7.2 / 7.3 ----------
+
+// digabung (GET) = sudah ada laporan lain di saluran ini sebelum laporan ini.
+// POST memakai nilai asli dari cariAtauBuatSaluran.
+async function ambilLaporan(id) {
+  const { rows } = await db.query(
+    `SELECT l.id, l.status, l.jenis_saluran, ST_Y(l.geom::geometry) AS lat, ST_X(l.geom::geometry) AS lng,
+       l.captured_at, l.foto_url, l.ai_json, l.ai_sumber, l.kelas, l.skor_sumbatan, l.keyakinan,
+       l.saluran_id, s.rw_id, rw.nama AS rw_nama, l.lokasi_demo,
+       EXISTS (SELECT 1 FROM laporan l2 WHERE l2.saluran_id = l.saluran_id AND l2.id < l.id) AS digabung
+     FROM laporan l
+     JOIN saluran s ON s.id = l.saluran_id
+     LEFT JOIN rw ON rw.id = s.rw_id
+     WHERE l.id = $1`,
+    [id]
+  );
+  const r = rows[0];
+  if (!r) return null;
+  const j = r.ai_json || {};
+  return {
+    id: r.id,
+    status: r.status,
+    jenis_saluran: r.jenis_saluran,
+    lat: r.lat,
+    lng: r.lng,
+    captured_at: r.captured_at,
+    foto_url: r.foto_url,
+    // Selalu objek (tidak null) agar mobile tidak error; AI gagal → tidak_terlihat + catatan.
+    ai: {
+      jenis_saluran: JENIS.includes(j.jenis_saluran) ? j.jenis_saluran : r.jenis_saluran,
+      saluran_terlihat: r.kelas !== 'tidak_terlihat',
+      kelas_sumbatan: r.kelas,
+      skor_sumbatan: r.skor_sumbatan,
+      penyebab: Array.isArray(j.penyebab) ? j.penyebab.filter((p) => PENYEBAB.includes(p)) : [],
+      keyakinan: r.keyakinan,
+      catatan: r.ai_sumber === 'gagal'
+        ? 'Penilaian AI gagal, saluran perlu dicek manual'
+        : typeof j.catatan === 'string' ? j.catatan : '',
+    },
+    ai_sumber: r.ai_sumber,
+    saluran_id: r.saluran_id,
+    digabung: r.digabung,
+    rw_id: r.rw_id,
+    rw_nama: r.rw_nama,
+    lokasi_demo: r.lokasi_demo,
+  };
+}
+
+// ---------- FR-BE-03: validasi ----------
+const MAKS_UMUR_FOTO_MS = 60 * 60 * 1000; // 60 menit lalu
+const MAKS_MAJU_FOTO_MS = 5 * 60 * 1000; // 5 menit ke depan (beda jam HP)
+const BENAR = ['true', '1', 'yes'];
+
+const angka = (v) => (v == null || String(v).trim() === '' ? NaN : Number(v));
+
+function cekInput(body) {
+  if (!JENIS.includes(body.jenis_saluran)) return 'jenis_saluran harus terbuka, gorong_gorong, atau inlet_jalan';
+  const lat = angka(body.lat);
+  const lng = angka(body.lng);
+  if (!Number.isFinite(lat) || lat < -90 || lat > 90 || !Number.isFinite(lng) || lng < -180 || lng > 180) {
+    return 'lat dan lng wajib diisi dengan koordinat yang valid';
+  }
+  // [ASUMSI] mobile mengirim flag lokasi palsu sebagai field "lokasi_palsu" (atau "is_mocked")
+  if (BENAR.includes(String(body.lokasi_palsu ?? body.is_mocked ?? '').toLowerCase())) {
+    return 'Lokasi palsu terdeteksi. Matikan aplikasi lokasi palsu lalu foto ulang';
+  }
+  if (!body.captured_at) return 'captured_at wajib diisi (waktu ISO 8601)';
+  const t = new Date(body.captured_at);
+  if (Number.isNaN(t.getTime())) return 'captured_at harus waktu ISO 8601';
+  const selisih = Date.now() - t.getTime();
+  if (selisih > MAKS_UMUR_FOTO_MS) return 'Foto sudah lebih dari 60 menit. Ambil foto baru';
+  if (selisih < -MAKS_MAJU_FOTO_MS) return 'Waktu foto di masa depan. Periksa jam HP';
+  return null;
+}
+
+// ---------- Route ----------
+
 router.post('/', terimaFoto, async (req, res) => {
   if (!req.file) throw httpError(400, 'Foto wajib dikirim (field "foto")');
-  const hapusFoto = () => fs.promises.unlink(req.file.path).catch(() => {});
+  const salah = cekInput(req.body);
+  if (salah) {
+    await fs.promises.unlink(req.file.path).catch(() => {});
+    throw httpError(400, salah);
+  }
 
   const jenis = req.body.jenis_saluran;
   const lat = Number(req.body.lat);
   const lng = Number(req.body.lng);
-  const capturedAt = req.body.captured_at ? new Date(req.body.captured_at) : new Date();
+  const capturedAt = new Date(req.body.captured_at);
 
-  let salah = null;
-  if (!JENIS.includes(jenis)) salah = 'jenis_saluran harus terbuka, gorong_gorong, atau inlet_jalan';
-  else if (!Number.isFinite(lat) || lat < -90 || lat > 90 || !Number.isFinite(lng) || lng < -180 || lng > 180)
-    salah = 'lat/lng tidak valid';
-  else if (Number.isNaN(capturedAt.getTime())) salah = 'captured_at harus waktu ISO 8601';
-  if (salah) {
-    await hapusFoto();
-    throw httpError(400, salah);
-  }
-
-  const saluran = await cariAtauBuatSaluran({ lat, lng, jenis });
   const ai = dariHasilAi(await nilaiFoto(req.file.path, req.file.mimetype, jenis));
+  const saluran = await cariAtauBuatSaluran({ lat, lng, jenis });
   const fotoUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
-  const pelaporId = req.user ? req.user.id : null; // diisi setelah middleware auth (FR-BE-01)
+  const pelaporId = req.user ? req.user.id : null; // token opsional (FR-BE-01)
 
   const { rows } = await db.query(
     `INSERT INTO laporan (saluran_id, pelapor_id, jenis_saluran, foto_url, geom, captured_at,
        ai_json, ai_sumber, kelas, skor_sumbatan, keyakinan, status)
      VALUES ($1, $2, $3, $4, ST_SetSRID(ST_MakePoint($5, $6), 4326)::geography, $7, $8, $9, $10, $11, $12, $13)
-     RETURNING id, created_at`,
+     RETURNING id`,
     [saluran.id, pelaporId, jenis, fotoUrl, lng, lat, capturedAt.toISOString(),
       ai.ai_json, ai.ai_sumber, ai.kelas, ai.skor_sumbatan, ai.keyakinan, ai.status]
   );
 
-  res.status(201).json({
-    id: rows[0].id,
-    saluran_id: saluran.id,
-    saluran_baru: saluran.baru,
-    rw_id: saluran.rw_id,
-    jenis_saluran: jenis,
-    foto_url: fotoUrl,
-    lokasi: { type: 'Point', coordinates: [lng, lat] },
-    captured_at: capturedAt.toISOString(),
-    kelas: ai.kelas,
-    skor_sumbatan: ai.skor_sumbatan,
-    keyakinan: ai.keyakinan,
-    penyebab: Array.isArray(ai.ai_json.penyebab) ? ai.ai_json.penyebab : [],
-    ai_sumber: ai.ai_sumber,
-    status: ai.status,
-    created_at: rows[0].created_at,
+  const laporan = await ambilLaporan(rows[0].id);
+  laporan.digabung = !saluran.baru;
+  res.status(201).json(laporan);
+});
+
+// FR-BE-07 · API 7.3
+router.get('/:id', async (req, res) => {
+  const id = ambilId(req);
+  const laporan = await ambilLaporan(id);
+  if (!laporan) throw httpError(404, 'Laporan tidak ditemukan');
+
+  const { rows } = await db.query(
+    `SELECT t.id, t.status, p.nama AS petugas_nama, t.foto_sesudah_url, t.selesai_at,
+       t.ai_verifikasi_json, lv.kelas AS kelas_verifikasi
+     FROM tugas t
+     JOIN pengguna p ON p.id = t.petugas_id
+     LEFT JOIN laporan lv ON lv.id = t.laporan_verifikasi_id
+     WHERE t.laporan_id = $1
+     ORDER BY t.id DESC LIMIT 1`,
+    [id]
+  );
+  const t = rows[0];
+  res.json({
+    ...laporan,
+    tugas: t ? { id: t.id, status: t.status, petugas_nama: t.petugas_nama } : null,
+    bukti: t && t.status === 'selesai' ? {
+      foto_sesudah_url: t.foto_sesudah_url,
+      kelas_sesudah: t.kelas_verifikasi ?? t.ai_verifikasi_json?.kelas_sesudah ?? null,
+      selesai_at: t.selesai_at,
+    } : null,
   });
 });
 
