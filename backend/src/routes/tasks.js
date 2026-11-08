@@ -95,6 +95,27 @@ router.get('/', wajibLogin('lurah', 'petugas'), async (req, res) => {
   res.json(await cariTugas(syarat.length ? `WHERE ${syarat.join(' AND ')}` : '', params));
 });
 
+// ---------- PATCH /tasks/:id (FR-BE-23, P2) ----------
+// Body { status: "dikerjakan" }. [ASUMSI] hanya petugas pemilik tugas; hanya baru → dikerjakan
+// (selesai hanya lewat verify). Sudah dikerjakan → 200 tanpa perubahan. Sudah selesai → 409.
+router.patch('/:id', wajibLogin('petugas'), async (req, res) => {
+  const id = idBulat(req.params.id);
+  if (!id) throw httpError(400, 'id tidak valid');
+  if ((req.body || {}).status !== 'dikerjakan') {
+    throw httpError(400, 'status hanya boleh "dikerjakan" (selesai lewat verifikasi foto)');
+  }
+  const { rows } = await db.query('SELECT status, petugas_id FROM tugas WHERE id = $1', [id]);
+  const t = rows[0];
+  if (!t) throw httpError(404, 'Tugas tidak ditemukan');
+  if (t.petugas_id !== req.user.id) throw httpError(403, 'Tugas ini bukan milikmu');
+  if (t.status === 'selesai') throw httpError(409, 'Tugas ini sudah selesai');
+  if (t.status === 'baru') {
+    await db.query("UPDATE tugas SET status = 'dikerjakan' WHERE id = $1 AND status = 'baru'", [id]);
+  }
+  const [tugas] = await cariTugas('WHERE t.id = $1', [id]);
+  res.json(tugas);
+});
+
 // ---------- POST /tasks/:id/verify (FR-BE-17) ----------
 // Multipart: foto (sesudah), lat, lng, captured_at. [ASUMSI] lat/lng/captured_at wajib seperti POST /reports
 // (dibutuhkan untuk radius 30 m). lokasi_demo=true + DEMO_MODE → radius dilewati (FR-BE-21).

@@ -250,7 +250,7 @@ Request: multipart `foto` (sesudah), `lat`, `lng`, `captured_at` (wajib, aturan 
 | Endpoint | Request | Respons |
 |---|---|---|
 | `POST /devices` | `{ "fcm_token": "…" }` | 204 |
-| `PATCH /tasks/:id` (P2) | `{ "status": "dikerjakan" }` | 200 objek tugas |
+| `PATCH /tasks/:id` (P2) | `{ "status": "dikerjakan" }` | 200 objek tugas. Hanya petugas pemilik (403), hanya `dikerjakan` (400), sudah selesai → 409, sudah dikerjakan → 200 tanpa perubahan |
 | `PUT /demo/hujan` [DEMO] | `{ "mm": 80 }` / `{ "mm": null }` | 200 `{ "mm": 80 }`. 404 bila `DEMO_MODE` mati |
 | `GET /health` (P1) | – | `{ "ok": true, "demo_mode": true, "ai_siap": true, "db": "ok" }` |
 
