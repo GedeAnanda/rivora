@@ -121,19 +121,22 @@ class ReportRepository extends ChangeNotifier {
     _error = null;
     if (!silent) notifyListeners();
     var gagal = 0;
-    final baru = await Future.wait(
-      _items.map((r) async {
+    final diminta = _items;
+    final hasil = <String, Report>{};
+    await Future.wait(
+      diminta.map((r) async {
         try {
-          return await api.getReport(r.id);
+          hasil[r.id] = await api.getReport(r.id);
         } on ApiException {
           gagal++;
-          return r;
         }
       }),
     );
-    _items = baru;
+    // Gabung ke daftar *terkini* per ID: laporan yang baru dikirim selama
+    // refresh berjalan tetap ada (tidak tertimpa daftar lama).
+    _items = [for (final r in _items) hasil[r.id] ?? r];
     if (gagal > 0 && !silent) {
-      _error = gagal == baru.length
+      _error = gagal == diminta.length
           ? 'Status laporan belum bisa dimuat. Menampilkan data terakhir.'
           : '$gagal laporan belum bisa diperbarui.';
     }
@@ -173,6 +176,11 @@ class TaskRepository extends ChangeNotifier {
   bool _loaded = false;
   String? _error;
 
+  /// Naik setiap [clear] (sesi berakhir). Respons dari generasi lama
+  /// dibuang supaya tugas akun sebelumnya tidak muncul lagi.
+  int _generasi = 0;
+  Future<void>? _berjalan;
+
   List<Task> get items => _items;
   List<Task> get aktif => _items.where((t) => !t.selesai).toList();
   bool get loading => _loading;
@@ -189,14 +197,27 @@ class TaskRepository extends ChangeNotifier {
     return null;
   }
 
-  Future<void> refresh({bool silent = false}) async {
-    if (_loading) return;
+  /// Muat ulang tugas. Kalau sedang memuat, kembalikan permintaan yang
+  /// sedang berjalan (pemanggil bisa menunggu hasilnya).
+  Future<void> refresh({bool silent = false}) {
+    final berjalan = _berjalan;
+    if (berjalan != null) return berjalan;
+    final generasi = _generasi;
+    late final Future<void> f;
+    f = _muat(generasi, silent: silent).whenComplete(() {
+      if (identical(_berjalan, f)) _berjalan = null;
+    });
+    return _berjalan = f;
+  }
+
+  Future<void> _muat(int generasi, {required bool silent}) async {
     _loading = true;
     _error = null;
     if (!silent) notifyListeners();
     try {
       final tasks = await api.myTasks()
         ..sort(_urutan);
+      if (generasi != _generasi) return;
       final sudahPernahMuat = _loaded;
       _items = tasks;
       _loaded = true;
@@ -205,11 +226,15 @@ class TaskRepository extends ChangeNotifier {
         if (baru && sudahPernahMuat && !t.selesai) _tugasMasuk.add(t);
       }
     } on ApiException catch (e) {
+      if (generasi != _generasi) return;
       if (!silent) _error = e.message;
+      // Sesi berakhir: sessionServices ikut mengosongkan daftar ini.
       if (e.unauthorized) await sessionStore.logout();
     } finally {
-      _loading = false;
-      notifyListeners();
+      if (generasi == _generasi) {
+        _loading = false;
+        notifyListeners();
+      }
     }
   }
 
@@ -226,7 +251,12 @@ class TaskRepository extends ChangeNotifier {
     return a.createdAt.compareTo(b.createdAt);
   }
 
+  /// Kosongkan data petugas (sesi berakhir). Permintaan yang masih
+  /// berjalan dibuang hasilnya; permintaan sesi baru tidak terhalang.
   void clear() {
+    _generasi++;
+    _berjalan = null;
+    _loading = false;
     _items = const [];
     _knownIds.clear();
     _loaded = false;

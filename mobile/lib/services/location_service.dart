@@ -20,6 +20,18 @@ class LocationException implements Exception {
 /// GPS untuk laporan. Lokasi diambil otomatis saat memotret (proposal 3.2),
 /// pengguna tidak bisa mengetik koordinat sendiri.
 class LocationService {
+  /// Posisi cadangan (posisi terakhir yang diketahui) hanya dipakai kalau
+  /// masih segar dan cukup akurat. Posisi lama bisa menempelkan laporan ke
+  /// saluran lain, dan membuat cek radius verifikasi 30 m tidak bermakna.
+  static const umurMaks = Duration(minutes: 2);
+  static const akurasiMaksMeter = 50.0;
+
+  /// `true` kalau [p] boleh dipakai sebagai lokasi foto.
+  static bool layak(Position p, {DateTime? sekarang}) {
+    final umur = (sekarang ?? DateTime.now()).difference(p.timestamp);
+    return umur <= umurMaks && p.accuracy <= akurasiMaksMeter;
+  }
+
   /// Pastikan GPS menyala dan izin lokasi diberikan.
   /// Dipanggil sebelum membuka kamera supaya dialog izin tidak
   /// mengganggu kamera yang sedang aktif.
@@ -55,7 +67,7 @@ class LocationService {
       final last = await Geolocator.getLastKnownPosition(
         forceAndroidLocationManager: Platform.isAndroid,
       );
-      if (last != null) return last;
+      if (last != null && layak(last)) return last;
       throw const LocationException(
         'Lokasi belum didapat. Coba pindah ke tempat lebih terbuka.',
       );

@@ -127,7 +127,7 @@ class HttpApiClient implements ApiClient {
       }),
       gagal: 'Gagal masuk',
     );
-    return Session.fromJson(body as Map<String, dynamic>);
+    return _baca(body, 'Gagal masuk', (b) => Session.fromJson(_objek(b)));
   }
 
   @override
@@ -147,7 +147,11 @@ class HttpApiClient implements ApiClient {
       extra: {'jenis_saluran': jenisSaluran.apiValue},
     );
     final body = await _send(req, gagal: 'Laporan gagal dikirim');
-    return Report.fromJson(body as Map<String, dynamic>);
+    return _baca(
+      body,
+      'Laporan gagal dikirim',
+      (b) => Report.fromJson(_objek(b)),
+    );
   }
 
   @override
@@ -156,7 +160,11 @@ class HttpApiClient implements ApiClient {
       http.Request('GET', _uri('/reports/${Uri.encodeComponent(id)}')),
       gagal: 'Laporan gagal dimuat',
     );
-    return Report.fromJson(body as Map<String, dynamic>);
+    return _baca(
+      body,
+      'Laporan gagal dimuat',
+      (b) => Report.fromJson(_objek(b)),
+    );
   }
 
   @override
@@ -165,11 +173,15 @@ class HttpApiClient implements ApiClient {
       http.Request('GET', _uri('/tasks?mine=1')),
       gagal: 'Tugas gagal dimuat',
     );
-    final raw = body is Map<String, dynamic> ? body['data'] : body;
-    return [
-      for (final t in (raw as List<dynamic>? ?? const []))
-        Task.fromJson(t as Map<String, dynamic>),
-    ];
+    // Wajib daftar (`{data: [...]}` atau `[...]`). Respons kosong/lain
+    // bukan "tidak ada tugas", tapi kesalahan server/proxy.
+    return _baca(body, 'Tugas gagal dimuat', (b) {
+      final raw = b is Map<String, dynamic> ? b['data'] : b;
+      return [
+        for (final t in raw as List<dynamic>)
+          Task.fromJson(t as Map<String, dynamic>),
+      ];
+    });
   }
 
   @override
@@ -178,8 +190,10 @@ class HttpApiClient implements ApiClient {
       _json('PATCH', '/tasks/${Uri.encodeComponent(id)}', {'status': status}),
       gagal: 'Status tugas gagal diubah',
     );
-    final map = body as Map<String, dynamic>;
-    return Task.fromJson(map['tugas'] as Map<String, dynamic>? ?? map);
+    return _baca(body, 'Status tugas gagal diubah', (b) {
+      final map = _objek(b);
+      return Task.fromJson(map['tugas'] as Map<String, dynamic>? ?? map);
+    });
   }
 
   @override
@@ -198,7 +212,11 @@ class HttpApiClient implements ApiClient {
       capturedAt: capturedAt,
     );
     final body = await _send(req, gagal: 'Verifikasi gagal dikirim');
-    return VerificationResult.fromJson(body as Map<String, dynamic>);
+    return _baca(
+      body,
+      'Verifikasi gagal dikirim',
+      (b) => VerificationResult.fromJson(_objek(b)),
+    );
   }
 
   @override
@@ -215,7 +233,30 @@ class HttpApiClient implements ApiClient {
       http.Request('GET', _uri('/rw/risk?kelurahan_id=$kelurahanId')),
       gagal: 'Peta risiko gagal dimuat',
     );
-    return PetaRisiko.fromJson(body as Map<String, dynamic>);
+    return _baca(
+      body,
+      'Peta risiko gagal dimuat',
+      (b) => PetaRisiko.fromJson(_objek(b)),
+    );
+  }
+
+  static ApiException _responsRusak(String gagal) =>
+      ApiException('$gagal: respons server tidak sesuai. Coba lagi.');
+
+  static Map<String, dynamic> _objek(Object? body) =>
+      body as Map<String, dynamic>;
+
+  /// Ubah body sukses jadi model. Bentuk yang tidak sesuai kontrak (null,
+  /// tipe salah, field wajib hilang) menjadi [ApiException] yang ditangani
+  /// layar, bukan TypeError.
+  static T _baca<T>(Object? body, String gagal, T Function(Object? b) ubah) {
+    try {
+      return ubah(body);
+    } on ApiException {
+      rethrow;
+    } on Object {
+      throw _responsRusak(gagal);
+    }
   }
 
   Future<Object?> _send(
@@ -235,13 +276,18 @@ class HttpApiClient implements ApiClient {
       throw const ApiException('Koneksi ke server terputus. Coba lagi.');
     }
 
+    final sukses = response.statusCode >= 200 && response.statusCode < 300;
     Object? body;
     try {
       body = response.body.isEmpty ? null : jsonDecode(response.body);
     } on FormatException {
+      // 2xx yang bukan JSON (mis. halaman HTML dari proxy) = respons rusak.
+      if (sukses) throw _responsRusak(gagal);
       body = null;
     }
-    if (response.statusCode >= 200 && response.statusCode < 300) return body;
+    // Body kosong tetap diterima untuk operasi tanpa isi (204);
+    // operasi yang wajib berisi menolaknya di _baca.
+    if (sukses) return body;
 
     // Pesan dari backend ditampilkan apa adanya (mobile SRS NFR-02).
     final pesan = body is Map<String, dynamic>

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'app_keys.dart';
 import 'models/session.dart';
 import 'screens/app_shell.dart';
+import 'services/session_services.dart';
 import 'services/session_store.dart';
 import 'theme/app_theme.dart';
 
@@ -12,8 +13,20 @@ Future<void> main() async {
   runApp(const RivoraApp());
 }
 
-class RivoraApp extends StatelessWidget {
+class RivoraApp extends StatefulWidget {
   const RivoraApp({super.key});
+
+  @override
+  State<RivoraApp> createState() => _RivoraAppState();
+}
+
+class _RivoraAppState extends State<RivoraApp> {
+  @override
+  void initState() {
+    super.initState();
+    // Layanan petugas (tugas, cek berkala, push) mengikuti sesi.
+    sessionServices.attach();
+  }
 
   @override
   Widget build(BuildContext context) {

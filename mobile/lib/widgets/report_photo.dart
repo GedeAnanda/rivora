@@ -46,6 +46,17 @@ class ReportPhoto extends StatelessWidget {
       jenis: jenis,
       alignment: placeholderAlignment,
     );
+    final adaUrl = url != null && url!.isNotEmpty;
+    Widget dariServer() => Image.network(
+      url!,
+      width: width,
+      height: height,
+      fit: BoxFit.cover,
+      semanticLabel: semanticLabel,
+      errorBuilder: (_, _, _) => placeholder,
+      loadingBuilder: (context, child, progress) =>
+          progress == null ? child : placeholder,
+    );
     final Widget image;
     if (file != null) {
       image = Image.file(
@@ -54,19 +65,12 @@ class ReportPhoto extends StatelessWidget {
         height: height,
         fit: BoxFit.cover,
         semanticLabel: semanticLabel,
-        errorBuilder: (_, _, _) => placeholder,
+        // File kamera bisa sudah terhapus (cache dibersihkan): pakai foto
+        // dari server sebelum menyerah ke pengganti.
+        errorBuilder: (_, _, _) => adaUrl ? dariServer() : placeholder,
       );
-    } else if (url != null && url!.isNotEmpty) {
-      image = Image.network(
-        url!,
-        width: width,
-        height: height,
-        fit: BoxFit.cover,
-        semanticLabel: semanticLabel,
-        errorBuilder: (_, _, _) => placeholder,
-        loadingBuilder: (context, child, progress) =>
-            progress == null ? child : placeholder,
-      );
+    } else if (adaUrl) {
+      image = dariServer();
     } else {
       image = Semantics(label: semanticLabel, image: true, child: placeholder);
     }
