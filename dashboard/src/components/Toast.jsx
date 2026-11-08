@@ -2,7 +2,7 @@
 export default function Toast({ pesan }) {
   if (!pesan) return null
   return (
-    <div className={`toast toast-${pesan.jenis ?? 'info'}`} role="status" aria-live="polite">
+    <div key={pesan.teks} className={`toast toast-${pesan.jenis ?? 'info'}`} role="status" aria-live="polite">
       {pesan.teks}
     </div>
   )
