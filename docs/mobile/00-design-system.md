@@ -22,18 +22,24 @@ Semua warna lewat token tema (`ColorScheme` + `RivoraColors`). Tidak ada hex lan
 
 ### Inti
 
+Palet biru air sejak 8 November 2026 (sebelumnya teal). Asal warna dan nama: [../BRAND.md](../BRAND.md) bagian 3.
+
 | Token | Light | Dark | Dipakai untuk |
 |---|---|---|---|
-| `primary` | `#0B6E79` teal air | `#5FC3CF` | Aksi utama, tab aktif, tanda merek |
-| `onPrimary` | `#FFFFFF` | `#00363D` | Teks di atas primary |
-| `primaryContainer` | `#D3ECEE` | `#0E4A52` | Pilihan terpilih, indikator tab |
-| `surface` | `#F3F6F5` | `#0D1417` | Latar halaman |
-| `surfaceContainerLowest` | `#FFFFFF` | `#152024` | Kartu |
-| `onSurface` | `#0B1F2A` | `#E6EEF0` | Teks utama |
-| `onSurfaceVariant` | `#46575D` | `#A7B6BB` | Teks sekunder |
-| `outline` | `#7A8B90` | `#6F8186` | Garis tepi kontrol (≥ 3:1) |
-| `outlineVariant` | `#DCE3E1` | `#2A3A3F` | Garis tepi kartu (dekoratif) |
+| `primary` | `#0361C3` Laut | `#63C6FF` | Aksi utama, tab aktif, tanda merek |
+| `onPrimary` | `#FFFFFF` | `#012C54` | Teks di atas primary |
+| `primaryContainer` | `#DFF2FE` Buih | `#0C3C75` | Pilihan terpilih, indikator tab |
+| `onPrimaryContainer` | `#012858` | `#D7EFFF` | Ikon/teks di atas container |
+| `secondary` | `#04214B` Samudra | `#E9F0F5` | Tinta merek |
+| `surface` | `#F4FAFE` Kabut | `#070F19` | Latar halaman |
+| `surfaceContainerLowest` | `#FFFFFF` | `#0C1521` | Kartu |
+| `onSurface` | `#04214B` Samudra | `#E9F0F5` | Teks utama |
+| `onSurfaceVariant` | `#47566C` | `#A8B6C3` | Teks sekunder |
+| `outline` | `#6E7D91` | `#728295` | Garis tepi kontrol (≥ 3:1) |
+| `outlineVariant` | `#D6E0EB` | `#293647` | Garis tepi kartu (dekoratif) |
 | `error` | `#B42318` | `#FF9A8F` | Pesan error |
+
+Warna di luar tema yang ikut diganti: kartu hujan "tidak/ringan" `#024D9D` (Laut 700, teks putih 8,23:1), garis pindai AI dan air di gambar sumbatan `#35C1F4` (Tirta), lapisan gelap di atas kamera dan foto `#07111F` dengan transparansi.
 
 ### Kelas sumbatan (`RivoraColors`)
 
@@ -43,22 +49,25 @@ Semua warna lewat token tema (`ColorScheme` + `RivoraColors`). Tidak ada hex lan
 | Ringan | `#5C6B0A` / `#F1F4DC` | `#C9D86A` / `#2A2F0E` | info |
 | Sedang | `#9A4A06` / `#FCEBD9` | `#F5B26B` / `#3A2410` | warning |
 | Berat | `#A51C14` / `#FBE4E1` | `#FF9A8F` / `#3D1714` | error |
-| Tidak terlihat | `#4A5A62` / `#E7ECEE` | `#B4C2C8` / `#243034` | visibility_off |
+| Tidak terlihat | `#47566C` / `#E8EDF3` | `#B4C2CE` / `#212F40` | visibility_off |
 
 ### Rasio kontras (dihitung, rumus WCAG)
 
 | Pasangan | Rasio |
 |---|---|
-| Light: primary di atas putih | 5,96 |
-| Light: teks utama di atas latar | 15,53 |
-| Light: teks sekunder di atas kartu | 7,55 |
-| Light: bersih / ringan / sedang / berat / tidak terlihat | 6,07 / 5,25 / 5,37 / 6,23 / 6,02 |
-| Dark: teks utama di atas latar | 15,81 |
-| Dark: teks sekunder di atas kartu | 7,95 |
-| Dark: onPrimary di atas primary | 6,39 |
-| Dark: bersih / ringan / sedang / berat / tidak terlihat | 8,32 / 8,94 / 7,96 / 7,72 / 7,43 |
+| Light: primary di atas putih / latar | 6,00 / 5,70 |
+| Light: teks utama di atas latar | 15,07 |
+| Light: teks sekunder di atas kartu | 7,46 |
+| Light: onPrimaryContainer di atas primaryContainer | 12,64 |
+| Light: garis kontrol di atas kartu | 4,20 |
+| Light: bersih / ringan / sedang / berat / tidak terlihat | 6,07 / 5,25 / 5,37 / 6,23 / 6,34 |
+| Dark: teks utama di atas latar | 16,72 |
+| Dark: teks sekunder di atas kartu | 8,86 |
+| Dark: onPrimary di atas primary | 7,42 |
+| Dark: garis kontrol di atas kartu | 4,67 |
+| Dark: tidak terlihat | 7,47 |
 
-Semua teks ≥ 4,5:1. Warna garis kontrol awalnya `#8A9A9E` (2,92:1, gagal) lalu digelapkan ke `#7A8B90`.
+Semua teks ≥ 4,5:1. Warna status kelas sumbatan lain tidak berubah dari versi teal.
 
 ## Tipografi
 
@@ -122,10 +131,10 @@ Jenis saluran memakai piktogram gambar sendiri (`JenisPictogram`), bukan ikon um
 
 | Item | Isi |
 |---|---|
-| Tanda merek | `RivoraMark` = ikon aplikasi **Mata Air** (`widgets/rivora_mark.dart`), digambar dari `brand/logo/rivora-mark.svg`. Panduan: [../BRAND.md](../BRAND.md) |
+| Tanda merek | `RivoraMark` = ikon aplikasi **Ombak** (`widgets/rivora_mark.dart`): gradien biru + ombak putih, sama dengan `brand/logo/rivora-app-icon.svg`. Panduan: [../BRAND.md](../BRAND.md) |
 | Warna `waspada` | Light `#8A4A00` / `#FCEFD6` (6,03:1) · Dark `#F2C16B` / `#362607` (8,78:1). Dipakai level risiko RW bersama `bersih` (aman) dan `berat` (risiko tinggi) |
 | Token `Motion` | `fast` 150 ms · `normal` 250 ms · `reveal` 700 ms · masuk `easeOutCubic` · keluar `easeInCubic`. `Motion.of()` mengembalikan 0 kalau "Hapus animasi" aktif |
-| Komponen gerak | `AnimatedScore`, `AnimatedBar`, `ScanOverlay` (garis pindai warna Bening `#5FC3CF`), `Skeleton`, `SkeletonList` (`widgets/motion.dart`) |
+| Komponen gerak | `AnimatedScore`, `AnimatedBar`, `ScanOverlay` (garis pindai warna Tirta `#35C1F4`), `Skeleton`, `SkeletonList` (`widgets/motion.dart`) |
 | `BeforeAfterCompare` | Geser, ketuk, atau aksi slider TalkBack (naik/turun 10%) |
 | `RisikoChip` | Aman / Waspada / Risiko tinggi, ikon + teks + warna |
 | Tombol | Padding horizontal 16 (bukan 24) supaya dua tombol berdampingan tidak memotong label |
@@ -151,7 +160,7 @@ Detail dan referensi: [04-redesign-modern.md](04-redesign-modern.md).
 | Ikon | Phosphor Regular/Fill sebagai font aset (`PhosphorRegular`, `PhosphorFill`), lewat `RIcons`. Paket `phosphor_flutter` tidak dipakai karena tidak bisa dikompilasi di Flutter 3.47 |
 | Piktogram jenis saluran | `JenisPictogram` (`widgets/pictogram.dart`): saluran terbuka (penampang), gorong-gorong (bawah jalan), inlet jalan (kisi + panah). Dipakai form, placeholder foto, kartu tugas |
 | Chip | Status = titik + teks. Badge sumbatan/risiko = teks berwarna di latar lembut, tanpa ikon. Tag penyebab = latar `surfaceContainerHigh`, tanpa garis (bukan tombol) |
-| Hero hujan | Warna datar, gradien dihapus: teal `#0A5C66`, cokelat `#6B3B00`, merah tua `#8A1A12`. Teks putih ≥ 4,5:1 |
+| Hero hujan | Warna datar, gradien dihapus: biru Laut 700 `#024D9D` (sebelumnya teal `#0A5C66`), cokelat `#6B3B00`, merah tua `#8A1A12`. Teks putih ≥ 4,5:1 |
 | Pin peta | Bentuk tetes (`_PinPainter`), ujung di titik. Laporan 28×36 warna kondisi sekarang (`kelasKini`), tugas 34×44 dengan nomor |
 | Poligon RW | Isi warna level 16%, garis 70%, label nama RW di sisi utara dengan halo warna permukaan. Label hanya di peta penuh |
 | Atribusi OSM | Strip kecil pojok kanan bawah, tidak tertutup legenda |
@@ -171,7 +180,7 @@ Aturan: **kata dan warna dulu, angka belakangan**. Angka 0–1, mm, rumus, dan k
 | `RiskMeter` | 3 segmen 10 dp (lebar 4 : 3 : 3 sesuai ambang), segmen aktif warna `fg`, lainnya `bg`; penanda lingkaran 22 dp, tepi 4 dp warna level, bayangan halus. Label Aman · Waspada · Tinggi di bawah |
 | Kotak saran | Latar `risiko(level).bg`, teks + ikon `fg`, tebal. Satu kalimat tindakan |
 | Baris faktor | Kotak ikon 36 dp (`bg`/`fg` tingkat), kalimat `bodyLarge`, tiga titik 8 dp |
-| `SumbatanVisual` | Penampang 104 × 75 dp: dinding `onSurfaceVariant`, sampah `sumbatan(kelas).fg`, air Bening `#5FC3CF`. Tidak terlihat = garis putus + "?" |
+| `SumbatanVisual` | Penampang 104 × 75 dp: dinding `onSurfaceVariant`, sampah `sumbatan(kelas).fg`, air Tirta `#35C1F4`. Tidak terlihat = garis putus + "?" |
 | Keyakinan | "AI yakin / cukup yakin / kurang yakin" + tiga batang |
 | `LokasiMini` | Ringkas: peta 76 dp di kiri. Penuh: peta 148 dp selebar kartu + pin kondisi. Judul "Di RW 05" |
 

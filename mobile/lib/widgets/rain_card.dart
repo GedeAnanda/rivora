@@ -64,7 +64,7 @@ class _Isi extends StatelessWidget {
   /// Satu warna datar per kategori (tanpa gradien); teks putih tetap
   /// kontras >= 4.5:1 di ketiganya.
   static Color _latar(KategoriHujan k) => switch (k) {
-    KategoriHujan.tidak || KategoriHujan.ringan => const Color(0xFF0A5C66),
+    KategoriHujan.tidak || KategoriHujan.ringan => const Color(0xFF024D9D),
     KategoriHujan.sedang => const Color(0xFF6B3B00),
     _ => const Color(0xFF8A1A12),
   };

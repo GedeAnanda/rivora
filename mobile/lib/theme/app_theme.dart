@@ -91,7 +91,7 @@ class RivoraColors extends ThemeExtension<RivoraColors> {
     ringan: StatusColor(Color(0xFF5C6B0A), Color(0xFFF1F4DC)),
     sedang: StatusColor(Color(0xFF9A4A06), Color(0xFFFCEBD9)),
     berat: StatusColor(Color(0xFFA51C14), Color(0xFFFBE4E1)),
-    tidakTerlihat: StatusColor(Color(0xFF4A5A62), Color(0xFFE7ECEE)),
+    tidakTerlihat: StatusColor(Color(0xFF47566C), Color(0xFFE8EDF3)),
     waspada: StatusColor(Color(0xFF8A4A00), Color(0xFFFCEFD6)),
   );
 
@@ -100,7 +100,7 @@ class RivoraColors extends ThemeExtension<RivoraColors> {
     ringan: StatusColor(Color(0xFFC9D86A), Color(0xFF2A2F0E)),
     sedang: StatusColor(Color(0xFFF5B26B), Color(0xFF3A2410)),
     berat: StatusColor(Color(0xFFFF9A8F), Color(0xFF3D1714)),
-    tidakTerlihat: StatusColor(Color(0xFFB4C2C8), Color(0xFF243034)),
+    tidakTerlihat: StatusColor(Color(0xFFB4C2CE), Color(0xFF212F40)),
     waspada: StatusColor(Color(0xFFF2C16B), Color(0xFF362607)),
   );
 
@@ -118,41 +118,43 @@ extension RivoraThemeContext on BuildContext {
 
 ThemeData buildRivoraTheme(Brightness brightness) {
   final light = brightness == Brightness.light;
+  // Palet biru air (docs/BRAND.md): Laut = utama, Samudra = tinta, Buih =
+  // kontainer, Kabut = latar. Mode gelap memakai Tirta yang lebih terang.
   final scheme = ColorScheme(
     brightness: brightness,
-    primary: light ? const Color(0xFF0B6E79) : const Color(0xFF5FC3CF),
-    onPrimary: light ? Colors.white : const Color(0xFF00363D),
-    primaryContainer: light ? const Color(0xFFD3ECEE) : const Color(0xFF0E4A52),
+    primary: light ? const Color(0xFF0361C3) : const Color(0xFF63C6FF),
+    onPrimary: light ? Colors.white : const Color(0xFF012C54),
+    primaryContainer: light ? const Color(0xFFDFF2FE) : const Color(0xFF0C3C75),
     onPrimaryContainer: light
-        ? const Color(0xFF052F35)
-        : const Color(0xFFCDEFF3),
-    secondary: light ? const Color(0xFF0B1F2A) : const Color(0xFFE6EEF0),
-    onSecondary: light ? Colors.white : const Color(0xFF0B1F2A),
-    // Dipakai SegmentedButton/filter terpilih: samakan dengan aksen teal.
+        ? const Color(0xFF012858)
+        : const Color(0xFFD7EFFF),
+    secondary: light ? const Color(0xFF04214B) : const Color(0xFFE9F0F5),
+    onSecondary: light ? Colors.white : const Color(0xFF04214B),
+    // Dipakai SegmentedButton/filter terpilih: samakan dengan aksen biru.
     secondaryContainer: light
-        ? const Color(0xFFD3ECEE)
-        : const Color(0xFF0E4A52),
+        ? const Color(0xFFDFF2FE)
+        : const Color(0xFF0C3C75),
     onSecondaryContainer: light
-        ? const Color(0xFF052F35)
-        : const Color(0xFFCDEFF3),
+        ? const Color(0xFF012858)
+        : const Color(0xFFD7EFFF),
     error: light ? const Color(0xFFB42318) : const Color(0xFFFF9A8F),
     onError: light ? Colors.white : const Color(0xFF3D1714),
-    surface: light ? const Color(0xFFF3F6F5) : const Color(0xFF0D1417),
-    onSurface: light ? const Color(0xFF0B1F2A) : const Color(0xFFE6EEF0),
-    onSurfaceVariant: light ? const Color(0xFF46575D) : const Color(0xFFA7B6BB),
-    surfaceContainerLowest: light ? Colors.white : const Color(0xFF152024),
+    surface: light ? const Color(0xFFF4FAFE) : const Color(0xFF070F19),
+    onSurface: light ? const Color(0xFF04214B) : const Color(0xFFE9F0F5),
+    onSurfaceVariant: light ? const Color(0xFF47566C) : const Color(0xFFA8B6C3),
+    surfaceContainerLowest: light ? Colors.white : const Color(0xFF0C1521),
     surfaceContainerLow: light
-        ? const Color(0xFFF8FAF9)
-        : const Color(0xFF172327),
-    surfaceContainer: light ? const Color(0xFFEDF1F0) : const Color(0xFF1B282C),
+        ? const Color(0xFFF0F7FD)
+        : const Color(0xFF0F1926),
+    surfaceContainer: light ? const Color(0xFFE8F0F9) : const Color(0xFF141F2D),
     surfaceContainerHigh: light
-        ? const Color(0xFFE6ECEA)
-        : const Color(0xFF213034),
+        ? const Color(0xFFE0EAF4)
+        : const Color(0xFF1A2636),
     surfaceContainerHighest: light
-        ? const Color(0xFFDCE3E1)
-        : const Color(0xFF283A3F),
-    outline: light ? const Color(0xFF7A8B90) : const Color(0xFF6F8186),
-    outlineVariant: light ? const Color(0xFFDCE3E1) : const Color(0xFF2A3A3F),
+        ? const Color(0xFFD6E0EB)
+        : const Color(0xFF212F40),
+    outline: light ? const Color(0xFF6E7D91) : const Color(0xFF728295),
+    outlineVariant: light ? const Color(0xFFD6E0EB) : const Color(0xFF293647),
   );
 
   final base = ThemeData(
@@ -199,7 +201,7 @@ ThemeData buildRivoraTheme(Brightness brightness) {
       color: scheme.surfaceContainerLowest,
       surfaceTintColor: Colors.transparent,
       elevation: light ? 1.5 : 0,
-      shadowColor: const Color(0x330B1F2A),
+      shadowColor: const Color(0x3304214B),
       margin: EdgeInsets.zero,
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(

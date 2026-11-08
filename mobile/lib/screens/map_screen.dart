@@ -342,7 +342,7 @@ class _Panel extends StatelessWidget {
         borderRadius: BorderRadius.circular(Radii.lg),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x260B1F2A),
+            color: Color(0x2607111F),
             blurRadius: 16,
             offset: Offset(0, 4),
           ),

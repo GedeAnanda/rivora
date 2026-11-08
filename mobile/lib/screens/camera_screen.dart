@@ -412,7 +412,7 @@ class _GpsChip extends StatelessWidget {
             vertical: 6,
           ),
           decoration: BoxDecoration(
-            color: const Color(0xB30B1F2A),
+            color: const Color(0xB307111F),
             borderRadius: BorderRadius.circular(999),
           ),
           child: Row(
@@ -446,7 +446,7 @@ class _SebelumThumb extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
-        color: const Color(0xB30B1F2A),
+        color: const Color(0xB307111F),
         borderRadius: BorderRadius.circular(Radii.md),
       ),
       child: Column(
@@ -492,7 +492,7 @@ class _ShutterBarState extends State<_ShutterBar> {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Color(0x000B1F2A), Color(0xE60B1F2A)],
+          colors: [Color(0x0007111F), Color(0xE607111F)],
         ),
       ),
       child: SafeArea(

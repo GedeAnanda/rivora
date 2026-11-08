@@ -1,188 +1,445 @@
-"""Generator logo RIVORA. Semua bentuk dihitung jadi path murni (tanpa clipPath/mask)."""
+"""Generator logo RIVORA "Ombak". Semua bentuk dihitung jadi path murni (tanpa clipPath/mask),
+jadi aman di Flutter, Figma, Canva, PPT, dan Android VectorDrawable.
+
+  python3 brand/tools/build_logo.py brand/logo                  # semua SVG
+  python3 brand/tools/build_logo.py brand/logo --android RES    # + vector drawable launcher
+  python3 brand/tools/build_logo.py brand/logo --dart           # cetak path untuk Flutter
+"""
 import math, os, sys
-OUT = sys.argv[1]
-os.makedirs(OUT, exist_ok=True)
 
-MALAM, ARUS, BENING, EMBUN, KABUT, PUTIH = "#0B1F2A", "#0B6E79", "#5FC3CF", "#D3ECEE", "#F3F6F5", "#FFFFFF"
-f = lambda v: f"{v:.2f}".rstrip("0").rstrip(".")
+SAMUDRA, LAUT, TIRTA, BUIH, PUTIH = "#04214B", "#0361C3", "#35C1F4", "#DFF2FE", "#FFFFFF"
+GRAD = ("#22B2F2", "#0347A8")  # gradien ikon aplikasi (kiri atas -> kanan bawah)
 
-# ---------- MARK (viewBox 0 0 120 84) ----------
-ALMOND = "M4 42C21 13 43 4 60 4S99 13 116 42C99 71 77 80 60 80S21 71 4 42Z"
-CX, CY, R_IRIS = 60, 42, 25
-GLINT = "M50.5 21.5c0 0-4.8 5.4-4.8 8.6a4.8 4.8 0 0 0 9.6 0c0-3.2-4.8-8.6-4.8-8.6Z"
 
-OFFSET = 0.0
-def wave_y(x):  # garis muka air: puncak kiri, lembah kanan
-    return 44.5 + OFFSET - 3.8 * math.sin(2 * math.pi * (x - 32.5) / 50)
+def f(v):
+    s = f"{v:.2f}".rstrip("0").rstrip(".")
+    return "0" if s in ("-0", "") else s
 
-def circle_hit(r, side):
-    # cari x di mana gelombang memotong lingkaran iris radius r
-    g = lambda x: (x - CX) ** 2 + (wave_y(x) - CY) ** 2 - r * r
-    a, b = (CX - r - 1, CX) if side < 0 else (CX, CX + r + 1)
-    if side < 0:
-        a, b = b, a
-    for _ in range(80):
-        m = (a + b) / 2
-        if (g(m) < 0) == (g(a) < 0):
-            a = m
-        else:
-            b = m
-    return (a + b) / 2
 
-def water_path(r, offset=0.0, top=False):
-    global OFFSET
-    OFFSET = offset
-    try:
-        return _water_path(r, top)
-    finally:
-        OFFSET = 0.0
+def P(p):
+    return f"{f(p[0])} {f(p[1])}"
 
-def _water_path(r, top):
-    xl, xr = circle_hit(r, -1), circle_hit(r, +1)
-    n = 10
-    pts = [(xl + (xr - xl) * i / n, wave_y(xl + (xr - xl) * i / n)) for i in range(n + 1)]
-    # Catmull-Rom -> Bezier
-    d = f"M{f(pts[0][0])} {f(pts[0][1])}"
-    ext = [(2 * pts[0][0] - pts[1][0], 2 * pts[0][1] - pts[1][1])] + pts + [(2 * pts[-1][0] - pts[-2][0], 2 * pts[-1][1] - pts[-2][1])]
-    for i in range(1, len(ext) - 2):
-        p0, p1, p2, p3 = ext[i - 1], ext[i], ext[i + 1], ext[i + 2]
-        c1 = (p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6)
-        c2 = (p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6)
-        d += f"C{f(c1[0])} {f(c1[1])} {f(c2[0])} {f(c2[1])} {f(p2[0])} {f(p2[1])}"
-    # busur bawah iris dari kanan kembali ke kiri (searah jarum jam di layar)
-    a_r = math.atan2(wave_y(xr) - CY, xr - CX)
-    a_l = math.atan2(wave_y(xl) - CY, xl - CX)
-    span = (a_l - a_r) % (2 * math.pi)
-    if top:  # busur atas: kanan -> kiri berlawanan jarum jam
-        span = 2 * math.pi - span
-    large = 1 if span > math.pi else 0
-    d += f"A{r} {r} 0 {large} {0 if top else 1} {f(pts[0][0])} {f(pts[0][1])}Z"
+
+# ---------------------------------------------------------------- geometri dasar
+def lerp(a, b, t):
+    return (a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t)
+
+
+def bez(s, t):
+    a, b, c, d = s
+    ab, bc, cd = lerp(a, b, t), lerp(b, c, t), lerp(c, d, t)
+    return lerp(lerp(ab, bc, t), lerp(bc, cd, t), t)
+
+
+def split(s, t):
+    a, b, c, d = s
+    ab, bc, cd = lerp(a, b, t), lerp(b, c, t), lerp(c, d, t)
+    abc, bcd = lerp(ab, bc, t), lerp(bc, cd, t)
+    m = lerp(abc, bcd, t)
+    return (a, ab, abc, m), (m, bcd, cd, d)
+
+
+def line_seg(a, b):
+    return (a, lerp(a, b, 1 / 3), lerp(a, b, 2 / 3), b)
+
+
+# ---------------------------------------------------------------- muka ombak (kotak 100)
+# Garis muka air dari kiri ke kanan: naik jadi puncak, menggulung ke dalam (tabung),
+# lalu dasar tabung keluar ke kanan. Air selalu di sisi kanan arah jalan garis.
+START = (-5, 74)
+CURVE = [
+    ((12, 74), (22, 64), (28, 50)),          # muka ombak naik
+    ((36, 32), (50, 22), (64, 24)),          # menuju puncak
+    ((78, 26), (88, 38), (86, 52)),          # puncak turun di kanan
+    ((85.5, 58.5), (81, 63.5), (75.5, 63.5)),  # bibir ombak
+    ((71.5, 63.5), (70.3, 59), (72.8, 56.6)),  # ujung bibir membulat
+    ((76.3, 53.3), (76, 47), (70, 44)),      # sisi dalam bibir
+    ((62, 40), (50, 42), (48, 52)),          # atap-belakang tabung
+    ((46, 62), (56, 71), (68, 71)),          # dasar tabung
+    ((80, 71), (92, 69), (105, 67)),         # keluar ke kanan
+]
+
+
+def wave_segments(T=lambda p: p, extend=True):
+    segs, p0 = [], START
+    for c1, c2, p3 in CURVE:
+        segs.append((p0, c1, c2, p3))
+        p0 = p3
+    if extend:  # perpanjang lurus supaya selalu menembus batas bentuk mana pun
+        segs.insert(0, line_seg((-60, 74), START))
+        segs.append(line_seg(p0, (p0[0] + 60, p0[1] - 60 * 2 / 13)))
+    return [tuple(T(q) for q in s) for s in segs]
+
+
+def crossings(segs, inside, n=600):
+    out = []
+    for i, s in enumerate(segs):
+        prev = inside(*bez(s, 0))
+        for k in range(1, n + 1):
+            t = k / n
+            cur = inside(*bez(s, t))
+            if cur != prev:
+                a, b = (k - 1) / n, t
+                for _ in range(60):
+                    m = (a + b) / 2
+                    if inside(*bez(s, m)) == prev:
+                        a = m
+                    else:
+                        b = m
+                out.append((i, (a + b) / 2, cur))
+            prev = cur
+    return out
+
+
+def sub_chain(segs, i0, t0, i1, t1):
+    """Potongan rantai bezier dari (i0,t0) sampai (i1,t1)."""
+    res = []
+    for i in range(i0, i1 + 1):
+        s = segs[i]
+        a = t0 if i == i0 else 0.0
+        b = t1 if i == i1 else 1.0
+        if b < 1:
+            s = split(s, b)[0]
+            if a > 0:
+                s = split(s, a / b)[1]
+        elif a > 0:
+            s = split(s, a)[1]
+        res.append(s)
+    return res
+
+
+def chain_d(chain, move=True):
+    d = f"M{P(chain[0][0])}" if move else ""
+    for s in chain:
+        d += f"C{P(s[1])} {P(s[2])} {P(s[3])}"
     return d
 
-WATER = water_path(R_IRIS)
-R_MONO = R_IRIS - 4
-GAP = 1.9
-MONO_TOP = water_path(R_MONO, -GAP, top=True)
-MONO_WATER = water_path(R_MONO, +GAP)
-def circ(r):
-    return f"M{f(CX - r)} {CY}a{r} {r} 0 1 0 {2*r} 0a{r} {r} 0 1 0 {-2*r} 0Z"
 
-def mark_layers(almond=MALAM, iris=ARUS, water=BENING, glint=PUTIH):
-    return (f'<path fill="{almond}" d="{ALMOND}"/>'
-            f'<circle fill="{iris}" cx="{CX}" cy="{CY}" r="{R_IRIS}"/>'
-            f'<path fill="{water}" d="{WATER}"/>'
-            f'<path fill="{glint}" d="{GLINT}"/>')
+def clipped_surface(segs, inside):
+    c = crossings(segs, inside)
+    assert len(c) == 2 and c[0][2] and not c[1][2], c
+    (i0, t0, _), (i1, t1, _) = c
+    return sub_chain(segs, i0, t0, i1, t1)
 
-def mark_mono(color):
-    # almond berlubang iris, iris dibelah celah garis air, kilau tetes jadi lubang
-    return (f'<path fill="{color}" fill-rule="evenodd" d="{ALMOND}{circ(R_IRIS)}"/>'
-            f'<path fill="{color}" fill-rule="evenodd" d="{MONO_TOP}{GLINT}"/>'
-            f'<path fill="{color}" d="{MONO_WATER}"/>')
 
-# ---------- WORDMARK (cap 0..100, stroke 17) ----------
-def stroke_quad(p, q, w, y0=0.0, y1=100.0):
-    """Parallelogram sepanjang garis p->q tebal w, dipotong datar di y0/y1."""
-    (x1, y1_), (x2, y2) = p, q
-    dx, dy = x2 - x1, y2 - y1_
-    L = math.hypot(dx, dy)
-    nx, ny = -dy / L * w / 2, dx / L * w / 2
-    def at_y(px, py, y):
-        t = (y - py) / dy
-        return px + dx * t
-    edges = [(x1 + nx, y1_ + ny), (x1 - nx, y1_ - ny)]
-    ya, yb = max(min(y1_, y2), y0), min(max(y1_, y2), y1)
+# ---------------------------------------------------------------- simbol (lingkaran)
+CX = CY = 50.0
+R = 46.0
+
+
+def in_circle(x, y):
+    return (x - CX) ** 2 + (y - CY) ** 2 < R * R
+
+
+def circle_d(cx=CX, cy=CY, r=R, cw=True):
+    s = 1 if cw else 0
+    return (f"M{f(cx + r)} {f(cy)}A{f(r)} {f(r)} 0 1 {s} {f(cx - r)} {f(cy)}"
+            f"A{f(r)} {f(r)} 0 1 {s} {f(cx + r)} {f(cy)}Z")
+
+
+def ang(p):
+    return math.atan2(p[1] - CY, p[0] - CX)
+
+
+def water_d():
+    ch = clipped_surface(wave_segments(), in_circle)
+    a, b = ch[-1][3], ch[0][0]  # keluar kanan -> masuk kiri, lewat bawah (searah jarum jam)
+    sweep_ang = (ang(b) - ang(a)) % (2 * math.pi)
+    large = 1 if sweep_ang > math.pi else 0
+    return chain_d(ch) + f"A{f(R)} {f(R)} 0 {large} 1 {P(b)}Z"
+
+
+# --- versi satu warna: langit dan air dipisah celah selebar GAP
+GAP = 3.4
+
+
+def sample_chain(segs, step=0.25):
+    pts = []
+    for s in segs:
+        L = sum(math.dist(bez(s, k / 40), bez(s, (k + 1) / 40)) for k in range(40))
+        n = max(4, int(L / step))
+        for k in range(n):
+            pts.append(bez(s, k / n))
+    pts.append(segs[-1][3])
+    return pts
+
+
+def offset_pts(pts, g, win=6):
     out = []
-    for (ex, ey), y in [(edges[0], ya), (edges[0], yb), (edges[1], yb), (edges[1], ya)]:
-        out.append((at_y(ex, ey, y), y))
-    return "M" + "L".join(f"{f(x)} {f(y)}" for x, y in out) + "Z"
+    for i, p in enumerate(pts):
+        a, b = pts[max(0, i - win)], pts[min(len(pts) - 1, i + win)]
+        dx, dy = b[0] - a[0], b[1] - a[1]
+        L = math.hypot(dx, dy) or 1
+        out.append((p[0] + g * dy / L, p[1] - g * dx / L))  # normal kiri = sisi langit
+    return out
 
-def rect(x, y, w, h):
-    return f"M{f(x)} {f(y)}h{f(w)}v{f(h)}h{f(-w)}Z"
 
-def letter_R(ox):
-    bowl = (f"M{ox} 0H{ox+34}A31 31 0 0 1 {ox+34} 62H{ox}Z"
-            f"M{ox+17} 17H{ox+34}A14 14 0 0 1 {ox+34} 45H{ox+17}Z")
-    return [(bowl, True), (rect(ox, 0, 17, 100), False),
-            (stroke_quad((ox + 30, 50), (ox + 64, 108), 17, 46, 100), False)]
+def resample(pts, step):
+    out, acc = [pts[0]], 0.0
+    for a, b in zip(pts, pts[1:]):
+        d = math.dist(a, b)
+        acc += d
+        if acc >= step:
+            out.append(b)
+            acc = 0.0
+    if out[-1] != pts[-1]:
+        out[-1] = pts[-1]
+    return out
 
-def letter_I(ox):
-    return [(rect(ox, 0, 17, 100), False)]
 
-def letter_V(ox):
-    return [(stroke_quad((ox + 6, -12), (ox + 38, 108), 17), False),
-            (stroke_quad((ox + 70, -12), (ox + 38, 108), 17), False)]
+def catmull(pts):
+    segs = []
+    for i in range(len(pts) - 1):
+        p0, p1, p2 = pts[max(0, i - 1)], pts[i], pts[i + 1]
+        p3 = pts[min(len(pts) - 1, i + 2)]
+        c1 = (p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6)
+        c2 = (p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6)
+        segs.append((p1, c1, c2, p2))
+    return segs
 
-def letter_A(ox):
-    return [(stroke_quad((ox + 6, 112), (ox + 38, -8), 17), False),
-            (stroke_quad((ox + 70, 112), (ox + 38, -8), 17), False),
-            (rect(ox + 18, 62, 40, 14), False)]
 
-def letter_O(ox):
-    c = ox + 50.5
-    return [(f"M{f(c-50.5)} 50a50.5 50.5 0 1 0 101 0a50.5 50.5 0 1 0 -101 0Z"
-             f"M{f(c-33.5)} 50a33.5 33.5 0 1 0 67 0a33.5 33.5 0 1 0 -67 0Z", True)]
+def sky_mono_d():
+    pts = offset_pts(sample_chain(wave_segments()), GAP)
+    ins = [in_circle(*p) for p in pts]
+    i0 = ins.index(True)
+    i1 = len(ins) - 1 - ins[::-1].index(True)
+    seg = pts[i0:i1 + 1]
+    # tempel titik potong tepat di lingkaran
+    def to_circle(p):
+        a = ang(p)
+        return (CX + R * math.cos(a), CY + R * math.sin(a))
+    seg = [to_circle(pts[i0 - 1])] + seg + [to_circle(pts[i1 + 1])]
+    ch = catmull(resample(seg, 1.1))
+    a, b = ch[-1][3], ch[0][0]  # kanan -> kiri lewat atas (berlawanan jarum jam)
+    sweep_ang = (ang(a) - ang(b)) % (2 * math.pi)
+    large = 1 if sweep_ang > math.pi else 0
+    return chain_d(ch) + f"A{f(R)} {f(R)} 0 {large} 0 {P(b)}Z"
 
-LETTERS = letter_R(0) + letter_I(91) + letter_V(126) + letter_O(220) + letter_R(341) + letter_A(422)
-WM_W, WM_VB = 498, "0 -1 498 102"
 
-def wordmark_paths(color):
-    return "".join(f'<path fill="{color}"{" fill-rule=\"evenodd\"" if eo else ""} d="{d}"/>' for d, eo in LETTERS)
+# ---------------------------------------------------------------- ikon aplikasi
+RX = 22.3  # sudut kotak membulat (rasio sama dengan ikon 1024: 228 px)
+ICON_T = lambda p: (p[0] * 1.12 - 6, p[1] * 1.12 + 8)  # ombak penuh di dalam ikon
 
+
+def in_rrect(x, y, r=RX):
+    if not (0 < x < 100 and 0 < y < 100):
+        return False
+    cx = min(max(x, r), 100 - r)
+    cy = min(max(y, r), 100 - r)
+    return (x - cx) ** 2 + (y - cy) ** 2 < r * r
+
+
+def icon_wave_d(rounded=True):
+    r = RX if rounded else 0.0
+    ch = clipped_surface(wave_segments(ICON_T), lambda x, y: in_rrect(x, y, r) if r else 0 < x < 100 and 0 < y < 100)
+    a, b = ch[-1][3], ch[0][0]
+    d = chain_d(ch)
+    if not r:
+        return d + f"L100 100L0 100Z"
+    # keluar di sisi kanan
+    if a[1] < 100 - r:
+        d += f"L100 {f(100 - r)}"
+    d += f"A{f(r)} {f(r)} 0 0 1 {f(100 - r)} 100L{f(r)} 100"
+    if b[1] < 100 - r:
+        d += f"A{f(r)} {f(r)} 0 0 1 0 {f(100 - r)}Z"
+    else:
+        d += f"A{f(r)} {f(r)} 0 0 1 {P(b)}Z"
+    return d
+
+
+def rrect_d(r=RX):
+    k = 100 - r
+    return (f"M{f(r)} 0H{f(k)}A{f(r)} {f(r)} 0 0 1 100 {f(r)}V{f(k)}A{f(r)} {f(r)} 0 0 1 {f(k)} 100"
+            f"H{f(r)}A{f(r)} {f(r)} 0 0 1 0 {f(k)}V{f(r)}A{f(r)} {f(r)} 0 0 1 {f(r)} 0Z")
+
+
+def fg_wave_d(T):
+    """Ombak untuk lapisan foreground adaptive icon (tanpa potong; launcher yang memotong)."""
+    segs = wave_segments(T)
+    a, b = segs[-1][3], segs[0][0]
+    return chain_d(segs) + f"L{P((a[0], 200))}L{P((b[0], 200))}Z"
+
+
+# ---------------------------------------------------------------- wordmark (garis membulat)
+W = 18.0  # tebal garis, tinggi huruf 100
+HW = W / 2
+
+
+def area(poly):
+    return sum(a[0] * b[1] - b[0] * a[1] for a, b in zip(poly, poly[1:] + poly[:1]))
+
+
+def stadium(a, b, r=HW):
+    dx, dy = b[0] - a[0], b[1] - a[1]
+    L = math.hypot(dx, dy)
+    ux, uy = dx / L, dy / L
+    n = (-uy, ux)
+    poly = [(a[0] + n[0] * r, a[1] + n[1] * r), (b[0] + n[0] * r, b[1] + n[1] * r),
+            (b[0] - n[0] * r, b[1] - n[1] * r), (a[0] - n[0] * r, a[1] - n[1] * r)]
+    if area(poly) < 0:
+        n = (-n[0], -n[1])
+        poly = [(a[0] + n[0] * r, a[1] + n[1] * r), (b[0] + n[0] * r, b[1] + n[1] * r),
+                (b[0] - n[0] * r, b[1] - n[1] * r), (a[0] - n[0] * r, a[1] - n[1] * r)]
+    cross = n[0] * uy - n[1] * ux
+    s = 1 if cross > 0 else 0
+    s2 = 1 if (-n[0]) * (-uy) - (-n[1]) * (-ux) > 0 else 0
+    rr = f(r)
+    return (f"M{P(poly[0])}L{P(poly[1])}A{rr} {rr} 0 0 {s} {P(poly[2])}"
+            f"L{P(poly[3])}A{rr} {rr} 0 0 {s2} {P(poly[0])}Z")
+
+
+def half_ring(cx, cy, r):  # setengah cincin di kanan (mangkuk huruf R)
+    o, i = r + HW, r - HW
+    return (f"M{f(cx)} {f(cy - o)}A{f(o)} {f(o)} 0 0 1 {f(cx)} {f(cy + o)}"
+            f"L{f(cx)} {f(cy + i)}A{f(i)} {f(i)} 0 0 0 {f(cx)} {f(cy - i)}Z")
+
+
+def ring(cx, cy, r):
+    return circle_d(cx, cy, r + HW, True) + circle_d(cx, cy, r - HW, False)
+
+
+def glyph_R(x):
+    t, b, mid = HW, 100 - HW, 51
+    return [stadium((x + HW, t), (x + HW, b)), stadium((x + HW, t), (x + 38, t)),
+            half_ring(x + 38, (t + mid) / 2, (mid - t) / 2), stadium((x + HW, mid), (x + 38, mid)),
+            stadium((x + 33, mid), (x + 60, b))], 69
+
+
+def glyph_I(x):
+    return [stadium((x + HW, HW), (x + HW, 100 - HW))], 18
+
+
+def glyph_V(x):
+    return [stadium((x + HW, HW), (x + 40, 100 - HW)), stadium((x + 40, 100 - HW), (x + 71, HW))], 80
+
+
+def glyph_O(x):
+    return [ring(x + 51, 50, 42)], 102
+
+
+def glyph_A(x):
+    return [stadium((x + HW, 100 - HW), (x + 40, HW)), stadium((x + 40, HW), (x + 71, 100 - HW)),
+            stadium((x + 21, 67), (x + 59, 67))], 80
+
+
+def wordmark_d():
+    parts, x = [], 0.0
+    for g, adv in ((glyph_R, 15), (glyph_I, 13), (glyph_V, 6), (glyph_O, 12), (glyph_R, 6), (glyph_A, 0)):
+        ps, w = g(x)
+        parts += ps
+        x += w + adv
+    return "".join(parts), x  # lebar 470
+
+
+# ---------------------------------------------------------------- tulis SVG
 def svg(vb, body, title="RIVORA"):
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{vb}" role="img" aria-label="{title}">'
-            f'<title>{title}</title>{body}</svg>\n')
+            f"<title>{title}</title>{body}</svg>\n")
 
-def write(name, content):
-    with open(os.path.join(OUT, name), "w") as fh:
-        fh.write(content)
 
-# Mark
-write("rivora-mark.svg", svg("0 0 120 84", mark_layers()))
-write("rivora-mark-reverse.svg", svg("0 0 120 84", mark_layers(almond=KABUT)))
-write("rivora-mark-mono-malam.svg", svg("0 0 120 84", mark_mono(MALAM)))
-write("rivora-mark-mono-putih.svg", svg("0 0 120 84", mark_mono(PUTIH)))
-# Wordmark
-write("rivora-wordmark.svg", svg(WM_VB, wordmark_paths(MALAM)))
-write("rivora-wordmark-putih.svg", svg(WM_VB, wordmark_paths(PUTIH)))
+def mark_body(variant="warna", T=None):
+    g = f' transform="{T}"' if T else ""
+    if variant == "warna":
+        return f'<g{g}><path fill="{LAUT}" d="{circle_d()}"/><path fill="{TIRTA}" d="{water_d()}"/></g>'
+    if variant == "reverse":
+        return f'<g{g}><path fill="{PUTIH}" d="{circle_d()}"/><path fill="{LAUT}" d="{water_d()}"/></g>'
+    col = SAMUDRA if variant == "mono" else PUTIH
+    return f'<g{g} fill="{col}"><path d="{sky_mono_d()}"/><path d="{water_d()}"/></g>'
 
-# Horizontal lockup: mark tinggi 112 (1,12 x cap), jarak 34
-def lockup_h(mark_body, wm_color):
-    s = 112 / 84
-    mw = 120 * s
-    gap = 36
-    wm_y = (112 - 100) / 2
-    body = (f'<g transform="scale({f(s)})">{mark_body}</g>'
-            f'<g transform="translate({f(mw + gap)} {f(wm_y)})">{wordmark_paths(wm_color)}</g>')
-    return svg(f"0 -1 {f(mw + gap + WM_W)} 114", body)
-write("rivora-logo-horizontal.svg", lockup_h(mark_layers(), MALAM))
-write("rivora-logo-horizontal-reverse.svg", lockup_h(mark_layers(almond=KABUT), PUTIH))
-write("rivora-logo-horizontal-mono.svg", lockup_h(mark_mono(MALAM), MALAM))
 
-# Stacked lockup
-def lockup_v(mark_body, wm_color):
-    W = WM_W
-    s = 2.2
-    mw, mh = 120 * s, 84 * s
-    wm_s = 0.62
-    body = (f'<g transform="translate({f((W - mw) / 2)} 0) scale({s})">{mark_body}</g>'
-            f'<g transform="translate({f(W * (1 - wm_s) / 2)} {f(mh + 34)}) scale({wm_s})">{wordmark_paths(wm_color)}</g>')
-    return svg(f"0 0 {W} {f(mh + 34 + 100 * wm_s + 2)}", body)
-write("rivora-logo-stacked.svg", lockup_v(mark_layers(), MALAM))
-write("rivora-logo-stacked-reverse.svg", lockup_v(mark_layers(almond=KABUT), PUTIH))
+def build(out):
+    os.makedirs(out, exist_ok=True)
+    wm, ww = wordmark_d()
+    w = lambda name, s: open(os.path.join(out, name), "w").write(s)
 
-# App icon 1024 (rounded square, gradien Arus) + foreground/background terpisah untuk adaptive icon
-GRAD = ('<defs><linearGradient id="rv-bg" x1="0" y1="0" x2="1" y2="1">'
-        '<stop offset="0" stop-color="#11808C"/><stop offset="1" stop-color="#0A4E57"/></linearGradient></defs>')
-def icon(radius):
-    s = 640 / 120
-    body = (GRAD + f'<rect width="1024" height="1024" rx="{radius}" fill="url(#rv-bg)"/>'
-            f'<g transform="translate({f((1024 - 640) / 2)} {f((1024 - 84 * s) / 2)}) scale({f(s)})">{mark_layers()}</g>')
-    return svg("0 0 1024 1024", body)
-write("rivora-app-icon.svg", icon(228))
-write("rivora-app-icon-square.svg", icon(0))
-write("favicon.svg", svg("0 0 120 84", mark_layers()))
+    # simbol
+    for name, v in (("rivora-mark.svg", "warna"), ("rivora-mark-reverse.svg", "reverse"),
+                    ("rivora-mark-mono.svg", "mono"), ("rivora-mark-mono-putih.svg", "mono-putih")):
+        w(name, svg("0 0 100 100", mark_body(v)))
+    w("favicon.svg", svg("0 0 100 100", mark_body("warna")))
 
-# ekspor data path untuk VectorDrawable
-with open(os.path.join(OUT, "_paths.txt"), "w") as fh:
-    fh.write(f"ALMOND={ALMOND}\nWATER={WATER}\nGLINT={GLINT}\nIRIS_HOLE={circ(R_IRIS)}\nMONO_TOP={MONO_TOP}\nMONO_WATER={MONO_WATER}\n")
-print("ok", WATER)
+    # wordmark
+    w("rivora-wordmark.svg", svg(f"0 0 {f(ww)} 100", f'<path fill="{SAMUDRA}" d="{wm}"/>'))
+    w("rivora-wordmark-putih.svg", svg(f"0 0 {f(ww)} 100", f'<path fill="{PUTIH}" d="{wm}"/>'))
+
+    # logo horizontal: simbol 1,45x tinggi huruf, celah 34
+    k, gap = 1.45, 34
+    mx = -4 * k  # tepi kiri lingkaran di x=0
+    my = 50 - 50 * k
+    tx = 92 * k + gap
+    top = my + 4 * k
+    vb = f"0 {f(top)} {f(tx + ww)} {f(92 * k)}"
+    for name, v, ink in (("rivora-logo-horizontal.svg", "warna", SAMUDRA),
+                         ("rivora-logo-horizontal-reverse.svg", "warna", PUTIH),
+                         ("rivora-logo-horizontal-mono.svg", "mono", SAMUDRA)):
+        body = mark_body(v, f"translate({f(mx)} {f(my)}) scale({k})")
+        body += f'<path fill="{ink}" transform="translate({f(tx)} 0)" d="{wm}"/>'
+        w(name, svg(vb, body))
+
+    # logo bertumpuk: simbol 1,9x di atas, celah 30
+    k2, gap2 = 1.9, 30
+    d2 = 92 * k2
+    mx2 = (ww - d2) / 2 - 4 * k2
+    my2 = -4 * k2
+    ty = d2 + gap2
+    vb2 = f"0 0 {f(ww)} {f(ty + 100)}"
+    for name, ink in (("rivora-logo-stacked.svg", SAMUDRA), ("rivora-logo-stacked-reverse.svg", PUTIH)):
+        body = mark_body("warna", f"translate({f(mx2)} {f(my2)}) scale({k2})")
+        body += f'<path fill="{ink}" transform="translate(0 {f(ty)})" d="{wm}"/>'
+        w(name, svg(vb2, body))
+
+    # ikon aplikasi
+    grad = (f'<defs><linearGradient id="rv-g" x1="0" y1="0" x2="1" y2="1">'
+            f'<stop offset="0" stop-color="{GRAD[0]}"/><stop offset="1" stop-color="{GRAD[1]}"/></linearGradient></defs>')
+    w("rivora-app-icon.svg", svg("0 0 100 100", grad + f'<path fill="url(#rv-g)" d="{rrect_d()}"/>'
+                                 f'<path fill="{PUTIH}" d="{icon_wave_d(True)}"/>'))
+    w("rivora-app-icon-square.svg", svg("0 0 100 100", grad + '<path fill="url(#rv-g)" d="M0 0H100V100H0Z"/>'
+                                        f'<path fill="{PUTIH}" d="{icon_wave_d(False)}"/>'))
+
+
+# ---------------------------------------------------------------- Android adaptive icon
+def android(res):
+    # desain ikon 100 unit dipetakan ke 72 dp tengah dari kanvas 108 dp
+    T = lambda p: ((p[0] * 1.12 - 6) * 0.72 + 18, (p[1] * 1.12 + 8) * 0.72 + 18)
+    fg = fg_wave_d(T)
+    head = ('<?xml version="1.0" encoding="utf-8"?>\n<vector xmlns:android="http://schemas.android.com/apk/res/android"\n'
+            '    android:width="108dp" android:height="108dp"\n    android:viewportWidth="108" android:viewportHeight="108">\n')
+    os.makedirs(os.path.join(res, "drawable"), exist_ok=True)
+    open(os.path.join(res, "drawable", "ic_launcher_foreground.xml"), "w").write(
+        head + f'    <!-- Logo RIVORA "Ombak" (brand/tools/build_logo.py) -->\n'
+        f'    <path android:fillColor="#FFFFFFFF" android:pathData="{fg}" />\n</vector>\n')
+    open(os.path.join(res, "drawable", "ic_launcher_monochrome.xml"), "w").write(
+        head + f'    <!-- Ikon bertema Android 13+: launcher mewarnai ulang bentuk ini -->\n'
+        f'    <path android:fillColor="#FFFFFFFF" android:pathData="{fg}" />\n</vector>\n')
+    bg = ('<?xml version="1.0" encoding="utf-8"?>\n<vector xmlns:android="http://schemas.android.com/apk/res/android"\n'
+          '    xmlns:aapt="http://schemas.android.com/aapt"\n'
+          '    android:width="108dp" android:height="108dp"\n    android:viewportWidth="108" android:viewportHeight="108">\n'
+          '    <!-- Gradien ikon RIVORA: biru muda ke biru laut -->\n'
+          '    <path android:pathData="M0,0h108v108h-108z">\n        <aapt:attr name="android:fillColor">\n'
+          '            <gradient android:type="linear"\n'
+          '                android:startX="0" android:startY="0" android:endX="108" android:endY="108">\n'
+          f'                <item android:offset="0" android:color="#FF{GRAD[0][1:]}" />\n'
+          f'                <item android:offset="1" android:color="#FF{GRAD[1][1:]}" />\n'
+          '            </gradient>\n        </aapt:attr>\n    </path>\n</vector>\n')
+    open(os.path.join(res, "drawable", "ic_launcher_background.xml"), "w").write(bg)
+
+
+# ---------------------------------------------------------------- Flutter
+def dart_path(d_chain, name):
+    """Cetak perintah Path Dart dari rantai bezier."""
+    lines = [f"    final {name} = Path()", f"      ..moveTo({f(d_chain[0][0][0])}, {f(d_chain[0][0][1])})"]
+    for s in d_chain:
+        lines.append(f"      ..cubicTo({f(s[1][0])}, {f(s[1][1])}, {f(s[2][0])}, {f(s[2][1])}, {f(s[3][0])}, {f(s[3][1])})")
+    return "\n".join(lines)
+
+
+if __name__ == "__main__":
+    build(sys.argv[1])
+    if "--android" in sys.argv:
+        android(sys.argv[sys.argv.index("--android") + 1])
+    if "--dart" in sys.argv:
+        ch = clipped_surface(wave_segments(), in_circle)
+        print("// simbol (kotak 100): air dalam lingkaran, tutup dengan arcToPoint ke titik awal")
+        print(dart_path(ch, "air"))
+        print("// ombak (kotak 100, belum ditransformasi), perpanjangan lurus kiri-kanan")
+        print(dart_path(wave_segments(), "ombak"))

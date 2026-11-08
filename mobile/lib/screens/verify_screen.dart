@@ -77,7 +77,10 @@ class _VerifyScreenState extends State<VerifyScreen> {
   }
 
   /// Mode contoh tidak memblokir, karena lokasi tugas contoh ada di Gedebage.
-  bool get _diblokir => _terlaluJauh && !AppConfig.useMockApi;
+  /// Mode contoh tidak memeriksa jarak; build `LOKASI_DEMO` dilewatkan
+  /// backend (FR-BE-21). Selain itu > 30 m diblokir seperti backend.
+  bool get _diblokir =>
+      _terlaluJauh && !AppConfig.useMockApi && !AppConfig.lokasiDemo;
 
   Future<void> _kirim() async {
     if (_tahap != _Tahap.tinjau || _diblokir) return;
@@ -362,6 +365,9 @@ class _Tinjau extends StatelessWidget {
                                 diblokir
                                     ? 'Foto sesudah harus diambil di lokasi '
                                           '(maks. ${VerifyScreen.batasJarakMeter.round()} m).'
+                                    : AppConfig.lokasiDemo
+                                    ? 'Mode demo: lokasi dipetakan ke saluran '
+                                          'contoh.'
                                     : 'Mode contoh: jarak tidak diperiksa.',
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: lokasiWarna.fg,

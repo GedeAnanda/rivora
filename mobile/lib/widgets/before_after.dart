@@ -136,9 +136,9 @@ class _Handle extends StatelessWidget {
             offset: Offset(0, 2),
           ),
         ],
-        border: Border.all(color: const Color(0xFF0B6E79), width: 2),
+        border: Border.all(color: const Color(0xFF0361C3), width: 2),
       ),
-      child: const Icon(RIcons.bandingkan, color: Color(0xFF0B6E79), size: 22),
+      child: const Icon(RIcons.bandingkan, color: Color(0xFF0361C3), size: 22),
     );
   }
 }
@@ -153,7 +153,7 @@ class _Tag extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: Space.sm, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xCC0B1F2A),
+        color: const Color(0xCC07111F),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(

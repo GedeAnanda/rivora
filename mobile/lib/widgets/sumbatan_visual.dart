@@ -38,7 +38,7 @@ class SumbatanVisual extends StatelessWidget {
             dinding: scheme.onSurfaceVariant,
             sampah: warna.fg,
             latar: warna.bg,
-            air: const Color(0xFF5FC3CF),
+            air: const Color(0xFF35C1F4),
           ),
         ),
       ),

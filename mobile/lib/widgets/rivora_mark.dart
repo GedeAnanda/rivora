@@ -1,78 +1,60 @@
 import 'package:flutter/material.dart';
 
-/// Logo RIVORA "Mata Air" (docs/BRAND.md bagian 1): mata dengan iris berisi
-/// air dan kilau berbentuk tetes. Digambar ulang dari
-/// `brand/logo/rivora-mark.svg` (viewBox 120×84) tanpa dependensi SVG.
-class MataAirPainter extends CustomPainter {
-  const MataAirPainter({this.reverse = false});
+/// Garis muka ombak logo RIVORA (docs/BRAND.md bagian 1) di kotak 100×100,
+/// diperpanjang lurus ke kiri-kanan lalu ditutup ke bawah supaya jadi bidang
+/// air. Angka dari `python3 brand/tools/build_logo.py <dir> --dart`, digambar
+/// tanpa dependensi SVG.
+Path _ombak() => Path()
+  ..moveTo(-60, 74)
+  ..cubicTo(-41.67, 74, -23.33, 74, -5, 74)
+  ..cubicTo(12, 74, 22, 64, 28, 50)
+  ..cubicTo(36, 32, 50, 22, 64, 24)
+  ..cubicTo(78, 26, 88, 38, 86, 52)
+  ..cubicTo(85.5, 58.5, 81, 63.5, 75.5, 63.5)
+  ..cubicTo(71.5, 63.5, 70.3, 59, 72.8, 56.6)
+  ..cubicTo(76.3, 53.3, 76, 47, 70, 44)
+  ..cubicTo(62, 40, 50, 42, 48, 52)
+  ..cubicTo(46, 62, 56, 71, 68, 71)
+  ..cubicTo(80, 71, 92, 69, 105, 67)
+  ..cubicTo(125, 63.92, 145, 60.85, 165, 57.77)
+  ..lineTo(165, 200)
+  ..lineTo(-60, 200)
+  ..close();
 
-  /// `true` = kelopak terang, untuk latar gelap (rivora-mark-reverse.svg).
+/// Simbol RIVORA "Ombak": ombak menggulung di dalam lingkaran
+/// (`brand/logo/rivora-mark.svg`).
+class OmbakPainter extends CustomPainter {
+  const OmbakPainter({this.reverse = false});
+
+  /// `true` = lingkaran putih dan ombak biru, untuk latar gelap
+  /// (`rivora-mark-reverse.svg`).
   final bool reverse;
 
-  static const _malam = Color(0xFF0B1F2A);
-  static const _kabut = Color(0xFFF3F6F5);
-  static const _arus = Color(0xFF0B6E79);
-  static const _bening = Color(0xFF5FC3CF);
+  static const _laut = Color(0xFF0361C3);
+  static const _tirta = Color(0xFF35C1F4);
 
   @override
   void paint(Canvas canvas, Size size) {
-    final s = size.width / 120;
+    final s = size.shortestSide / 100;
+    final lingkaran = Rect.fromCircle(center: const Offset(50, 50), radius: 46);
     canvas
       ..save()
-      ..scale(s, s);
-
-    final kelopak = Path()
-      ..moveTo(4, 42)
-      ..cubicTo(21, 13, 43, 4, 60, 4)
-      ..cubicTo(77, 4, 99, 13, 116, 42)
-      ..cubicTo(99, 71, 77, 80, 60, 80)
-      ..cubicTo(43, 80, 21, 71, 4, 42)
-      ..close();
-    canvas
-      ..drawPath(kelopak, Paint()..color = reverse ? _kabut : _malam)
-      ..drawCircle(const Offset(60, 42), 25, Paint()..color = _arus);
-
-    final air = Path()
-      ..moveTo(35.03, 43.31)
-      ..cubicTo(36.7, 42.68, 38.36, 41.85, 40.03, 41.42)
-      ..cubicTo(41.69, 40.98, 43.36, 40.7, 45.02, 40.7)
-      ..cubicTo(46.68, 40.7, 48.35, 40.99, 50.01, 41.43)
-      ..cubicTo(51.68, 41.87, 53.34, 42.62, 55.01, 43.33)
-      ..cubicTo(56.67, 44.04, 58.33, 44.97, 60, 45.67)
-      ..cubicTo(61.66, 46.38, 63.33, 47.13, 64.99, 47.57)
-      ..cubicTo(66.66, 48.01, 68.32, 48.3, 69.99, 48.3)
-      ..cubicTo(71.65, 48.3, 73.31, 48.02, 74.98, 47.58)
-      ..cubicTo(76.64, 47.14, 78.31, 46.39, 79.97, 45.69)
-      ..cubicTo(81.64, 44.98, 83.3, 44.12, 84.96, 43.34)
-      ..arcToPoint(
-        const Offset(35.03, 43.31),
-        radius: const Radius.circular(25),
-      )
-      ..close();
-    canvas.drawPath(air, Paint()..color = _bening);
-
-    final tetes = Path()
-      ..moveTo(50.5, 21.5)
-      ..cubicTo(50.5, 21.5, 45.7, 26.9, 45.7, 30.1)
-      ..arcToPoint(
-        const Offset(55.3, 30.1),
-        radius: const Radius.circular(4.8),
-        clockwise: false,
-      )
-      ..cubicTo(55.3, 26.9, 50.5, 21.5, 50.5, 21.5)
-      ..close();
-    canvas
-      ..drawPath(tetes, Paint()..color = Colors.white)
+      ..translate((size.width - 100 * s) / 2, (size.height - 100 * s) / 2)
+      ..scale(s, s)
+      ..drawOval(lingkaran, Paint()..color = reverse ? Colors.white : _laut)
+      ..clipPath(Path()..addOval(lingkaran))
+      ..drawPath(_ombak(), Paint()..color = reverse ? _laut : _tirta)
       ..restore();
   }
 
   @override
-  bool shouldRepaint(MataAirPainter oldDelegate) =>
+  bool shouldRepaint(OmbakPainter oldDelegate) =>
       oldDelegate.reverse != reverse;
 }
 
-/// Ikon aplikasi RIVORA (brand/logo/rivora-app-icon.svg): kotak membulat
-/// bergradien Arus dengan simbol Mata Air. Sama dengan ikon launcher.
+/// Ikon aplikasi RIVORA (`brand/logo/rivora-app-icon.svg`): kotak membulat
+/// bergradien biru dengan ombak putih memenuhi ikon. Sama dengan ikon
+/// launcher Android.
 class RivoraAppIcon extends StatelessWidget {
   const RivoraAppIcon({super.key, this.size = 40});
 
@@ -81,26 +63,40 @@ class RivoraAppIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ExcludeSemantics(
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(size * 0.2227),
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF11808C), Color(0xFF0A4E57)],
-          ),
-        ),
-        // Posisi simbol sama dengan ikon 1024 px: lebar 62,5 %, mulai 18,75 %.
-        padding: EdgeInsets.fromLTRB(
-          size * 0.1875,
-          size * 0.28125,
-          size * 0.1875,
-          size * 0.28125,
-        ),
-        child: const CustomPaint(painter: MataAirPainter()),
+      child: CustomPaint(
+        size: Size.square(size),
+        painter: const _IkonPainter(),
       ),
     );
   }
+}
+
+class _IkonPainter extends CustomPainter {
+  const _IkonPainter();
+
+  static const _bidang = Rect.fromLTWH(0, 0, 100, 100);
+  static const _gradien = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF22B2F2), Color(0xFF0347A8)],
+  );
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final s = size.width / 100;
+    canvas
+      ..save()
+      ..scale(s, s)
+      // Sudut 22,3 % sama dengan ikon 1024 px (radius 228 px).
+      ..clipRRect(RRect.fromRectAndRadius(_bidang, const Radius.circular(22.3)))
+      ..drawRect(_bidang, Paint()..shader = _gradien.createShader(_bidang))
+      // Posisi ombak sama dengan ikon SVG: geser (-6, 8), skala 1,12.
+      ..translate(-6, 8)
+      ..scale(1.12, 1.12)
+      ..drawPath(_ombak(), Paint()..color = Colors.white)
+      ..restore();
+  }
+
+  @override
+  bool shouldRepaint(_IkonPainter oldDelegate) => false;
 }
