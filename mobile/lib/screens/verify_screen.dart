@@ -568,17 +568,21 @@ class _SkorRw extends StatelessWidget {
                 style: theme.textTheme.titleMedium,
               ),
               const SizedBox(height: Space.md),
+              // Level berubah: "Waspada → Aman". Level sama: satu chip saja
+              // (bukan "Aman → Aman"); turunnya terlihat di meteran.
               Row(
                 children: [
-                  RisikoChip(level: levelSebelum),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: Space.sm),
-                    child: Icon(
-                      RIcons.panah,
-                      size: 18,
-                      color: scheme.onSurfaceVariant,
+                  if (pindahLevel) ...[
+                    RisikoChip(level: levelSebelum),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: Space.sm),
+                      child: Icon(
+                        RIcons.panah,
+                        size: 18,
+                        color: scheme.onSurfaceVariant,
+                      ),
                     ),
-                  ),
+                  ],
                   RisikoChip(level: levelSesudah),
                 ],
               ),
