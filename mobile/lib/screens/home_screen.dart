@@ -189,6 +189,8 @@ class _Header extends StatelessWidget {
             children: [
               Text(
                 _salam(DateTime.now()),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -208,12 +210,20 @@ class _Header extends StatelessWidget {
             icon: const Icon(RIcons.akun),
           )
         else
-          TextButton.icon(
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (_) => const LoginScreen()),
+          // Layar sempit / huruf besar: label dipendekkan jadi "Petugas"
+          // (ikon helm tetap), supaya sapaan tidak terlipat.
+          Tooltip(
+            message: 'Masuk petugas',
+            child: TextButton.icon(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const LoginScreen()),
+              ),
+              icon: const Icon(RIcons.petugas, size: 18),
+              label: Text(
+                layarSempit(context) ? 'Petugas' : 'Masuk petugas',
+                semanticsLabel: 'Masuk petugas',
+              ),
             ),
-            icon: const Icon(RIcons.petugas, size: 18),
-            label: const Text('Masuk petugas'),
           ),
       ],
     );
@@ -353,11 +363,13 @@ class _TugasTerdekat extends StatelessWidget {
             children: [
               Icon(RIcons.selesai, color: context.rivora.bersih.fg),
               const SizedBox(width: Space.md),
-              Text(
-                taskRepository.loading
-                    ? 'Memuat tugas…'
-                    : 'Semua tugas selesai',
-                style: Theme.of(context).textTheme.titleSmall,
+              Expanded(
+                child: Text(
+                  taskRepository.loading
+                      ? 'Memuat tugas…'
+                      : 'Semua tugas selesai',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
               ),
             ],
           ),

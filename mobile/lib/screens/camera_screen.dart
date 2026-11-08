@@ -235,7 +235,7 @@ class _CameraScreenState extends State<CameraScreen>
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text(_verifikasi ? 'Foto sesudah dibersihkan' : 'Foto saluran'),
+        title: Text(_verifikasi ? 'Foto sesudah' : 'Foto saluran'),
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
         titleTextStyle: Theme.of(context).textTheme.titleLarge
@@ -420,11 +420,15 @@ class _GpsChip extends StatelessWidget {
             children: [
               Icon(icon, size: 16, color: color),
               const SizedBox(width: 6),
-              Text(
-                label,
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ],

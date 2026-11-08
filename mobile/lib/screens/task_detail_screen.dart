@@ -234,33 +234,40 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                   Space.lg,
                   Space.lg,
                 ),
-                child: Row(
-                  children: [
-                    if (t.status == 'baru') ...[
-                      Expanded(
-                        flex: 2,
-                        child: OutlinedButton(
+                child: _TombolBawah(
+                  mulai: t.status == 'baru'
+                      ? OutlinedButton(
                           onPressed: _mengubah ? null : () => _mulaiKerjakan(t),
                           child: Text(
                             _mengubah ? 'Menyimpan…' : 'Mulai kerjakan',
+                            maxLines: 1,
                           ),
-                        ),
-                      ),
-                      const SizedBox(width: Space.md),
-                    ],
-                    Expanded(
-                      flex: 3,
-                      child: FilledButton.icon(
-                        onPressed: () => mulaiVerifikasi(context, t),
-                        icon: const Icon(RIcons.kamera, size: 18),
-                        label: const Text('Foto sesudah'),
-                      ),
-                    ),
-                  ],
+                        )
+                      : null,
+                  foto: FilledButton.icon(
+                    onPressed: () => mulaiVerifikasi(context, t),
+                    icon: const Icon(RIcons.kamera, size: 18),
+                    label: const Text('Foto sesudah', maxLines: 1),
+                  ),
                 ),
               ),
             ),
     );
+  }
+}
+
+/// Foto sesudah (+ Mulai kerjakan kalau tugas masih baru).
+class _TombolBawah extends StatelessWidget {
+  const _TombolBawah({required this.foto, this.mulai});
+
+  final Widget foto;
+  final Widget? mulai;
+
+  @override
+  Widget build(BuildContext context) {
+    final mulai = this.mulai;
+    if (mulai == null) return SizedBox(width: double.infinity, child: foto);
+    return TombolBerpasangan(sekunder: mulai, utama: foto);
   }
 }
 

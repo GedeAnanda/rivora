@@ -160,9 +160,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           color: scheme.onSurfaceVariant,
                         ),
                         const SizedBox(width: Space.sm),
-                        Text(
-                          'Mode contoh (tanpa server)',
-                          style: theme.textTheme.labelLarge,
+                        Flexible(
+                          child: Text(
+                            'Mode contoh (tanpa server)',
+                            style: theme.textTheme.labelLarge,
+                          ),
                         ),
                       ],
                     ),

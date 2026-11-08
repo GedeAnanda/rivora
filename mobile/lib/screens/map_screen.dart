@@ -17,6 +17,7 @@ import '../theme/app_theme.dart';
 import '../theme/rivora_icons.dart';
 import '../utils/format.dart';
 import '../utils/maps.dart';
+import '../widgets/common.dart';
 import '../widgets/report_photo.dart';
 import '../widgets/rivora_map.dart';
 import '../widgets/status_chip.dart';
@@ -608,26 +609,17 @@ class _KartuTugas extends StatelessWidget {
               ),
             )
           else
-            Row(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: OutlinedButton.icon(
-                    onPressed: () => bukaPeta(task.lat, task.lng, arah: true),
-                    icon: const Icon(RIcons.arahkan, size: 18),
-                    label: const Text('Arahkan'),
-                  ),
-                ),
-                const SizedBox(width: Space.md),
-                Expanded(
-                  flex: 3,
-                  child: FilledButton.icon(
-                    onPressed: () => mulaiVerifikasi(context, task),
-                    icon: const Icon(RIcons.kamera, size: 18),
-                    label: const Text('Foto sesudah'),
-                  ),
-                ),
-              ],
+            TombolBerpasangan(
+              sekunder: OutlinedButton.icon(
+                onPressed: () => bukaPeta(task.lat, task.lng, arah: true),
+                icon: const Icon(RIcons.arahkan, size: 18),
+                label: const Text('Arahkan'),
+              ),
+              utama: FilledButton.icon(
+                onPressed: () => mulaiVerifikasi(context, task),
+                icon: const Icon(RIcons.kamera, size: 18),
+                label: const Text('Foto sesudah'),
+              ),
             ),
         ],
       ),

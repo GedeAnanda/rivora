@@ -117,3 +117,49 @@ class EmptyState extends StatelessWidget {
     );
   }
 }
+
+/// Lebar layar dibagi skala huruf. Di bawah 380 dp, label dua tombol
+/// berdampingan mulai terlipat (HP kecil atau huruf besar).
+bool layarSempit(BuildContext context) =>
+    MediaQuery.sizeOf(context).width /
+        MediaQuery.textScalerOf(context).scale(1) <
+    380;
+
+/// Tombol sekunder + utama. Berdampingan (2 : 3) di layar lebar; ditumpuk
+/// (utama di atas) di layar sempit supaya label tidak terlipat dua baris.
+class TombolBerpasangan extends StatelessWidget {
+  const TombolBerpasangan({
+    super.key,
+    required this.sekunder,
+    required this.utama,
+    this.rata = false,
+  });
+
+  final Widget sekunder;
+  final Widget utama;
+
+  /// `true` = lebar sama (1 : 1).
+  final bool rata;
+
+  @override
+  Widget build(BuildContext context) {
+    if (layarSempit(context)) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          utama,
+          const SizedBox(height: Space.sm),
+          sekunder,
+        ],
+      );
+    }
+    return Row(
+      children: [
+        Expanded(flex: rata ? 1 : 2, child: sekunder),
+        const SizedBox(width: Space.md),
+        Expanded(flex: rata ? 1 : 3, child: utama),
+      ],
+    );
+  }
+}
