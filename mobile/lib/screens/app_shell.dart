@@ -7,8 +7,8 @@ import '../app_keys.dart';
 import '../models/task.dart';
 import '../services/push_service.dart';
 import '../services/repositories.dart';
+import '../services/session_services.dart';
 import '../services/session_store.dart';
-import '../services/task_watcher.dart';
 import '../services/weather_service.dart';
 import '../theme/app_theme.dart';
 import 'home_screen.dart';
@@ -51,15 +51,13 @@ class _AppShellState extends State<AppShell> {
     reportRepository.refresh();
     weatherService.refresh();
     riskRepository.refresh();
+    // Daftar tugas, cek berkala, dan push dinyalakan/dimatikan oleh
+    // sessionServices mengikuti sesi. Shell hanya menampilkan hasilnya.
     if (_petugas) {
-      taskRepository.refresh();
-      taskWatcher.start();
       _tugasMasuk = taskRepository.tugasMasuk.listen(_terimaTugasBaru);
       layarFokus.addListener(_tampilkanTertunda);
-      // Push hanya untuk petugas, setelah login (mobile SRS FR-MB-09).
       pushService.onOpenTask = _bukaTugasDariNotifikasi;
       pushService.onForegroundMessage = _beriTahuPesan;
-      pushService.start();
     }
   }
 
@@ -67,11 +65,19 @@ class _AppShellState extends State<AppShell> {
   Future<void> _bukaTugasDariNotifikasi(String? tugasId) async {
     shellTab.value = Tabs.tugas;
     if (tugasId == null) return;
+    // Kalau ada refresh yang sedang berjalan, tunggu itu. Refresh itu bisa
+    // dimulai sebelum tugas ini dibuat, jadi kalau belum ketemu muat sekali
+    // lagi.
     await taskRepository.refresh(silent: true);
-    final t = taskRepository.byId(tugasId);
-    if (t == null) return;
+    var t = taskRepository.byId(tugasId);
+    if (t == null) {
+      await taskRepository.refresh(silent: true);
+      t = taskRepository.byId(tugasId);
+    }
+    if (t == null || !mounted) return;
+    final tugas = t;
     await navigatorKey.currentState?.push(
-      MaterialPageRoute<void>(builder: (_) => TaskDetailScreen(task: t)),
+      MaterialPageRoute<void>(builder: (_) => TaskDetailScreen(task: tugas)),
     );
   }
 
@@ -79,9 +85,14 @@ class _AppShellState extends State<AppShell> {
   void dispose() {
     _tugasMasuk?.cancel();
     layarFokus.removeListener(_tampilkanTertunda);
-    taskWatcher.stop();
-    // Juga terjadi saat sesi berakhir (401), bukan hanya tombol Keluar.
-    pushService.stop();
+    // Lepas callback hanya kalau masih milik shell ini; shell sesi baru
+    // bisa sudah memasang miliknya sebelum shell lama di-dispose.
+    if (pushService.onOpenTask == _bukaTugasDariNotifikasi) {
+      pushService.onOpenTask = null;
+    }
+    if (pushService.onForegroundMessage == _beriTahuPesan) {
+      pushService.onForegroundMessage = null;
+    }
     super.dispose();
   }
 
@@ -226,10 +237,10 @@ class _AppShellState extends State<AppShell> {
 
 /// Keluar dari akun petugas → kembali sebagai warga. Laporan saya tetap
 /// tersimpan di HP (dilacak per perangkat, mobile SRS FR-MB-06).
+/// sessionServices menghentikan cek berkala, mengosongkan tugas, dan
+/// menghapus token FCM.
 Future<void> keluar() async {
-  await pushService.stop();
-  taskWatcher.stop();
   await sessionStore.logout();
-  taskRepository.clear();
+  await sessionServices.selesai;
   shellTab.value = Tabs.beranda;
 }

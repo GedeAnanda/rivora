@@ -17,6 +17,9 @@ class TaskWatcher with WidgetsBindingObserver {
       ? const Duration(seconds: 10)
       : const Duration(seconds: 30);
 
+  /// `true` selama cek berkala menyala.
+  bool get aktif => _timer != null;
+
   void start() {
     if (_timer != null) return;
     WidgetsBinding.instance.addObserver(this);

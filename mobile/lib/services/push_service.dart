@@ -35,9 +35,23 @@ class PushService {
 
   bool get enabled => _enabled;
 
+  void Function(String? tugasId)? _onOpenTask;
+
+  /// Notifikasi yang diketuk sebelum ada yang siap membukanya (mis. app
+  /// dibuka dari notifikasi, shell petugas belum dibuat).
+  ({String? tugasId})? _tertunda;
+
   /// Dipanggil saat pengguna membuka notifikasi "tugas baru" dari luar
   /// aplikasi. Argumen = `data.tugas_id` (mobile SRS FR-MB-09).
-  void Function(String? tugasId)? onOpenTask;
+  void Function(String? tugasId)? get onOpenTask => _onOpenTask;
+  set onOpenTask(void Function(String? tugasId)? callback) {
+    _onOpenTask = callback;
+    final t = _tertunda;
+    if (callback == null || t == null) return;
+    _tertunda = null;
+    // Sesudah frame berjalan selesai: callback bisa berpindah halaman.
+    scheduleMicrotask(() => callback(t.tugasId));
+  }
 
   /// Dipanggil saat pesan masuk ketika aplikasi sedang terbuka.
   void Function(String title, String body)? onForegroundMessage;
@@ -84,8 +98,19 @@ class PushService {
 
   /// Payload backend: `data.type` (atau `data.jenis`) = `"tugas_baru"`,
   /// `data.tugas_id`. Pesan lain cukup membuka aplikasi.
-  void _buka(RemoteMessage m) =>
-      onOpenTask?.call(tugasIdDariNotifikasi(m.data));
+  void _buka(RemoteMessage m) => terimaKetukan(tugasIdDariNotifikasi(m.data));
+
+  /// Notifikasi diketuk. Kalau belum ada [onOpenTask], disimpan sampai
+  /// ada yang memasangnya.
+  @visibleForTesting
+  void terimaKetukan(String? id) {
+    final callback = _onOpenTask;
+    if (callback == null) {
+      _tertunda = (tugasId: id);
+    } else {
+      callback(id);
+    }
+  }
 
   Future<void> _register(String token) async {
     try {
@@ -101,6 +126,7 @@ class PushService {
     }
     _subs.clear();
     _started = false;
+    _tertunda = null;
     if (_enabled) {
       // Token lama tidak boleh menerima notifikasi untuk pengguna berikutnya.
       try {
