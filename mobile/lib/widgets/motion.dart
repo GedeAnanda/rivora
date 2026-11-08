@@ -108,8 +108,8 @@ class _ScanOverlayState extends State<ScanOverlay>
     super.dispose();
   }
 
-  /// Warna brand "Bening" (air jernih), docs/BRAND.md.
-  static const _bening = Color(0xFF5FC3CF);
+  /// Warna brand "Tirta" (air), docs/BRAND.md.
+  static const _tirta = Color(0xFF35C1F4);
 
   @override
   Widget build(BuildContext context) {
@@ -132,10 +132,10 @@ class _ScanOverlayState extends State<ScanOverlay>
                 child: Container(
                   height: 3,
                   decoration: BoxDecoration(
-                    color: _bening,
+                    color: _tirta,
                     boxShadow: [
                       BoxShadow(
-                        color: _bening.withValues(alpha: 0.7),
+                        color: _tirta.withValues(alpha: 0.7),
                         blurRadius: 18,
                         spreadRadius: 4,
                       ),
@@ -154,7 +154,7 @@ class _ScanOverlayState extends State<ScanOverlay>
                   vertical: Space.sm,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xCC0B1F2A),
+                  color: const Color(0xCC07111F),
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Row(

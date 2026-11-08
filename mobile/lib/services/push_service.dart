@@ -13,6 +13,21 @@ import 'task_watcher.dart';
 /// Aktif hanya kalau `android/app/google-services.json` ada saat build.
 /// Tanpa itu `Firebase.initializeApp()` gagal, [enabled] tetap `false`,
 /// dan aplikasi memakai [TaskWatcher] (cek berkala) sebagai pengganti.
+/// `tugas_id` kalau [data] adalah notifikasi tugas baru, selain itu `null`.
+///
+/// Backend SRS bagian 11 memakai `type: "tugas_baru"`, implementasi backend
+/// (`notify/fcm.js`) memakai `jenis: "tugas_baru"`. Keduanya diterima.
+String? tugasIdDariNotifikasi(Map<String, dynamic> data) {
+  final jenis = data['type'] ?? data['jenis'];
+  if (jenis != 'tugas_baru') return null;
+  final id = data['tugas_id'];
+  return id?.toString();
+}
+
+/// `true` kalau [data] adalah notifikasi tugas baru.
+bool notifikasiTugasBaru(Map<String, dynamic> data) =>
+    (data['type'] ?? data['jenis']) == 'tugas_baru';
+
 class PushService {
   bool _enabled = false;
   bool _started = false;
@@ -57,7 +72,7 @@ class PushService {
         taskWatcher.checkNow();
         reportRepository.refresh(silent: true);
         final n = message.notification;
-        if (n != null && message.data['type'] != 'tugas_baru') {
+        if (n != null && !notifikasiTugasBaru(message.data)) {
           onForegroundMessage?.call(n.title ?? 'RIVORA', n.body ?? '');
         }
       }),
@@ -67,14 +82,10 @@ class PushService {
     if (initial != null) _buka(initial);
   }
 
-  /// Payload backend: `data.type = "tugas_baru"`, `data.tugas_id`.
-  void _buka(RemoteMessage m) {
-    if (m.data['type'] == 'tugas_baru') {
-      onOpenTask?.call(m.data['tugas_id'] as String?);
-    } else {
-      onOpenTask?.call(null);
-    }
-  }
+  /// Payload backend: `data.type` (atau `data.jenis`) = `"tugas_baru"`,
+  /// `data.tugas_id`. Pesan lain cukup membuka aplikasi.
+  void _buka(RemoteMessage m) =>
+      onOpenTask?.call(tugasIdDariNotifikasi(m.data));
 
   Future<void> _register(String token) async {
     try {

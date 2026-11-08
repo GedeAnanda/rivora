@@ -107,6 +107,8 @@ class HttpApiClient implements ApiClient {
     ..fields['lat'] = lat.toString()
     ..fields['lng'] = lng.toString()
     ..fields['captured_at'] = capturedAt.toUtc().toIso8601String()
+    // Build demo saja (FR-BE-21); di build biasa field ini tidak dikirim.
+    ..fields.addAll(AppConfig.lokasiDemo ? {'lokasi_demo': 'true'} : const {})
     ..fields.addAll(extra)
     ..files.add(
       await http.MultipartFile.fromPath(

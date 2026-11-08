@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import 'rivora_mark.dart';
 
-/// Tanda merek RIVORA di dalam aplikasi = ikon aplikasi "Mata Air".
+/// Tanda merek RIVORA di dalam aplikasi = ikon aplikasi "Ombak".
 class RivoraMark extends StatelessWidget {
   const RivoraMark({super.key, this.size = 40});
 
