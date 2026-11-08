@@ -38,13 +38,14 @@ Taruh `google-services.json` di `mobile/android/app/`. File ini sudah di-`.gitig
 
 **B · Backend (Node.js + Express + PostGIS)**
 
+Tanpa Docker. Database PostGIS memakai **Supabase** (cloud), jadi anggota lain tidak perlu menginstal database.
+
 ```bash
 cd backend
-npm init -y
-npm i express cors dotenv pg multer firebase-admin
-npm i -D nodemon
-docker run -d --name rivora-db -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=rivora -p 5432:5432 postgis/postgis:16-3.4
+npm i
 ```
+
+Lalu: buat proyek Supabase, aktifkan extension `postgis`, jalankan `db/schema.sql` di SQL Editor, isi `backend/.env`, `npm run seed`, `npm start`. Langkah lengkap ada di [`docs/backend/README.md`](backend/README.md).
 
 **C · Dasbor (React + Leaflet)**
 
