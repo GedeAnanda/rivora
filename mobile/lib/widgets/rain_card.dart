@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 
 import '../services/weather_service.dart';
@@ -287,111 +285,27 @@ class RainChart extends StatelessWidget {
   }
 }
 
-/// Ilustrasi cuaca sederhana, digambar sendiri: matahari, awan + tetes
-/// (jumlah tetes ikut kategori), awan gelap + kilat untuk hujan lebat.
+/// Ikon cuaca Lucide (garis tipis 300 supaya ringan di ukuran besar):
+/// matahari, gerimis, hujan, atau awan berpetir untuk hujan lebat ke atas.
 class CuacaIlustrasi extends StatelessWidget {
   const CuacaIlustrasi({super.key, required this.kategori, this.size = 64});
 
   final KategoriHujan kategori;
   final double size;
 
+  static IconData ikon(KategoriHujan k) => switch (k) {
+    KategoriHujan.tidak => RIcons.cuacaCerah,
+    KategoriHujan.ringan => RIcons.cuacaGerimis,
+    KategoriHujan.sedang => RIcons.cuacaHujan,
+    _ => RIcons.cuacaLebat,
+  };
+
   @override
   Widget build(BuildContext context) {
     return ExcludeSemantics(
-      child: CustomPaint(
-        size: Size.square(size),
-        painter: _CuacaPainter(kategori),
-      ),
+      child: Icon(ikon(kategori), size: size, color: Colors.white),
     );
   }
-}
-
-class _CuacaPainter extends CustomPainter {
-  const _CuacaPainter(this.k);
-
-  final KategoriHujan k;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final s = size.width;
-    final putih = Paint()..color = Colors.white;
-    final garis = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = s * 0.06
-      ..strokeCap = StrokeCap.round;
-
-    if (k == KategoriHujan.tidak) {
-      final c = Offset(s * 0.5, s * 0.5);
-      canvas.drawCircle(c, s * 0.18, putih);
-      for (var i = 0; i < 8; i++) {
-        final a = i * math.pi / 4;
-        final d = Offset(math.cos(a), math.sin(a));
-        canvas.drawLine(c + d * s * 0.28, c + d * s * 0.4, garis);
-      }
-      return;
-    }
-
-    // Awan: tiga lingkaran + alas membulat.
-    final awan = Path()
-      ..addOval(
-        Rect.fromCircle(center: Offset(s * 0.36, s * 0.42), radius: s * 0.16),
-      )
-      ..addOval(
-        Rect.fromCircle(center: Offset(s * 0.56, s * 0.34), radius: s * 0.2),
-      )
-      ..addOval(
-        Rect.fromCircle(center: Offset(s * 0.72, s * 0.46), radius: s * 0.13),
-      )
-      ..addRRect(
-        RRect.fromLTRBR(
-          s * 0.2,
-          s * 0.4,
-          s * 0.85,
-          s * 0.58,
-          Radius.circular(s * 0.09),
-        ),
-      );
-    canvas.drawPath(
-      awan,
-      Paint()..color = Colors.white.withValues(alpha: k.index >= 3 ? 0.75 : 1),
-    );
-
-    final jumlah = switch (k) {
-      KategoriHujan.ringan => 2,
-      KategoriHujan.sedang => 3,
-      _ => 4,
-    };
-    final tetes = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = s * 0.055
-      ..strokeCap = StrokeCap.round;
-    for (var i = 0; i < jumlah; i++) {
-      final x = s * (0.32 + 0.4 * (i + 0.5) / jumlah);
-      final y0 = s * (i.isEven ? 0.68 : 0.74);
-      canvas.drawLine(
-        Offset(x, y0),
-        Offset(x - s * 0.05, y0 + s * 0.13),
-        tetes,
-      );
-    }
-
-    if (k.index >= KategoriHujan.lebat.index) {
-      final kilat = Path()
-        ..moveTo(s * 0.58, s * 0.6)
-        ..lineTo(s * 0.5, s * 0.76)
-        ..lineTo(s * 0.58, s * 0.76)
-        ..lineTo(s * 0.52, s * 0.92)
-        ..lineTo(s * 0.66, s * 0.72)
-        ..lineTo(s * 0.58, s * 0.72)
-        ..close();
-      canvas.drawPath(kilat, Paint()..color = const Color(0xFFF2C16B));
-    }
-  }
-
-  @override
-  bool shouldRepaint(_CuacaPainter old) => old.k != k;
 }
 
 class _Gagal extends StatelessWidget {

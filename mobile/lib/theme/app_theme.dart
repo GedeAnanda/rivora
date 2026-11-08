@@ -161,14 +161,39 @@ ThemeData buildRivoraTheme(Brightness brightness) {
     useMaterial3: true,
     brightness: brightness,
     colorScheme: scheme,
-    fontFamily: 'AtkinsonHyperlegible',
+    // Plus Jakarta Sans (Tokotype, OFL): dibuat untuk identitas kota
+    // Jakarta dan komunikasi publik pemerintah.
+    fontFamily: 'PlusJakartaSans',
     scaffoldBackgroundColor: scheme.surface,
     extensions: [light ? RivoraColors.light : RivoraColors.dark],
   );
   // base.textTheme baru berisi warna + font; ukuran huruf baru diisi Flutter
   // saat runtime. Gabungkan dengan geometri M3 supaya gaya di tema ini
   // (judul AppBar, tombol, chip) punya ukuran yang benar.
-  final text = Typography.englishLike2021.merge(base.textTheme);
+  final m3 = Typography.englishLike2021.merge(base.textTheme);
+  // Angka selebar sama (tnum) di semua teks: skor, jam, jarak, dan jumlah
+  // tidak bergeser saat berubah atau beranimasi.
+  TextStyle? tnum(TextStyle? s, {double? spacing}) => s?.copyWith(
+    fontFeatures: const [FontFeature.tabularFigures()],
+    letterSpacing: spacing,
+  );
+  final text = TextTheme(
+    displayLarge: tnum(m3.displayLarge, spacing: -1),
+    displayMedium: tnum(m3.displayMedium, spacing: -0.8),
+    displaySmall: tnum(m3.displaySmall, spacing: -0.6),
+    headlineLarge: tnum(m3.headlineLarge, spacing: -0.5),
+    headlineMedium: tnum(m3.headlineMedium, spacing: -0.4),
+    headlineSmall: tnum(m3.headlineSmall, spacing: -0.3),
+    titleLarge: tnum(m3.titleLarge, spacing: -0.2),
+    titleMedium: tnum(m3.titleMedium, spacing: 0),
+    titleSmall: tnum(m3.titleSmall, spacing: 0),
+    bodyLarge: tnum(m3.bodyLarge, spacing: 0),
+    bodyMedium: tnum(m3.bodyMedium, spacing: 0),
+    bodySmall: tnum(m3.bodySmall, spacing: 0.1),
+    labelLarge: tnum(m3.labelLarge, spacing: 0.1),
+    labelMedium: tnum(m3.labelMedium, spacing: 0.2),
+    labelSmall: tnum(m3.labelSmall, spacing: 0.3),
+  );
   const bold = FontWeight.w700;
   final buttonText = text.titleMedium?.copyWith(fontWeight: bold);
   final buttonShape = RoundedRectangleBorder(
