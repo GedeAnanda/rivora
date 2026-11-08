@@ -93,13 +93,15 @@ Gutter halaman 16 dp. Tinggi minimal tombol 52 dp, area tap ≥ 48 dp.
 | `SumbatanBadge` | `widgets/sumbatan_style.dart` | Ikon + teks + warna, versi `compact` untuk daftar |
 | `LaporanStatusChip`, `TugasStatusChip` | `widgets/status_chip.dart` | Dikirim / Ditugaskan / Ditangani / Cek manual; Baru / Dikerjakan / Selesai |
 | `AiResultCard` | `widgets/ai_result_card.dart` | Kelas, skor 0–1 besar + bar, penyebab, indikator keyakinan 3 batang, catatan |
-| `ReportPhoto` | `widgets/report_photo.dart` | File lokal → URL → pengganti "Foto belum tersedia" |
+| `ReportPhoto` | `widgets/report_photo.dart` | File lokal → URL → pengganti (latar kelas + piktogram jenis saluran, tahap 05) |
 | `ReportTile` | `widgets/report_tile.dart` | Baris laporan di Beranda dan Laporan saya |
 | `RivoraMark`, `SectionTitle`, `EmptyState` | `widgets/common.dart` | Tanda merek, judul bagian (header untuk TalkBack), keadaan kosong/gagal |
 
 ## Ikon
 
-Satu keluarga: Material Icons varian **rounded**. Tab tidak aktif memakai varian outlined, tab aktif rounded terisi (konvensi Material 3). Tidak ada emoji sebagai ikon.
+Satu keluarga: **Phosphor** (sejak tahap 05, rekomendasi ui-ux-pro-max). Garis tipis seragam; versi Fill hanya untuk tab aktif. Semua ikon lewat `RIcons` di `lib/theme/rivora_icons.dart`, tidak ada `Icons.*` langsung di layar. Font dipasang sebagai aset (lihat tahap 05). Tidak ada emoji sebagai ikon.
+
+Jenis saluran memakai piktogram gambar sendiri (`JenisPictogram`), bukan ikon umum.
 
 ## Aksesibilitas
 
@@ -141,6 +143,23 @@ Satu keluarga: Material Icons varian **rounded**. Tab tidak aktif memakai varian
 | Placeholder foto | Latar warna kelas + tekstur gelombang 10% + ikon jenis saluran |
 
 Detail dan referensi: [04-redesign-modern.md](04-redesign-modern.md).
+
+## Tambahan tahap 05
+
+| Item | Isi |
+|---|---|
+| Ikon | Phosphor Regular/Fill sebagai font aset (`PhosphorRegular`, `PhosphorFill`), lewat `RIcons`. Paket `phosphor_flutter` tidak dipakai karena tidak bisa dikompilasi di Flutter 3.47 |
+| Piktogram jenis saluran | `JenisPictogram` (`widgets/pictogram.dart`): saluran terbuka (penampang), gorong-gorong (bawah jalan), inlet jalan (kisi + panah). Dipakai form, placeholder foto, kartu tugas |
+| Chip | Status = titik + teks. Badge sumbatan/risiko = teks berwarna di latar lembut, tanpa ikon. Tag penyebab = latar `surfaceContainerHigh`, tanpa garis (bukan tombol) |
+| Hero hujan | Warna datar, gradien dihapus: teal `#0A5C66`, cokelat `#6B3B00`, merah tua `#8A1A12`. Teks putih ≥ 4,5:1 |
+| Pin peta | Bentuk tetes (`_PinPainter`), ujung di titik. Laporan 28×36 warna kondisi sekarang (`kelasKini`), tugas 34×44 dengan nomor |
+| Poligon RW | Isi warna level 16%, garis 70%, label nama RW di sisi utara dengan halo warna permukaan. Label hanya di peta penuh |
+| Atribusi OSM | Strip kecil pojok kanan bawah, tidak tertutup legenda |
+| Kartu risiko | `RiskCard`: nama RW, `RisikoChip`, skor, alasan, tiga bar komponen, rumus, label mode demo bila hujan disimulasikan |
+| App bar | `SliverAppBar.medium` di Laporan dan Tugas (menggantikan `large`) |
+| Lembar izin | Bottom sheet "Sebelum memotret" sekali sebelum dialog izin sistem (NFR-04) |
+
+Detail: [05-audit-qa.md](05-audit-qa.md).
 
 ## Checklist pra-rilis (pro-rules)
 
