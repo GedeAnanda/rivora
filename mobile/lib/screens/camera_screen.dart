@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../config.dart';
 import '../services/location_service.dart';
@@ -113,6 +114,7 @@ class _CameraScreenState extends State<CameraScreen>
       _busyText = 'Memotret…';
     });
     try {
+      HapticFeedback.mediumImpact();
       final capturedAt = DateTime.now();
       final shot = await controller.takePicture();
       if (!mounted) return;
