@@ -25,8 +25,13 @@ Petugas atau warga memotret saluran lewat aplikasi, AI vision menilai tingkat su
     ├── RENCANA_FINAL.md
     ├── SETUP_JAM0.md
     ├── API.md
+    ├── ALUR_GIT.md
     └── LAPORAN_PENGEMBANGAN.md
 ```
+
+## Alur branch
+
+`feature/*` → PR ke `dev` (gabung + uji) → PR ke `main` di checkpoint. Jangan push langsung ke `main`. Panduan lengkap: [`docs/ALUR_GIT.md`](docs/ALUR_GIT.md).
 
 ## Tech stack
 
