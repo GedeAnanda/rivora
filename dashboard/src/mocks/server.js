@@ -300,11 +300,11 @@ export const alatUji = {
     if (!t || t.status === 'selesai') return 'tugas tidak ada atau sudah selesai'
     const s = db.saluran.find((x) => x.id === t.saluran_id)
     const v = { sudah_bersih: true, kelas_sesudah: 'bersih', skor_sumbatan_sesudah: 0.08, keyakinan: 'tinggi', catatan: 'Saluran sudah bersih, aliran lancar' }
-    Object.assign(t, { status: 'selesai', verifikasi: v, selesai_at: new Date().toISOString() })
+    Object.assign(t, { status: 'selesai', verifikasi: v, foto_sesudah_url: '/contoh-saluran/bersih.jpg', selesai_at: new Date().toISOString() })
     for (const l of db.laporan) if (l.saluran_id === s.id && ['dikirim', 'ditugaskan'].includes(l.status)) l.status = 'ditangani'
     db.laporan.push({
       id: db.idLaporan++, saluran_id: s.id, sumber: 'verifikasi', jenis_saluran: s.jenis, kelas: 'bersih', skor_sumbatan: 0.08,
-      keyakinan: 'tinggi', penyebab: [], catatan: v.catatan, foto_url: null, captured_at: new Date().toISOString(),
+      keyakinan: 'tinggi', penyebab: [], catatan: v.catatan, foto_url: '/contoh-saluran/bersih.jpg', captured_at: new Date().toISOString(),
       ai_sumber: 'model', lokasi_demo: false, status: 'ditangani',
     })
     return 'ok'
@@ -316,7 +316,7 @@ export const alatUji = {
     db.laporan.push({
       id: db.idLaporan++, saluran_id: s.id, sumber: 'laporan', jenis_saluran: s.jenis, kelas, skor_sumbatan: skor,
       keyakinan: 'tinggi', penyebab: kelas === 'berat' ? ['plastik', 'sedimen'] : [], catatan: 'Laporan uji dari konsol',
-      foto_url: null, captured_at: new Date().toISOString(), ai_sumber: 'model', lokasi_demo: false,
+      foto_url: `/contoh-saluran/${kelas}.jpg`, captured_at: new Date().toISOString(), ai_sumber: 'model', lokasi_demo: false,
       status: kelas === 'tidak_terlihat' ? 'cek_manual' : tugasAktif(s.id) ? 'ditugaskan' : 'dikirim',
     })
     return 'ok'

@@ -1,5 +1,4 @@
 import Foto from './Foto'
-import Ikon from './Ikon'
 import { StatusTugasAtauTombol } from './PriorityList'
 import { JENIS, umur } from '../format'
 
@@ -11,7 +10,7 @@ export default function ManualCheckList({ data, saluranTerpilih, onPilih, onTuga
   return (
     <div>
       <div className="kepala-daftar">
-        <Ikon nama="mata_tutup" ukuran={15} /> AI tidak bisa menilai saluran ini. Tidak masuk skor, petugas perlu mengecek langsung.
+        AI tidak bisa menilai saluran ini. Tidak masuk skor, petugas perlu mengecek langsung.
       </div>
       {daftar.length === 0 && <p className="teks-redup kosong">Tidak ada saluran yang perlu dicek manual.</p>}
       <ul className="daftar">
@@ -24,17 +23,17 @@ export default function ManualCheckList({ data, saluranTerpilih, onPilih, onTuga
             onClick={() => onPilih(c.saluran_id)}
             onKeyDown={(e) => e.key === 'Enter' && onPilih(c.saluran_id)}
           >
-            <Foto url={c.foto_url} alt="Foto saluran" kecil bisaPerbesar={false} />
-            <div className="item-isi">
-              <div className="item-judul">
-                {JENIS[c.jenis]} · {c.rw_nama}
-              </div>
-              <div className="teks-redup kecil">{c.catatan}</div>
-              <div className="item-bawah">
-                <StatusTugasAtauTombol tugasAktif={c.tugas_aktif} onTugaskan={() => onTugaskan(c)} />
-                <span className="teks-redup kecil">{umur(c.captured_at)}</span>
+            <div className="item-atas">
+              <Foto url={c.foto_url} alt="Foto saluran" kecil bisaPerbesar={false} />
+              <div className="item-isi">
+                <h3 className="item-judul">
+                  {c.rw_nama}, {JENIS[c.jenis].toLowerCase()}
+                </h3>
+                <p className="item-meta">{c.catatan}</p>
+                <p className="item-meta">Dilaporkan {umur(c.captured_at)}.</p>
               </div>
             </div>
+            <StatusTugasAtauTombol tugasAktif={c.tugas_aktif} onTugaskan={() => onTugaskan(c)} />
           </li>
         ))}
       </ul>

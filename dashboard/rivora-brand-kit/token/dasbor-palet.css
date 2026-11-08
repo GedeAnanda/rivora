@@ -1,0 +1,20 @@
+/* RIVORA: palet biru air untuk dasbor kelurahan.
+ * Nama variabel SENGAJA sama dengan dashboard/src/index.css (--navy, --teal, ...),
+ * jadi cukup ganti nilainya di blok :root paling atas index.css. Komponen tidak perlu diubah.
+ * Nama warna dan alasannya: panduan/BRAND.md bagian 3. */
+:root {
+  --navy: #04214B;       /* Samudra: teks judul, header, latar gelap      15,9:1 di putih */
+  --navy-2: #012858;     /* Laut 900: hover di latar gelap                                */
+  --teal: #0361C3;       /* Laut: aksi utama, tombol, tautan, fokus        6,0:1 di putih */
+  --teal-gelap: #024D9D; /* Laut 700: hover/tombol ditekan                 8,2:1 di putih */
+  --teal-muda: #DFF2FE;  /* Buih: latar terpilih, chip aktif               teks Laut 5,2:1 */
+
+  /* --biru-tugas (#0075de) sekarang mirip warna utama. Kalau penanda tugas jadi tertukar
+   * dengan tombol, ganti ke Tirta 700: */
+  /* --biru-tugas: #066784; */
+
+  /* Opsional, kalau mau kanvas ikut kebiruan (sama dengan aplikasi mobile): */
+  /* --latar: #F4FAFE;  Kabut */
+  /* --teks: #04214B;   Samudra */
+  /* --teks-2: #47566C; Batu 700, 7,5:1 di putih */
+}

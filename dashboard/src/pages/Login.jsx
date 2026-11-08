@@ -4,9 +4,9 @@ import { api, token, USE_MOCK } from '../api/client'
 
 // Foto dari Wikimedia Commons (CC BY-SA), kredit wajib tampil: lihat KREDIT_FOTO di kaki halaman.
 const FITUR = [
-  { foto: '/login/kartu-1.jpg', posisi: '100% 100%', teks: <>Petugas dan warga <b>memotret saluran</b>, AI menilai sumbatannya.</> },
-  { foto: '/login/kartu-2.jpg', posisi: '40% 50%', teks: <>Daftar saluran yang <b>perlu dibersihkan</b> sebelum hujan turun.</> },
-  { foto: '/login/kartu-3.jpg', posisi: '50% 50%', teks: <><b>Bukti foto</b> sebelum dan sesudah pembersihan.</> },
+  { foto: '/login/kartu-1.jpg', teks: <>Petugas dan warga <b>memotret saluran</b>, AI menilai sumbatannya.</> },
+  { foto: '/login/kartu-2.jpg', teks: <>Daftar saluran yang <b>perlu dibersihkan</b> sebelum hujan turun.</> },
+  { foto: '/login/kartu-3.jpg', teks: <><b>Bukti foto</b> sebelum dan sesudah pembersihan.</> },
 ]
 
 const KREDIT_FOTO = [
@@ -46,48 +46,55 @@ export default function Login({ onMasuk }) {
 
   return (
     <div className="halaman-login">
-      <header className="login-nav">
-        <div className="merek">
-          <span className="logo" aria-hidden="true">
-            <Ikon nama="air" ukuran={18} />
-          </span>
-          <span className="login-merek">RIVORA</span>
-        </div>
-        <span className="login-nav-ket">Dasbor kelurahan</span>
-      </header>
-
       <section className="hero">
-        <div className="hero-tengah">
-          <form className="kartu-login" onSubmit={masuk}>
-            <h1>Lihat genangan sebelum airnya datang</h1>
+        <div className="hero-foto" aria-hidden="true" />
+        <header className="login-nav">
+          <img className="logo-login" src="/brand/rivora-logo-putih.svg" alt="RIVORA" />
+        </header>
 
-            <input ref={inputPertama} className="isian" placeholder="Username" aria-label="Username"
-              autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} required autoFocus />
-            <div className="isian-bungkus">
-              <input className="isian" type={lihat ? 'text' : 'password'} placeholder="Password" aria-label="Password"
-                autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-              <button type="button" className="tombol-ikon isian-mata" onClick={() => setLihat((x) => !x)}
-                aria-label={lihat ? 'Sembunyikan password' : 'Tampilkan password'}>
-                <Ikon nama={lihat ? 'mata_tutup' : 'mata'} ukuran={18} />
+        <div className="hero-isi">
+          <div className="hero-teks">
+            <h1>Lihat Genangan Sebelum Airnya Datang.</h1>
+            <p>
+              Masuk untuk melihat saluran mana yang perlu dibersihkan lebih dulu sebelum hujan turun di kelurahan Anda.
+            </p>
+          </div>
+
+          <div className="hero-form">
+            <form className="kartu-login" onSubmit={masuk}>
+              <h2>Masuk dasbor kelurahan</h2>
+
+              <label className="isian-label" htmlFor="login-username">Username</label>
+              <input id="login-username" ref={inputPertama} className="isian" autoComplete="username"
+                value={username} onChange={(e) => setUsername(e.target.value)} required autoFocus />
+
+              <label className="isian-label" htmlFor="login-password">Password</label>
+              <div className="isian-bungkus">
+                <input id="login-password" className="isian" type={lihat ? 'text' : 'password'} autoComplete="current-password"
+                  value={password} onChange={(e) => setPassword(e.target.value)} required />
+                <button type="button" className="tombol-ikon isian-mata" onClick={() => setLihat((x) => !x)}
+                  aria-label={lihat ? 'Sembunyikan password' : 'Tampilkan password'}>
+                  <Ikon nama={lihat ? 'mata_tutup' : 'mata'} ukuran={20} />
+                </button>
+              </div>
+
+              {galat && <p className="galat" role="alert">{galat}</p>}
+
+              <button className="tombol tombol-pill" disabled={kirim}>
+                {kirim ? 'Memeriksa...' : 'Masuk'}
               </button>
-            </div>
 
-            {galat && <p className="galat">{galat}</p>}
-
-            <p className="login-kecil">Khusus akun lurah atau koordinator lapangan kelurahan.</p>
-
-            <button className="tombol tombol-pill" disabled={kirim}>
-              {kirim ? 'Memeriksa...' : 'Masuk'}
-            </button>
-
-            {USE_MOCK && (
-              <p className="login-kecil">
-                Mode data contoh: username <strong>lurah</strong>, password apa saja.
-              </p>
-            )}
-          </form>
-          <div className="kartu-login kedua">Petugas atau warga? Pakai aplikasi RIVORA di Android.</div>
+              <p className="login-kecil">Khusus akun lurah atau koordinator lapangan kelurahan.</p>
+              {USE_MOCK && (
+                <p className="login-kecil">
+                  Mode data contoh: username <strong>lurah</strong>, password apa saja.
+                </p>
+              )}
+            </form>
+            <p className="kartu-login kedua">Petugas atau warga? Pakai aplikasi RIVORA di Android.</p>
+          </div>
         </div>
+
         <a className="hero-kredit" href="https://commons.wikimedia.org/wiki/File:Gotong_Royong_Membersihkan_Sungai.jpg" target="_blank" rel="noreferrer">
           Foto: Galeri ega, Wikimedia Commons, CC BY-SA 4.0
         </a>
@@ -96,7 +103,7 @@ export default function Login({ onMasuk }) {
       <section className="fitur">
         {FITUR.map((f, i) => (
           <div key={i} className="fitur-kartu" style={{ '--foto': `url(${f.foto})` }}>
-            <img className="fitur-foto" src={f.foto} alt="" style={{ objectPosition: f.posisi }} />
+            <img className="fitur-foto" src={f.foto} alt="" loading="lazy" />
             <p>{f.teks}</p>
           </div>
         ))}

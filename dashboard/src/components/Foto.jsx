@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import Ikon from './Ikon'
 
-/** Foto saluran. Gagal dimuat atau kosong -> kotak abu-abu (NFR-03). Klik -> perbesar. */
+/** Foto saluran. Gagal dimuat -> placeholder (NFR-03). Klik foto -> perbesar. */
 export default function Foto({ url, alt, kecil, bisaPerbesar = true }) {
   const [gagal, setGagal] = useState(false)
   const [besar, setBesar] = useState(false)
@@ -9,7 +9,7 @@ export default function Foto({ url, alt, kecil, bisaPerbesar = true }) {
   if (!url || gagal) {
     return (
       <div className={`foto-kosong${kecil ? ' kecil' : ''}`}>
-        <Ikon nama="kamera" ukuran={kecil ? 16 : 26} />
+        <Ikon nama="kamera" ukuran={kecil ? 18 : 28} />
         {!kecil && <span>Foto tidak tersedia</span>}
       </div>
     )

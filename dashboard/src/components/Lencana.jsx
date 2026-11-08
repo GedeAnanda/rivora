@@ -1,12 +1,10 @@
-import Ikon from './Ikon'
 import { KELAS, KEYAKINAN, infoLevel } from '../format'
 
-/** Lencana level RW: ikon + teks + warna (NFR-04). Menerima properties fitur RW. */
+/** Lencana level RW: teks + warna (NFR-04, level selalu ditulis). Menerima properties fitur RW. */
 export function LencanaLevel({ props, kecil }) {
   const l = infoLevel(props)
   return (
-    <span className={`lencana${kecil ? ' kecil' : ''}`} style={{ '--w': l.warna }}>
-      <Ikon nama={l.ikon} ukuran={kecil ? 12 : 14} />
+    <span className={`lencana${kecil ? ' kecil' : ''}`} style={{ background: l.latar, color: l.teks, borderColor: l.latar }}>
       {l.label}
     </span>
   )

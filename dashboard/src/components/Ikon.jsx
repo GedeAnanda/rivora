@@ -70,6 +70,7 @@ const JALUR = {
     </>
   ),
   panah: <path d="M9 6l6 6-6 6" />,
+  kembali: <path d="M19 12H5M11 6l-6 6 6 6" />,
   awan_putus: (
     <>
       <path d="M7 17a4.5 4.5 0 1 1 1.2-8.8A5.5 5.5 0 0 1 18.5 11 3.5 3.5 0 0 1 17.5 17z" />
