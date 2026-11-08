@@ -1,0 +1,32 @@
+# --- Rahasia: JANGAN di-commit (repo akan dilihat panitia & juri) ---
+.env
+.env.*
+!.env.example
+**/google-services.json
+**/GoogleService-Info.plist
+**/*service-account*.json
+**/*firebase-adminsdk*.json
+*.keystore
+*.jks
+**/android/key.properties
+
+# --- Node (backend, dashboard) ---
+node_modules/
+dist/
+build/
+*.log
+
+# --- Flutter / Dart (mobile) ---
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+**/android/.gradle/
+**/android/local.properties
+*.iml
+.idea/
+
+# --- OS / editor ---
+.DS_Store
+.vscode/

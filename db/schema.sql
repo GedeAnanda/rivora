@@ -1,0 +1,2 @@
+-- Skema basis data RIVORA (PostgreSQL + PostGIS). Pemilik: B (backend).
+-- Diisi di jam 0–1. Draft tabel ada di docs/RENCANA_FINAL.md bagian 6.
