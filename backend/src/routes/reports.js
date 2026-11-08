@@ -234,14 +234,17 @@ router.get('/:id', async (req, res) => {
   const laporan = await ambilLaporan(id);
   if (!laporan) throw httpError(404, 'Laporan tidak ditemukan');
 
+  // Tugas yang menangani laporan ini = tugas pertama di saluran yang sama yang belum selesai
+  // saat laporan dibuat (laporan gabungan ikut mendapat status & foto bukti tugas tersebut).
   const { rows } = await db.query(
     `SELECT t.id, t.status, p.nama AS petugas_nama, t.foto_sesudah_url, t.selesai_at,
        t.ai_verifikasi_json, lv.kelas AS kelas_verifikasi
-     FROM tugas t
+     FROM laporan l
+     JOIN tugas t ON t.saluran_id = l.saluran_id AND (t.selesai_at IS NULL OR t.selesai_at >= l.created_at)
      JOIN pengguna p ON p.id = t.petugas_id
      LEFT JOIN laporan lv ON lv.id = t.laporan_verifikasi_id
-     WHERE t.laporan_id = $1
-     ORDER BY t.id DESC LIMIT 1`,
+     WHERE l.id = $1 AND l.sumber = 'laporan'
+     ORDER BY t.id ASC LIMIT 1`,
     [id]
   );
   const t = rows[0];

@@ -59,9 +59,11 @@ router.post('/', wajibLogin('lurah'), async (req, res) => {
     if (err.code === '23505') throw httpError(409, 'Saluran ini sudah punya tugas yang belum selesai');
     throw err;
   }
+  // Semua laporan warga terbuka di saluran ini ikut ditugaskan (laporan gabungan)
   await db.query(
-    "UPDATE laporan SET status = 'ditugaskan' WHERE id = $1 AND status IN ('dikirim', 'cek_manual')",
-    [laporanId]
+    `UPDATE laporan SET status = 'ditugaskan'
+     WHERE saluran_id = $1 AND sumber = 'laporan' AND status IN ('dikirim', 'cek_manual')`,
+    [saluranId]
   );
 
   const [tugas] = await cariTugas('WHERE t.id = $1', [tugasId]);
@@ -213,31 +215,55 @@ router.post('/:id/verify', wajibLogin('petugas'), terimaFoto, async (req, res) =
     await tolak(400, `Kamu berjarak ${Math.round(t.jarak_m)} m dari saluran. Dekati saluran (maks ${RADIUS_VERIFIKASI_M} m) lalu foto ulang`);
   }
 
+  // AI + unggah foto di luar transaksi (lambat, jangan tahan kunci baris)
   const v = dariHasilVerifikasi(await nilaiVerifikasi(t.foto_sebelum, req.file));
   const fotoUrl = await require('../storage').simpanFoto(req, req.file);
-
-  // Kondisi baru saluran = laporan sumber 'verifikasi' → skor RW ikut turun
-  const lv = await db.query(
-    `INSERT INTO laporan (saluran_id, pelapor_id, sumber, jenis_saluran, foto_url, geom, lokasi_demo, captured_at,
-       ai_json, ai_sumber, kelas, skor_sumbatan, keyakinan, status)
-     VALUES ($1, $2, 'verifikasi', $3, $4, ST_SetSRID(ST_MakePoint($5, $6), 4326)::geography, $7, $8,
-       $9, $10, $11, $12, $13, $14)
-     RETURNING id`,
-    [t.saluran_id, req.user.id, t.jenis, fotoUrl, lng, lat, lokasiDemo, new Date(req.body.captured_at).toISOString(),
-      v.ai_json, v.ai_sumber, v.verifikasi.kelas_sesudah, v.verifikasi.skor_sumbatan_sesudah,
-      v.verifikasi.keyakinan, v.ok ? 'ditangani' : 'cek_manual']
-  );
-
   // [ASUMSI] belum bersih / AI gagal → tugas tetap aktif (status dikerjakan), petugas bisa verifikasi ulang
   const selesai = v.verifikasi.sudah_bersih;
-  const upd = await db.query(
-    `UPDATE tugas SET status = $2, foto_sesudah_url = $3, ai_verifikasi_json = $4, laporan_verifikasi_id = $5,
-       selesai_at = CASE WHEN $2 = 'selesai' THEN now() ELSE NULL END
-     WHERE id = $1 AND status <> 'selesai' RETURNING id`,
-    [id, selesai ? 'selesai' : 'dikerjakan', fotoUrl, { ...v.verifikasi, ai_sumber: v.ai_sumber }, lv.rows[0].id]
-  );
-  if (!upd.rows[0]) throw httpError(409, 'Tugas ini sudah selesai'); // verifikasi ganda bersamaan
-  if (selesai) await db.query("UPDATE laporan SET status = 'ditangani' WHERE id = $1", [t.laporan_id]);
+
+  // Cek ulang status + simpan kondisi + update tugas & laporan dalam SATU transaksi.
+  // FOR UPDATE: verifikasi kedua yang bersamaan menunggu, lalu melihat status 'selesai' → 409 tanpa menyimpan apa pun.
+  const client = await db.pool.connect();
+  try {
+    await client.query('BEGIN');
+    const cek = await client.query('SELECT status FROM tugas WHERE id = $1 FOR UPDATE', [id]);
+    if (cek.rows[0].status === 'selesai') throw httpError(409, 'Tugas ini sudah selesai');
+
+    // Kondisi baru saluran = laporan sumber 'verifikasi' → skor RW ikut turun
+    const lv = await client.query(
+      `INSERT INTO laporan (saluran_id, pelapor_id, sumber, jenis_saluran, foto_url, geom, lokasi_demo, captured_at,
+         ai_json, ai_sumber, kelas, skor_sumbatan, keyakinan, status)
+       VALUES ($1, $2, 'verifikasi', $3, $4, ST_SetSRID(ST_MakePoint($5, $6), 4326)::geography, $7, $8,
+         $9, $10, $11, $12, $13, $14)
+       RETURNING id`,
+      [t.saluran_id, req.user.id, t.jenis, fotoUrl, lng, lat, lokasiDemo, new Date(req.body.captured_at).toISOString(),
+        v.ai_json, v.ai_sumber, v.verifikasi.kelas_sesudah, v.verifikasi.skor_sumbatan_sesudah,
+        v.verifikasi.keyakinan, v.ok ? 'ditangani' : 'cek_manual']
+    );
+
+    await client.query(
+      `UPDATE tugas SET status = $2, foto_sesudah_url = $3, ai_verifikasi_json = $4, laporan_verifikasi_id = $5,
+         selesai_at = CASE WHEN $2 = 'selesai' THEN now() ELSE NULL END
+       WHERE id = $1`,
+      [id, selesai ? 'selesai' : 'dikerjakan', fotoUrl, { ...v.verifikasi, ai_sumber: v.ai_sumber }, lv.rows[0].id]
+    );
+
+    // Semua laporan warga yang masih terbuka di saluran ini ikut ditangani (laporan gabungan),
+    // bukan hanya laporan yang dipakai saat membuat tugas. Bukti foto: lihat GET /reports/:id.
+    if (selesai) {
+      await client.query(
+        `UPDATE laporan SET status = 'ditangani'
+         WHERE saluran_id = $1 AND sumber = 'laporan' AND status <> 'ditangani'`,
+        [t.saluran_id]
+      );
+    }
+    await client.query('COMMIT');
+  } catch (err) {
+    await client.query('ROLLBACK').catch(() => {});
+    throw err;
+  } finally {
+    client.release();
+  }
 
   const [tugas] = await cariTugas('WHERE t.id = $1', [id]);
   res.json({ tugas, verifikasi: v.verifikasi, ai_sumber: v.ai_sumber });
