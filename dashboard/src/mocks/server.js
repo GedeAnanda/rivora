@@ -1,6 +1,6 @@
 // Tiruan backend in-memory. Bentuk respons persis SRS backend bagian 7, rumus persis bagian 9.
 // Dipakai saat VITE_USE_MOCK=1. Skor di sini hanya meniru backend; dasbor sendiri tidak menghitung skor.
-import { KELURAHAN, PETUGAS, buatSeed } from './seed'
+import { KELURAHAN, PETUGAS, buatSeed, fotoContoh } from './seed'
 
 const BOBOT = { hujan: 0.4, sumbatan: 0.4, kerentanan: 0.2 }
 const BOBOT_KEYAKINAN = { tinggi: 1, sedang: 0.6, rendah: 0.3 }
@@ -300,11 +300,12 @@ export const alatUji = {
     if (!t || t.status === 'selesai') return 'tugas tidak ada atau sudah selesai'
     const s = db.saluran.find((x) => x.id === t.saluran_id)
     const v = { sudah_bersih: true, kelas_sesudah: 'bersih', skor_sumbatan_sesudah: 0.08, keyakinan: 'tinggi', catatan: 'Saluran sudah bersih, aliran lancar' }
-    Object.assign(t, { status: 'selesai', verifikasi: v, foto_sesudah_url: '/contoh-saluran/bersih.jpg', selesai_at: new Date().toISOString() })
+    const foto = fotoContoh('bersih')
+    Object.assign(t, { status: 'selesai', verifikasi: v, foto_sesudah_url: foto, selesai_at: new Date().toISOString() })
     for (const l of db.laporan) if (l.saluran_id === s.id && ['dikirim', 'ditugaskan'].includes(l.status)) l.status = 'ditangani'
     db.laporan.push({
       id: db.idLaporan++, saluran_id: s.id, sumber: 'verifikasi', jenis_saluran: s.jenis, kelas: 'bersih', skor_sumbatan: 0.08,
-      keyakinan: 'tinggi', penyebab: [], catatan: v.catatan, foto_url: '/contoh-saluran/bersih.jpg', captured_at: new Date().toISOString(),
+      keyakinan: 'tinggi', penyebab: [], catatan: v.catatan, foto_url: foto, captured_at: new Date().toISOString(),
       ai_sumber: 'model', lokasi_demo: false, status: 'ditangani',
     })
     return 'ok'
@@ -316,7 +317,7 @@ export const alatUji = {
     db.laporan.push({
       id: db.idLaporan++, saluran_id: s.id, sumber: 'laporan', jenis_saluran: s.jenis, kelas, skor_sumbatan: skor,
       keyakinan: 'tinggi', penyebab: kelas === 'berat' ? ['plastik', 'sedimen'] : [], catatan: 'Laporan uji dari konsol',
-      foto_url: `/contoh-saluran/${kelas}.jpg`, captured_at: new Date().toISOString(), ai_sumber: 'model', lokasi_demo: false,
+      foto_url: fotoContoh(kelas), captured_at: new Date().toISOString(), ai_sumber: 'model', lokasi_demo: false,
       status: kelas === 'tidak_terlihat' ? 'cek_manual' : tugasAktif(s.id) ? 'ditugaskan' : 'dikirim',
     })
     return 'ok'

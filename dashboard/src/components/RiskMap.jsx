@@ -106,6 +106,17 @@ function SaluranLayer({ saluran, saluranTerpilih, onPilihSaluran }) {
             pathOptions={{ color: WARNA_DITUGASKAN, weight: 3, fill: false }}
           />
         )}
+        {/* Riak sekali saat titik dipilih (dipasang baru tiap pilihan, jadi animasinya jalan sekali) */}
+        {pilih && (
+          <CircleMarker
+            renderer={rendererPin}
+            center={[lat, lng]}
+            radius={11}
+            interactive={false}
+            className="riak-pilih"
+            pathOptions={{ color: '#04214B', weight: 2, fill: false }}
+          />
+        )}
         <CircleMarker
           renderer={rendererPin}
           center={[lat, lng]}

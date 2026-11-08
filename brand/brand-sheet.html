@@ -1,0 +1,430 @@
+<title>RIVORA Brand</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Atkinson+Hyperlegible+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: lembar panduan bergaris seperti papan peil (pengukur muka air); tiap bagian = satu "level". */
+:root {
+  --bg: #F4FAFE;
+  --surface: #FFFFFF;
+  --fg: #04214B;
+  --muted: #47566C;
+  --line: #D6E0EB;
+  --accent: #0361C3;
+  --accent-soft: #DFF2FE;
+  --band: #04214B;
+  --band-fg: #E9F0F5;
+  --band-muted: #B5C8DD;
+  --font-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Atkinson Hyperlegible Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --step--1: 0.8125rem;
+  --step-0: 1rem;
+  --step-1: 1.25rem;
+  --step-2: 1.75rem;
+  --step-3: 2.5rem;
+  --r: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #070F19; --surface: #0C1521; --fg: #E9F0F5; --muted: #A8B6C3; --line: #293647;
+    --accent: #63C6FF; --accent-soft: #0C3C75; --band: #030B17; --band-fg: #E9F0F5; --band-muted: #A8B6C3;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #070F19; --surface: #0C1521; --fg: #E9F0F5; --muted: #A8B6C3; --line: #293647;
+  --accent: #63C6FF; --accent-soft: #0C3C75; --band: #030B17; --band-fg: #E9F0F5; --band-muted: #A8B6C3;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: var(--step-0); line-height: 1.55; }
+.wrap { max-width: 1080px; margin-inline: auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { line-height: 1.15; text-wrap: balance; margin: 0; }
+h2 { font-size: var(--step-2); }
+h3 { font-size: var(--step-1); }
+p { margin: 0; max-width: 64ch; }
+code, .mono { font-family: var(--font-mono); font-size: 0.875em; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+
+/* ---------- hero ---------- */
+.hero { background: linear-gradient(165deg, #0A55B5 0%, var(--band) 62%); color: var(--band-fg); }
+.hero .wrap { padding-block: clamp(40px, 7vw, 80px) 0; display: grid; gap: 28px; }
+.eyebrow { font-family: var(--font-mono); font-size: var(--step--1); letter-spacing: .08em; text-transform: uppercase; color: var(--band-muted); }
+.hero-logo { width: min(560px, 100%); height: auto; display: block; }
+.tagline { font-size: var(--step-1); font-style: italic; color: var(--band-fg); }
+.hero p.lede { color: var(--band-muted); }
+.gauge { display: grid; grid-template-columns: 40fr 30fr 30fr; margin-top: 12px; }
+.gauge span { height: 10px; }
+.gauge-ticks { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 11px; color: var(--band-muted); padding-block: 6px 18px; position: relative; }
+.gauge-ticks i { font-style: normal; position: absolute; transform: translateX(-50%); }
+
+/* ---------- sections ---------- */
+section { padding-block: clamp(40px, 6vw, 72px); border-bottom: 1px solid var(--line); }
+.sec-head { display: grid; gap: 8px; margin-bottom: 28px; }
+.sec-head .lvl { font-family: var(--font-mono); font-size: var(--step--1); color: var(--accent); letter-spacing: .06em; text-transform: uppercase; }
+.sec-head p { color: var(--muted); }
+
+/* konsep */
+.concept { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); align-items: center; }
+.concept-mark { width: 100%; height: auto; display: block; background: #FFFFFF; border-radius: var(--r); padding: 28px; border: 1px solid var(--line); max-width: 100%; }
+.pin-num circle { fill: #04214B; }
+.pin-num text { fill: #FFFFFF; font: 700 7px var(--font-body); text-anchor: middle; }
+.pin-num path { stroke: #04214B; stroke-width: .9; fill: none; }
+.parts { display: grid; gap: 18px; list-style: none; margin: 0; padding: 0; }
+.parts li { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 12px; }
+.parts .n { width: 28px; height: 28px; border-radius: 50%; background: var(--fg); color: var(--bg); display: grid; place-items: center; font-weight: 700; font-size: 14px; }
+.parts b { display: block; }
+.parts span { color: var(--muted); }
+.pun { margin-top: 22px; padding: 16px 18px; background: var(--accent-soft); border-radius: 10px; }
+
+/* logo grid */
+.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.tile { border-radius: var(--r); padding: clamp(20px, 4vw, 40px) clamp(20px, 4vw, 40px) 44px; display: grid; place-items: center; gap: 12px; min-height: 180px; position: relative; }
+.tile.light { background: #FFFFFF; border: 1px solid var(--line); }
+.tile.dark { background: #04214B; }
+.tile.laut { background: #0361C3; }
+.tile.wide { grid-column: span 2; }
+.tile .cap { position: absolute; left: 14px; bottom: 10px; font-family: var(--font-mono); font-size: 11px; color: #47566C; }
+.tile.dark .cap, .tile.laut .cap { color: #C4E2FE; }
+.v-h { width: min(420px, 100%); height: auto; }
+.v-v { width: min(230px, 80%); height: auto; }
+.v-m { width: 120px; height: auto; }
+.v-wm { width: min(240px, 70%); height: auto; }
+.v-h.sm { width: min(260px, 100%); }
+.v-m.sm { width: 96px; }
+.row { display: flex; gap: 28px; align-items: center; justify-content: center; flex-wrap: wrap; }
+
+/* ikon */
+.icons { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: clamp(20px, 4vw, 48px); align-items: center; }
+.ic { width: clamp(140px, 22vw, 200px); height: auto; display: block; filter: drop-shadow(0 10px 24px rgba(4, 33, 75, .28)); }
+.icon-sizes { display: flex; align-items: flex-end; gap: 22px; flex-wrap: wrap; margin-top: 8px; padding: 16px 20px; background: #FFFFFF; border: 1px solid var(--line); border-radius: var(--r); justify-self: start; }
+.sz { display: grid; justify-items: center; gap: 6px; }
+.sz small { font-family: var(--font-mono); font-size: 11px; color: #47566C; }
+.sz svg { height: auto; }
+.icon-notes { display: grid; gap: 10px; color: var(--muted); }
+.icon-notes b { color: var(--fg); }
+
+/* warna */
+.swatches { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+.sw { text-align: left; border: 1px solid rgba(4, 33, 75, .12); border-radius: var(--r); background: var(--c); color: var(--t); padding: 16px; min-height: 230px; display: flex; flex-direction: column; gap: 10px; cursor: pointer; transition: transform .15s ease; }
+.sw:hover { transform: translateY(-2px); }
+.sw-top { display: grid; gap: 2px; }
+.sw-name { font-size: var(--step-1); font-weight: 700; }
+.sw-hex { font-family: var(--font-mono); font-size: var(--step--1); }
+.sw-desc { font-size: 14px; line-height: 1.45; flex: 1; }
+.sw-cr { font-family: var(--font-mono); font-size: 11px; opacity: .85; }
+.sub { margin-top: 36px; display: grid; gap: 12px; }
+.sub h3 { font-size: var(--step-0); }
+.sub p { color: var(--muted); font-size: 15px; }
+.ramp { display: grid; grid-template-columns: repeat(11, minmax(0, 1fr)); border-radius: 10px; overflow: hidden; border: 1px solid var(--line); }
+.ramp.batu, .ramp.tirta { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.rp { border: 0; background: var(--c); color: var(--t); padding: 30px 6px 8px; text-align: left; cursor: pointer; display: grid; gap: 2px; min-width: 0; }
+.rp b { font-size: 13px; }
+.rp span { font-family: var(--font-mono); font-size: 10.5px; overflow-wrap: anywhere; }
+.risk { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 300px); gap: clamp(20px, 4vw, 40px); align-items: start; }
+.risk-gauge { display: grid; grid-template-columns: 40fr 30fr 30fr; border-radius: 6px; overflow: hidden; }
+.risk-gauge span { height: 14px; }
+.risk-ticks { position: relative; height: 18px; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.risk-ticks i { position: absolute; font-style: normal; transform: translateX(-50%); top: 3px; }
+.risk-rows { display: grid; gap: 10px; margin-top: 14px; }
+.risk-row { display: grid; grid-template-columns: 14px 130px 100px minmax(0, 1fr); gap: 12px; align-items: center; }
+.dot { width: 14px; height: 14px; border-radius: 50%; background: var(--c); }
+.chip { display: inline-flex; align-items: center; justify-self: start; padding: 4px 12px; border-radius: 999px; background: var(--b); color: var(--t); font-weight: 700; font-size: 14px; }
+.risk-row code { color: var(--muted); }
+.hexes { display: flex; gap: 6px; flex-wrap: wrap; }
+.hx { border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 2px 8px; font-family: var(--font-mono); font-size: 11.5px; cursor: pointer; }
+.minimap { width: 100%; height: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 10px; display: block; }
+.map-cap { font-size: 13px; color: var(--muted); margin-top: 8px; }
+.sumb { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* tipografi */
+.type { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+.type-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 24px; display: grid; gap: 12px; align-content: start; }
+.type-card .big { font-size: clamp(2.6rem, 6vw, 4rem); font-weight: 700; line-height: 1; letter-spacing: -.01em; }
+.type-card .meta { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.type-card .wmk { width: min(300px, 100%); color: var(--fg); }
+
+/* aturan */
+.rules { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+.rule { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 24px; display: grid; gap: 14px; align-content: start; }
+.rule p { color: var(--muted); font-size: 15px; }
+.clear { width: min(300px, 100%); height: auto; color: var(--muted); }
+.clear .unit { fill: var(--accent-soft); }
+.clear .u-t { font: italic 700 11px var(--font-body); fill: var(--fg); text-anchor: middle; }
+.minsize { display: flex; align-items: flex-end; gap: 28px; flex-wrap: wrap; padding: 16px 20px; background: #FFFFFF; border: 1px solid var(--line); border-radius: 10px; }
+.minsize figure { margin: 0; display: grid; gap: 6px; justify-items: start; }
+.minsize figcaption { font-family: var(--font-mono); font-size: 11px; color: #47566C; }
+.donts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-top: 14px; }
+.dont { margin: 0; display: grid; gap: 8px; }
+.dont-box { background: #FFFFFF; border: 1px solid var(--line); border-radius: var(--r); aspect-ratio: 4 / 3; display: grid; place-items: center; position: relative; overflow: hidden; max-width: 100%; }
+.dont-box svg { width: 52%; }
+.dont-box::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top right, transparent calc(50% - 1.5px), #C8372D calc(50% - 1.5px), #C8372D calc(50% + 1.5px), transparent calc(50% + 1.5px)); opacity: .85; }
+.dont figcaption { font-size: 14px; color: var(--muted); }
+
+/* file */
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 15px; }
+td { padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+td:first-child { white-space: nowrap; }
+footer { padding-block: 32px 48px; color: var(--muted); font-size: 14px; }
+
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 8px 16px; border-radius: 999px; font-family: var(--font-mono); font-size: 13px; }
+
+@media (max-width: 860px) {
+  .swatches { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .swatches .sw:first-child { grid-column: span 2; min-height: 160px; }
+  .risk, .concept, .icons, .type, .rules { grid-template-columns: minmax(0, 1fr); }
+  .donts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .tiles { grid-template-columns: minmax(0, 1fr); }
+  .tile.wide { grid-column: auto; }
+  .ramp { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .ramp.batu, .ramp.tirta { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .risk-row { grid-template-columns: 14px minmax(0, 1fr) auto; }
+  .risk-row .hexes { grid-column: 2 / -1; }
+  .sw { min-height: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .sw { transition: none; } .sw:hover { transform: none; } }
+</style>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Identitas visual · CR YOUTH 2026 · Tim Abis Ini ke WDP</span>
+    <svg class="hero-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 -16.7 637.4 133.4" role="img" aria-label="RIVORA"><g transform="translate(-5.8 -22.5) scale(1.45)"><path fill="#0361C3" d="M96 50A46 46 0 1 1 4 50A46 46 0 1 1 96 50Z"/><path fill="#35C1F4" d="M9.16 71.17C17.94 67.25 23.9 59.56 28 50C36 32 50 22 64 24C78 26 88 38 86 52C85.5 58.5 81 63.5 75.5 63.5C71.5 63.5 70.3 59 72.8 56.6C76.3 53.3 76 47 70 44C62 40 50 42 48 52C46 62 56 71 68 71C75.87 71 83.75 70.14 91.9 68.98A46 46 0 0 1 9.16 71.17Z"/></g><path fill="#FFFFFF" transform="translate(167.4 0)" d="M18 9L18 91A9 9 0 0 1 0 91L0 9A9 9 0 0 1 18 9ZM9 0L38 0A9 9 0 0 1 38 18L9 18A9 9 0 0 1 9 0ZM38 0A30 30 0 0 1 38 60L38 42A12 12 0 0 0 38 18ZM9 42L38 42A9 9 0 0 1 38 60L9 60A9 9 0 0 1 9 42ZM40.46 45.96L67.46 85.96A9 9 0 0 1 52.54 96.04L25.54 56.04A9 9 0 0 1 40.46 45.96ZM102 9L102 91A9 9 0 0 1 84 91L84 9A9 9 0 0 1 102 9ZM132.42 5.82L163.42 87.82A9 9 0 0 1 146.58 94.18L115.58 12.18A9 9 0 0 1 132.42 5.82ZM146.58 87.82L177.58 5.82A9 9 0 0 1 194.42 12.18L163.42 94.18A9 9 0 0 1 146.58 87.82ZM303 50A51 51 0 1 1 201 50A51 51 0 1 1 303 50ZM285 50A33 33 0 1 0 219 50A33 33 0 1 0 285 50ZM333 9L333 91A9 9 0 0 1 315 91L315 9A9 9 0 0 1 333 9ZM324 0L353 0A9 9 0 0 1 353 18L324 18A9 9 0 0 1 324 0ZM353 0A30 30 0 0 1 353 60L353 42A12 12 0 0 0 353 18ZM324 42L353 42A9 9 0 0 1 353 60L324 60A9 9 0 0 1 324 42ZM355.46 45.96L382.46 85.96A9 9 0 0 1 367.54 96.04L340.54 56.04A9 9 0 0 1 355.46 45.96ZM390.58 87.82L421.58 5.82A9 9 0 0 1 438.42 12.18L407.42 94.18A9 9 0 0 1 390.58 87.82ZM438.42 5.82L469.42 87.82A9 9 0 0 1 452.58 94.18L421.58 12.18A9 9 0 0 1 438.42 5.82ZM411 58L449 58A9 9 0 0 1 449 76L411 76A9 9 0 0 1 411 58Z"/></svg>
+    <div style="display:grid;gap:10px">
+      <p class="tagline">“See The Flood Before You See The Water.”</p>
+      <p class="lede">Sistem prediksi dan pencegahan genangan berbasis kondisi saluran drainase. Panduan ini dipakai untuk aplikasi pelapor, dasbor kelurahan, PPT pitching, video demo, dan laporan pengembangan.</p>
+    </div>
+    <div>
+      <div class="gauge" aria-hidden="true"><span style="background:#2E9E6B"></span><span style="background:#E9A23B"></span><span style="background:#C8372D"></span></div>
+      <div class="gauge-ticks" aria-hidden="true"><i style="left:0;transform:none">0,00</i><i style="left:40%">0,40</i><i style="left:70%">0,70</i><i style="right:0;left:auto;transform:none">1,00 skor risiko</i></div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section>
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="lvl">Konsep</span>
+        <h2>Ombak</h2>
+        <p>Simbol RIVORA adalah ombak yang menggulung di dalam lingkaran: air sudah naik dan akan pecah, tapi belum sampai. Satu bentuk yang menceritakan seluruh produk: bahaya genangan terbaca lebih dulu, lalu warga dan petugas bertindak sebelum air datang.</p>
+      </div>
+      <div class="concept">
+        <svg class="concept-mark" viewBox="-10 -6 120 112" role="img" aria-label="Bagian-bagian logo Ombak"><g><path fill="#0361C3" d="M96 50A46 46 0 1 1 4 50A46 46 0 1 1 96 50Z"/><path fill="#35C1F4" d="M9.16 71.17C17.94 67.25 23.9 59.56 28 50C36 32 50 22 64 24C78 26 88 38 86 52C85.5 58.5 81 63.5 75.5 63.5C71.5 63.5 70.3 59 72.8 56.6C76.3 53.3 76 47 70 44C62 40 50 42 48 52C46 62 56 71 68 71C75.87 71 83.75 70.14 91.9 68.98A46 46 0 0 1 9.16 71.17Z"/></g>
+<g class="pin-num"><path d="M2.5 6.5 L17 17.5"/><circle cx="-2" cy="2" r="6"/><text x="-2" y="4.4">1</text></g>
+<g class="pin-num"><path d="M1 92 L21 62"/><circle cx="-2" cy="97" r="6"/><text x="-2" y="99.4">2</text></g>
+<g class="pin-num"><path d="M98 93 L62 56"/><circle cx="102" cy="97" r="6"/><text x="102" y="99.4">3</text></g></svg>
+        <div>
+          <ol class="parts">
+            <li><span class="n">1</span><div><b>Lingkaran Laut</b><span>Wilayah yang dipantau: RW, kelurahan, kota. Dasbor menampilkan risiko genangan per RW.</span></div></li>
+            <li><span class="n">2</span><div><b>Ombak Tirta yang naik</b><span>Muka air yang diprediksi naik dari curah hujan, sumbatan saluran hasil AI, dan kerentanan lokasi.</span></div></li>
+            <li><span class="n">3</span><div><b>Gulungan di puncak</b><span>Detik sebelum ombak pecah: peringatan dini. Warga dan petugas membersihkan saluran sebelum genangan terjadi.</span></div></li>
+          </ol>
+          <p class="pun">Tagline <b>See The Flood Before You See The Water</b> digambar langsung: bahayanya sudah terlihat, tapi airnya belum sampai.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="lvl">Logo</span>
+        <h2>Versi logo</h2>
+        <p>Logo horizontal adalah versi utama. Logo bertumpuk untuk ruang tegak. Simbol saja dipakai saat nama RIVORA sudah terlihat di sekitarnya. Wordmark digambar khusus dari garis membulat, jadi jangan diketik ulang memakai font.</p>
+      </div>
+      <div class="tiles">
+        <div class="tile light wide"><svg class="v-h" xmlns="http://www.w3.org/2000/svg" viewBox="0 -16.7 637.4 133.4" role="img" aria-label="RIVORA"><g transform="translate(-5.8 -22.5) scale(1.45)"><path fill="#0361C3" d="M96 50A46 46 0 1 1 4 50A46 46 0 1 1 96 50Z"/><path fill="#35C1F4" d="M9.16 71.17C17.94 67.25 23.9 59.56 28 50C36 32 50 22 64 24C78 26 88 38 86 52C85.5 58.5 81 63.5 75.5 63.5C71.5 63.5 70.3 59 72.8 56.6C76.3 53.3 76 47 70 44C62 40 50 42 48 52C46 62 56 71 68 71C75.87 71 83.75 70.14 91.9 68.98A46 46 0 0 1 9.16 71.17Z"/></g><path fill="#04214B" transform="translate(167.4 0)" d="M18 9L18 91A9 9 0 0 1 0 91L0 9A9 9 0 0 1 18 9ZM9 0L38 0A9 9 0 0 1 38 18L9 18A9 9 0 0 1 9 0ZM38 0A30 30 0 0 1 38 60L38 42A12 12 0 0 0 38 18ZM9 42L38 42A9 9 0 0 1 38 60L9 60A9 9 0 0 1 9 42ZM40.46 45.96L67.46 85.96A9 9 0 0 1 52.54 96.04L25.54 56.04A9 9 0 0 1 40.46 45.96ZM102 9L102 91A9 9 0 0 1 84 91L84 9A9 9 0 0 1 102 9ZM132.42 5.82L163.42 87.82A9 9 0 0 1 146.58 94.18L115.58 12.18A9 9 0 0 1 132.42 5.82ZM146.58 87.82L177.58 5.82A9 9 0 0 1 194.42 12.18L163.42 94.18A9 9 0 0 1 146.58 87.82ZM303 50A51 51 0 1 1 201 50A51 51 0 1 1 303 50ZM285 50A33 33 0 1 0 219 50A33 33 0 1 0 285 50ZM333 9L333 91A9 9 0 0 1 315 91L315 9A9 9 0 0 1 333 9ZM324 0L353 0A9 9 0 0 1 353 18L324 18A9 9 0 0 1 324 0ZM353 0A30 30 0 0 1 353 60L353 42A12 12 0 0 0 353 18ZM324 42L353 42A9 9 0 0 1 353 60L324 60A9 9 0 0 1 324 42ZM355.46 45.96L382.46 85.96A9 9 0 0 1 367.54 96.04L340.54 56.04A9 9 0 0 1 355.46 45.96ZM390.58 87.82L421.58 5.82A9 9 0 0 1 438.42 12.18L407.42 94.18A9 9 0 0 1 390.58 87.82ZM438.42 5.82L469.42 87.82A9 9 0 0 1 452.58 94.18L421.58 12.18A9 9 0 0 1 438.42 5.82ZM411 58L449 58A9 9 0 0 1 449 76L411 76A9 9 0 0 1 411 58Z"/></svg><span class="cap">horizontal · latar terang</span></div>
+        <div class="tile dark wide"><svg class="v-h" xmlns="http://www.w3.org/2000/svg" viewBox="0 -16.7 637.4 133.4" role="img" aria-label="RIVORA"><g transform="translate(-5.8 -22.5) scale(1.45)"><path fill="#0361C3" d="M96 50A46 46 0 1 1 4 50A46 46 0 1 1 96 50Z"/><path fill="#35C1F4" d="M9.16 71.17C17.94 67.25 23.9 59.56 28 50C36 32 50 22 64 24C78 26 88 38 86 52C85.5 58.5 81 63.5 75.5 63.5C71.5 63.5 70.3 59 72.8 56.6C76.3 53.3 76 47 70 44C62 40 50 42 48 52C46 62 56 71 68 71C75.87 71 83.75 70.14 91.9 68.98A46 46 0 0 1 9.16 71.17Z"/></g><path fill="#FFFFFF" transform="translate(167.4 0)" d="M18 9L18 91A9 9 0 0 1 0 91L0 9A9 9 0 0 1 18 9ZM9 0L38 0A9 9 0 0 1 38 18L9 18A9 9 0 0 1 9 0ZM38 0A30 30 0 0 1 38 60L38 42A12 12 0 0 0 38 18ZM9 42L38 42A9 9 0 0 1 38 60L9 60A9 9 0 0 1 9 42ZM40.46 45.96L67.46 85.96A9 9 0 0 1 52.54 96.04L25.54 56.04A9 9 0 0 1 40.46 45.96ZM102 9L102 91A9 9 0 0 1 84 91L84 9A9 9 0 0 1 102 9ZM132.42 5.82L163.42 87.82A9 9 0 0 1 146.58 94.18L115.58 12.18A9 9 0 0 1 132.42 5.82ZM146.58 87.82L177.58 5.82A9 9 0 0 1 194.42 12.18L163.42 94.18A9 9 0 0 1 146.58 87.82ZM303 50A51 51 0 1 1 201 50A51 51 0 1 1 303 50ZM285 50A33 33 0 1 0 219 50A33 33 0 1 0 285 50ZM333 9L333 91A9 9 0 0 1 315 91L315 9A9 9 0 0 1 333 9ZM324 0L353 0A9 9 0 0 1 353 18L324 18A9 9 0 0 1 324 0ZM353 0A30 30 0 0 1 353 60L353 42A12 12 0 0 0 353 18ZM324 42L353 42A9 9 0 0 1 353 60L324 60A9 9 0 0 1 324 42ZM355.46 45.96L382.46 85.96A9 9 0 0 1 367.54 96.04L340.54 56.04A9 9 0 0 1 355.46 45.96ZM390.58 87.82L421.58 5.82A9 9 0 0 1 438.42 12.18L407.42 94.18A9 9 0 0 1 390.58 87.82ZM438.42 5.82L469.42 87.82A9 9 0 0 1 452.58 94.18L421.58 12.18A9 9 0 0 1 438.42 5.82ZM411 58L449 58A9 9 0 0 1 449 76L411 76A9 9 0 0 1 411 58Z"/></svg><span class="cap">horizontal · latar gelap</span></div>
+        <div class="tile light"><svg class="v-v" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 470 304.8" role="img" aria-label="RIVORA"><g transform="translate(140 -7.6) scale(1.9)"><path fill="#0361C3" d="M96 50A46 46 0 1 1 4 50A46 46 0 1 1 96 50Z"/><path fill="#35C1F4" d="M9.16 71.17C17.94 67.25 23.9 59.56 28 50C36 32 50 22 64 24C78 26 88 38 86 52C85.5 58.5 81 63.5 75.5 63.5C71.5 63.5 70.3 59 72.8 56.6C76.3 53.3 76 47 70 44C62 40 50 42 48 52C46 62 56 71 68 71C75.87 71 83.75 70.14 91.9 68.98A46 46 0 0 1 9.16 71.17Z"/></g><path fill="#04214B" transform="translate(0 204.8)" d="M18 9L18 91A9 9 0 0 1 0 91L0 9A9 9 0 0 1 18 9ZM9 0L38 0A9 9 0 0 1 38 18L9 18A9 9 0 0 1 9 0ZM38 0A30 30 0 0 1 38 60L38 42A12 12 0 0 0 38 18ZM9 42L38 42A9 9 0 0 1 38 60L9 60A9 9 0 0 1 9 42ZM40.46 45.96L67.46 85.96A9 9 0 0 1 52.54 96.04L25.54 56.04A9 9 0 0 1 40.46 45.96ZM102 9L102 91A9 9 0 0 1 84 91L84 9A9 9 0 0 1 102 9ZM132.42 5.82L163.42 87.82A9 9 0 0 1 146.58 94.18L115.58 12.18A9 9 0 0 1 132.42 5.82ZM146.58 87.82L177.58 5.82A9 9 0 0 1 194.42 12.18L163.42 94.18A9 9 0 0 1 146.58 87.82ZM303 50A51 51 0 1 1 201 50A51 51 0 1 1 303 50ZM285 50A33 33 0 1 0 219 50A33 33 0 1 0 285 50ZM333 9L333 91A9 9 0 0 1 315 91L315 9A9 9 0 0 1 333 9ZM324 0L353 0A9 9 0 0 1 353 18L324 18A9 9 0 0 1 324 0ZM353 0A30 30 0 0 1 353 60L353 42A12 12 0 0 0 353 18ZM324 42L353 42A9 9 0 0 1 353 60L324 60A9 9 0 0 1 324 42ZM355.46 45.96L382.46 85.96A9 9 0 0 1 367.54 96.04L340.54 56.04A9 9 0 0 1 355.46 45.96ZM390.58 87.82L421.58 5.82A9 9 0 0 1 438.42 12.18L407.42 94.18A9 9 0 0 1 390.58 87.82ZM438.42 5.82L469.42 87.82A9 9 0 0 1 452.58 94.18L421.58 12.18A9 9 0 0 1 438.42 5.82ZM411 58L449 58A9 9 0 0 1 449 76L411 76A9 9 0 0 1 411 58Z"/></svg><span class="cap">bertumpuk</span></div>
+        <div class="tile dark"><svg class="v-v" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 470 304.8" role="img" aria-label="RIVORA"><g transform="translate(140 -7.6) scale(1.9)"><path fill="#0361C3" d="M96 50A46 46 0 1 1 4 50A46 46 0 1 1 96 50Z"/><path fill="#35C1F4" d="M9.16 71.17C17.94 67.25 23.9 59.56 28 50C36 32 50 22 64 24C78 26 88 38 86 52C85.5 58.5 81 63.5 75.5 63.5C71.5 63.5 70.3 59 72.8 56.6C76.3 53.3 76 47 70 44C62 40 50 42 48 52C46 62 56 71 68 71C75.87 71 83.75 70.14 91.9 68.98A46 46 0 0 1 9.16 71.17Z"/></g><path fill="#FFFFFF" transform="translate(0 204.8)" d="M18 9L18 91A9 9 0 0 1 0 91L0 9A9 9 0 0 1 18 9ZM9 0L38 0A9 9 0 0 1 38 18L9 18A9 9 0 0 1 9 0ZM38 0A30 30 0 0 1 38 60L38 42A12 12 0 0 0 38 18ZM9 42L38 42A9 9 0 0 1 38 60L9 60A9 9 0 0 1 9 42ZM40.46 45.96L67.46 85.96A9 9 0 0 1 52.54 96.04L25.54 56.04A9 9 0 0 1 40.46 45.96ZM102 9L102 91A9 9 0 0 1 84 91L84 9A9 9 0 0 1 102 9ZM132.42 5.82L163.42 87.82A9 9 0 0 1 146.58 94.18L115.58 12.18A9 9 0 0 1 132.42 5.82ZM146.58 87.82L177.58 5.82A9 9 0 0 1 194.42 12.18L163.42 94.18A9 9 0 0 1 146.58 87.82ZM303 50A51 51 0 1 1 201 50A51 51 0 1 1 303 50ZM285 50A33 33 0 1 0 219 50A33 33 0 1 0 285 50ZM333 9L333 91A9 9 0 0 1 315 91L315 9A9 9 0 0 1 333 9ZM324 0L353 0A9 9 0 0 1 353 18L324 18A9 9 0 0 1 324 0ZM353 0A30 30 0 0 1 353 60L353 42A12 12 0 0 0 353 18ZM324 42L353 42A9 9 0 0 1 353 60L324 60A9 9 0 0 1 324 42ZM355.46 45.96L382.46 85.96A9 9 0 0 1 367.54 96.04L340.54 56.04A9 9 0 0 1 355.46 45.96ZM390.58 87.82L421.58 5.82A9 9 0 0 1 438.42 12.18L407.42 94.18A9 9 0 0 1 390.58 87.82ZM438.42 5.82L469.42 87.82A9 9 0 0 1 452.58 94.18L421.58 12.18A9 9 0 0 1 438.42 5.82ZM411 58L449 58A9 9 0 0 1 449 76L411 76A9 9 0 0 1 411 58Z"/></svg><span class="cap">bertumpuk · gelap</span></div>
+        <div class="tile light"><div class="row"><svg class="v-m sm" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="RIVORA"><g><path fill="#0361C3" d="M96 50A46 46 0 1 1 4 50A46 46 0 1 1 96 50Z"/><path fill="#35C1F4" d="M9.16 71.17C17.94 67.25 23.9 59.56 28 50C36 32 50 22 64 24C78 26 88 38 86 52C85.5 58.5 81 63.5 75.5 63.5C71.5 63.5 70.3 59 72.8 56.6C76.3 53.3 76 47 70 44C62 40 50 42 48 52C46 62 56 71 68 71C75.87 71 83.75 70.14 91.9 68.98A46 46 0 0 1 9.16 71.17Z"/></g></svg><svg class="v-h sm" xmlns="http://www.w3.org/2000/svg" viewBox="0 -16.7 637.4 133.4" role="img" aria-label="RIVORA"><g transform="translate(-5.8 -22.5) scale(1.45)" fill="#04214B"><path d="M7.71 68.1C7.88 68.02 8.35 67.81 8.71 67.63C9.06 67.45 9.47 67.24 9.84 67.04C10.21 66.83 10.57 66.62 10.93 66.4C11.29 66.17 11.64 65.94 11.99 65.71C12.34 65.47 12.68 65.22 13.02 64.97C13.35 64.72 13.68 64.45 14.01 64.18C14.33 63.91 14.65 63.64 14.97 63.35C15.29 63.07 15.6 62.78 15.9 62.48C16.21 62.17 16.51 61.87 16.8 61.55C17.1 61.24 17.39 60.91 17.67 60.58C17.96 60.25 18.26 59.89 18.52 59.57C18.77 59.26 18.97 58.99 19.2 58.7C19.42 58.4 19.64 58.1 19.86 57.79C20.08 57.48 20.29 57.17 20.5 56.86C20.71 56.54 20.92 56.22 21.12 55.89C21.33 55.57 21.53 55.24 21.73 54.9C21.93 54.57 22.12 54.23 22.32 53.89C22.51 53.54 22.7 53.2 22.88 52.84C23.07 52.49 23.25 52.14 23.43 51.78C23.61 51.42 23.79 51.05 23.96 50.68C24.14 50.31 24.3 49.95 24.48 49.56C24.66 49.16 24.85 48.71 25.03 48.31C25.21 47.91 25.39 47.53 25.57 47.14C25.75 46.76 25.94 46.37 26.13 45.98C26.32 45.6 26.51 45.22 26.71 44.85C26.9 44.47 27.1 44.1 27.3 43.73C27.5 43.37 27.71 43 27.91 42.64C28.12 42.28 28.33 41.93 28.54 41.57C28.75 41.22 28.96 40.87 29.18 40.53C29.4 40.18 29.62 39.84 29.84 39.5C30.06 39.16 30.28 38.83 30.51 38.5C30.73 38.17 30.96 37.84 31.19 37.52C31.43 37.2 31.66 36.88 31.9 36.57C32.13 36.25 32.37 35.94 32.61 35.64C32.85 35.33 33.09 35.03 33.34 34.73C33.58 34.43 33.83 34.14 34.08 33.85C34.33 33.56 34.58 33.27 34.84 32.99C35.09 32.71 35.35 32.43 35.61 32.16C35.86 31.89 36.13 31.62 36.39 31.35C36.65 31.09 36.92 30.83 37.18 30.57C37.45 30.31 37.68 30.09 37.99 29.81C38.29 29.54 38.67 29.2 39.01 28.91C39.36 28.61 39.71 28.32 40.06 28.04C40.41 27.76 40.76 27.48 41.12 27.22C41.47 26.95 41.83 26.69 42.2 26.43C42.56 26.18 42.92 25.93 43.29 25.69C43.66 25.46 44.03 25.22 44.4 25C44.78 24.78 45.15 24.56 45.53 24.35C45.91 24.14 46.29 23.94 46.67 23.75C47.05 23.55 47.44 23.37 47.82 23.19C48.21 23.01 48.6 22.84 48.99 22.68C49.38 22.52 49.78 22.36 50.17 22.22C50.57 22.07 50.97 21.94 51.37 21.81C51.77 21.68 52.17 21.56 52.57 21.44C52.97 21.33 53.38 21.23 53.78 21.13C54.19 21.03 54.6 20.95 55.01 20.87C55.42 20.79 55.83 20.72 56.24 20.66C56.65 20.6 57.06 20.55 57.48 20.5C57.89 20.46 58.3 20.43 58.72 20.4C59.14 20.38 59.55 20.36 59.97 20.35C60.39 20.34 60.8 20.35 61.22 20.36C61.64 20.37 62.05 20.39 62.47 20.42C62.89 20.45 63.3 20.49 63.74 20.54C64.17 20.59 64.66 20.66 65.08 20.73C65.5 20.79 65.86 20.86 66.25 20.94C66.63 21.01 67.02 21.1 67.4 21.19C67.78 21.28 68.16 21.38 68.54 21.49C68.92 21.59 69.29 21.71 69.66 21.82C70.03 21.94 70.39 22.07 70.76 22.2C71.12 22.33 71.48 22.47 71.83 22.61C72.19 22.76 72.54 22.91 72.89 23.07C73.23 23.22 73.58 23.39 73.92 23.56C74.26 23.73 74.59 23.9 74.93 24.08C75.26 24.26 75.59 24.45 75.91 24.65C76.23 24.84 76.55 25.04 76.87 25.24C77.18 25.45 77.49 25.66 77.8 25.87C78.1 26.09 78.4 26.31 78.7 26.53C78.99 26.76 79.29 26.99 79.57 27.23C79.86 27.47 80.14 27.71 80.42 27.96C80.69 28.2 80.96 28.46 81.23 28.71C81.5 28.97 81.76 29.23 82.01 29.5C82.27 29.77 82.52 30.04 82.76 30.32C83.01 30.59 83.25 30.88 83.48 31.16C83.71 31.45 83.94 31.74 84.16 32.03C84.39 32.33 84.6 32.63 84.81 32.93C85.02 33.23 85.23 33.54 85.42 33.85C85.62 34.16 85.81 34.48 86 34.8C86.18 35.12 86.36 35.44 86.53 35.77C86.71 36.1 86.87 36.43 87.03 36.77C87.19 37.1 87.34 37.44 87.49 37.78C87.63 38.12 87.77 38.47 87.91 38.82C88.04 39.17 88.16 39.52 88.28 39.87C88.4 40.23 88.51 40.59 88.61 40.95C88.71 41.31 88.81 41.67 88.9 42.04C88.99 42.41 89.07 42.78 89.14 43.15C89.21 43.52 89.28 43.9 89.34 44.27C89.4 44.65 89.45 45.03 89.49 45.41C89.53 45.8 89.56 46.18 89.59 46.57C89.62 46.95 89.64 47.34 89.65 47.73C89.66 48.12 89.66 48.51 89.65 48.9C89.64 49.3 89.63 49.7 89.61 50.09C89.58 50.48 89.55 50.86 89.51 51.25C89.48 51.64 89.42 52.01 89.37 52.41C89.33 52.82 89.29 53.25 89.23 53.68C89.16 54.11 89.08 54.55 88.98 54.98C88.88 55.42 88.76 55.86 88.63 56.29C88.49 56.71 88.35 57.13 88.18 57.54C88.02 57.95 87.84 58.35 87.65 58.75C87.46 59.14 87.26 59.52 87.04 59.89C86.82 60.27 86.58 60.63 86.34 60.98C86.09 61.33 85.83 61.67 85.56 61.99C85.29 62.32 85 62.64 84.7 62.94C84.4 63.24 84.09 63.53 83.77 63.8C83.45 64.07 83.11 64.33 82.77 64.57C82.42 64.81 82.06 65.04 81.69 65.25C81.32 65.46 80.94 65.65 80.55 65.82C80.16 66 79.76 66.15 79.36 66.28C78.95 66.42 78.54 66.53 78.11 66.62C77.68 66.71 77.18 66.79 76.78 66.83C76.37 66.88 76.07 66.9 75.67 66.9C75.27 66.89 74.81 66.89 74.37 66.82C73.92 66.76 73.47 66.66 73.02 66.52C72.58 66.37 72.11 66.17 71.7 65.93C71.28 65.7 70.88 65.41 70.52 65.09C70.16 64.78 69.84 64.43 69.56 64.06C69.28 63.7 69.04 63.3 68.84 62.89C68.64 62.49 68.49 62.06 68.37 61.64C68.25 61.21 68.17 60.77 68.13 60.33C68.09 59.89 68.09 59.44 68.12 59C68.16 58.56 68.24 58.11 68.35 57.68C68.47 57.25 68.64 56.79 68.82 56.4C69 56.01 69.2 55.67 69.45 55.32C69.7 54.97 70.05 54.62 70.33 54.3C70.6 53.97 70.89 53.7 71.09 53.36C71.29 53.02 71.46 52.64 71.55 52.26C71.64 51.87 71.67 51.44 71.65 51.05C71.62 50.67 71.52 50.29 71.39 49.94C71.25 49.59 71.06 49.25 70.84 48.94C70.62 48.63 70.35 48.35 70.05 48.08C69.75 47.82 69.41 47.57 69.05 47.35C68.69 47.14 68.28 46.94 67.91 46.77C67.53 46.6 67.19 46.47 66.8 46.34C66.42 46.2 66.02 46.08 65.62 45.98C65.22 45.87 64.8 45.78 64.39 45.71C63.98 45.64 63.56 45.58 63.14 45.54C62.73 45.5 62.31 45.48 61.89 45.47C61.48 45.46 61.06 45.47 60.65 45.5C60.24 45.53 59.84 45.57 59.44 45.63C59.04 45.69 58.65 45.77 58.27 45.86C57.89 45.95 57.52 46.06 57.17 46.19C56.81 46.31 56.49 46.43 56.13 46.6C55.78 46.77 55.38 46.98 55.04 47.2C54.69 47.42 54.36 47.66 54.06 47.91C53.76 48.17 53.48 48.44 53.22 48.74C52.96 49.03 52.72 49.35 52.5 49.69C52.29 50.03 52.08 50.42 51.92 50.78C51.76 51.15 51.64 51.5 51.53 51.87C51.42 52.25 51.33 52.65 51.27 53.04C51.2 53.44 51.16 53.85 51.15 54.26C51.14 54.66 51.15 55.06 51.19 55.46C51.22 55.85 51.29 56.25 51.37 56.63C51.46 57.02 51.57 57.41 51.7 57.79C51.84 58.17 52 58.55 52.18 58.93C52.36 59.3 52.58 59.7 52.79 60.03C53 60.37 53.2 60.65 53.43 60.96C53.66 61.26 53.91 61.56 54.17 61.85C54.43 62.14 54.7 62.42 55 62.7C55.29 62.97 55.6 63.24 55.92 63.5C56.24 63.76 56.57 64.01 56.92 64.25C57.27 64.49 57.63 64.72 58.01 64.94C58.38 65.16 58.8 65.39 59.16 65.57C59.52 65.75 59.83 65.89 60.18 66.03C60.52 66.18 60.88 66.32 61.23 66.44C61.59 66.57 61.96 66.69 62.33 66.8C62.7 66.9 63.08 67 63.46 67.09C63.84 67.18 64.23 67.25 64.62 67.32C65.01 67.38 65.4 67.44 65.81 67.48C66.21 67.53 66.61 67.56 67.03 67.58C67.44 67.6 67.88 67.6 68.27 67.6C68.67 67.6 69.02 67.6 69.41 67.59C69.79 67.59 70.19 67.58 70.58 67.57C70.97 67.56 71.36 67.55 71.75 67.54C72.14 67.52 72.54 67.51 72.93 67.49C73.32 67.47 73.71 67.45 74.11 67.43C74.5 67.41 74.89 67.39 75.29 67.36C75.68 67.34 76.08 67.31 76.47 67.29C76.87 67.26 77.26 67.23 77.66 67.2C78.06 67.17 78.45 67.13 78.85 67.1C79.25 67.07 79.65 67.03 80.05 66.99C80.44 66.95 80.84 66.92 81.24 66.88C81.64 66.84 82.04 66.79 82.45 66.75C82.85 66.71 83.25 66.66 83.65 66.62C84.05 66.57 84.46 66.53 84.86 66.48C85.27 66.43 85.67 66.38 86.08 66.33C86.48 66.28 86.89 66.23 87.3 66.18C87.7 66.12 88.11 66.07 88.52 66.02C88.93 65.96 89.34 65.91 89.75 65.85C90.16 65.79 90.58 65.74 90.99 65.68C91.4 65.62 91.83 65.57 92.23 65.5C92.63 65.44 93.19 65.32 93.39 65.29A46 46 0 1 0 7.71 68.1Z"/><path d="M9.16 71.17C17.94 67.25 23.9 59.56 28 50C36 32 50 22 64 24C78 26 88 38 86 52C85.5 58.5 81 63.5 75.5 63.5C71.5 63.5 70.3 59 72.8 56.6C76.3 53.3 76 47 70 44C62 40 50 42 48 52C46 62 56 71 68 71C75.87 71 83.75 70.14 91.9 68.98A46 46 0 0 1 9.16 71.17Z"/></g><path fill="#04214B" transform="translate(167.4 0)" d="M18 9L18 91A9 9 0 0 1 0 91L0 9A9 9 0 0 1 18 9ZM9 0L38 0A9 9 0 0 1 38 18L9 18A9 9 0 0 1 9 0ZM38 0A30 30 0 0 1 38 60L38 42A12 12 0 0 0 38 18ZM9 42L38 42A9 9 0 0 1 38 60L9 60A9 9 0 0 1 9 42ZM40.46 45.96L67.46 85.96A9 9 0 0 1 52.54 96.04L25.54 56.04A9 9 0 0 1 40.46 45.96ZM102 9L102 91A9 9 0 0 1 84 91L84 9A9 9 0 0 1 102 9ZM132.42 5.82L163.42 87.82A9 9 0 0 1 146.58 94.18L115.58 12.18A9 9 0 0 1 132.42 5.82ZM146.58 87.82L177.58 5.82A9 9 0 0 1 194.42 12.18L163.42 94.18A9 9 0 0 1 146.58 87.82ZM303 50A51 51 0 1 1 201 50A51 51 0 1 1 303 50ZM285 50A33 33 0 1 0 219 50A33 33 0 1 0 285 50ZM333 9L333 91A9 9 0 0 1 315 91L315 9A9 9 0 0 1 333 9ZM324 0L353 0A9 9 0 0 1 353 18L324 18A9 9 0 0 1 324 0ZM353 0A30 30 0 0 1 353 60L353 42A12 12 0 0 0 353 18ZM324 42L353 42A9 9 0 0 1 353 60L324 60A9 9 0 0 1 324 42ZM355.46 45.96L382.46 85.96A9 9 0 0 1 367.54 96.04L340.54 56.04A9 9 0 0 1 355.46 45.96ZM390.58 87.82L421.58 5.82A9 9 0 0 1 438.42 12.18L407.42 94.18A9 9 0 0 1 390.58 87.82ZM438.42 5.82L469.42 87.82A9 9 0 0 1 452.58 94.18L421.58 12.18A9 9 0 0 1 438.42 5.82ZM411 58L449 58A9 9 0 0 1 449 76L411 76A9 9 0 0 1 411 58Z"/></svg></div><span class="cap">simbol · satu warna</span></div>
+        <div class="tile laut"><div class="row"><svg class="v-m sm" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="RIVORA"><g fill="#FFFFFF"><path d="M7.71 68.1C7.88 68.02 8.35 67.81 8.71 67.63C9.06 67.45 9.47 67.24 9.84 67.04C10.21 66.83 10.57 66.62 10.93 66.4C11.29 66.17 11.64 65.94 11.99 65.71C12.34 65.47 12.68 65.22 13.02 64.97C13.35 64.72 13.68 64.45 14.01 64.18C14.33 63.91 14.65 63.64 14.97 63.35C15.29 63.07 15.6 62.78 15.9 62.48C16.21 62.17 16.51 61.87 16.8 61.55C17.1 61.24 17.39 60.91 17.67 60.58C17.96 60.25 18.26 59.89 18.52 59.57C18.77 59.26 18.97 58.99 19.2 58.7C19.42 58.4 19.64 58.1 19.86 57.79C20.08 57.48 20.29 57.17 20.5 56.86C20.71 56.54 20.92 56.22 21.12 55.89C21.33 55.57 21.53 55.24 21.73 54.9C21.93 54.57 22.12 54.23 22.32 53.89C22.51 53.54 22.7 53.2 22.88 52.84C23.07 52.49 23.25 52.14 23.43 51.78C23.61 51.42 23.79 51.05 23.96 50.68C24.14 50.31 24.3 49.95 24.48 49.56C24.66 49.16 24.85 48.71 25.03 48.31C25.21 47.91 25.39 47.53 25.57 47.14C25.75 46.76 25.94 46.37 26.13 45.98C26.32 45.6 26.51 45.22 26.71 44.85C26.9 44.47 27.1 44.1 27.3 43.73C27.5 43.37 27.71 43 27.91 42.64C28.12 42.28 28.33 41.93 28.54 41.57C28.75 41.22 28.96 40.87 29.18 40.53C29.4 40.18 29.62 39.84 29.84 39.5C30.06 39.16 30.28 38.83 30.51 38.5C30.73 38.17 30.96 37.84 31.19 37.52C31.43 37.2 31.66 36.88 31.9 36.57C32.13 36.25 32.37 35.94 32.61 35.64C32.85 35.33 33.09 35.03 33.34 34.73C33.58 34.43 33.83 34.14 34.08 33.85C34.33 33.56 34.58 33.27 34.84 32.99C35.09 32.71 35.35 32.43 35.61 32.16C35.86 31.89 36.13 31.62 36.39 31.35C36.65 31.09 36.92 30.83 37.18 30.57C37.45 30.31 37.68 30.09 37.99 29.81C38.29 29.54 38.67 29.2 39.01 28.91C39.36 28.61 39.71 28.32 40.06 28.04C40.41 27.76 40.76 27.48 41.12 27.22C41.47 26.95 41.83 26.69 42.2 26.43C42.56 26.18 42.92 25.93 43.29 25.69C43.66 25.46 44.03 25.22 44.4 25C44.78 24.78 45.15 24.56 45.53 24.35C45.91 24.14 46.29 23.94 46.67 23.75C47.05 23.55 47.44 23.37 47.82 23.19C48.21 23.01 48.6 22.84 48.99 22.68C49.38 22.52 49.78 22.36 50.17 22.22C50.57 22.07 50.97 21.94 51.37 21.81C51.77 21.68 52.17 21.56 52.57 21.44C52.97 21.33 53.38 21.23 53.78 21.13C54.19 21.03 54.6 20.95 55.01 20.87C55.42 20.79 55.83 20.72 56.24 20.66C56.65 20.6 57.06 20.55 57.48 20.5C57.89 20.46 58.3 20.43 58.72 20.4C59.14 20.38 59.55 20.36 59.97 20.35C60.39 20.34 60.8 20.35 61.22 20.36C61.64 20.37 62.05 20.39 62.47 20.42C62.89 20.45 63.3 20.49 63.74 20.54C64.17 20.59 64.66 20.66 65.08 20.73C65.5 20.79 65.86 20.86 66.25 20.94C66.63 21.01 67.02 21.1 67.4 21.19C67.78 21.28 68.16 21.38 68.54 21.49C68.92 21.59 69.29 21.71 69.66 21.82C70.03 21.94 70.39 22.07 70.76 22.2C71.12 22.33 71.48 22.47 71.83 22.61C72.19 22.76 72.54 22.91 72.89 23.07C73.23 23.22 73.58 23.39 73.92 23.56C74.26 23.73 74.59 23.9 74.93 24.08C75.26 24.26 75.59 24.45 75.91 24.65C76.23 24.84 76.55 25.04 76.87 25.24C77.18 25.45 77.49 25.66 77.8 25.87C78.1 26.09 78.4 26.31 78.7 26.53C78.99 26.76 79.29 26.99 79.57 27.23C79.86 27.47 80.14 27.71 80.42 27.96C80.69 28.2 80.96 28.46 81.23 28.71C81.5 28.97 81.76 29.23 82.01 29.5C82.27 29.77 82.52 30.04 82.76 30.32C83.01 30.59 83.25 30.88 83.48 31.16C83.71 31.45 83.94 31.74 84.16 32.03C84.39 32.33 84.6 32.63 84.81 32.93C85.02 33.23 85.23 33.54 85.42 33.85C85.62 34.16 85.81 34.48 86 34.8C86.18 35.12 86.36 35.44 86.53 35.77C86.71 36.1 86.87 36.43 87.03 36.77C87.19 37.1 87.34 37.44 87.49 37.78C87.63 38.12 87.77 38.47 87.91 38.82C88.04 39.17 88.16 39.52 88.28 39.87C88.4 40.23 88.51 40.59 88.61 40.95C88.71 41.31 88.81 41.67 88.9 42.04C88.99 42.41 89.07 42.78 89.14 43.15C89.21 43.52 89.28 43.9 89.34 44.27C89.4 44.65 89.45 45.03 89.49 45.41C89.53 45.8 89.56 46.18 89.59 46.57C89.62 46.95 89.64 47.34 89.65 47.73C89.66 48.12 89.66 48.51 89.65 48.9C89.64 49.3 89.63 49.7 89.61 50.09C89.58 50.48 89.55 50.86 89.51 51.25C89.48 51.64 89.42 52.01 89.37 52.41C89.33 52.82 89.29 53.25 89.23 53.68C89.16 54.11 89.08 54.55 88.98 54.98C88.88 55.42 88.76 55.86 88.63 56.29C88.49 56.71 88.35 57.13 88.18 57.54C88.02 57.95 87.84 58.35 87.65 58.75C87.46 59.14 87.26 59.52 87.04 59.89C86.82 60.27 86.58 60.63 86.34 60.98C86.09 61.33 85.83 61.67 85.56 61.99C85.29 62.32 85 62.64 84.7 62.94C84.4 63.24 84.09 63.53 83.77 63.8C83.45 64.07 83.11 64.33 82.77 64.57C82.42 64.81 82.06 65.04 81.69 65.25C81.32 65.46 80.94 65.65 80.55 65.82C80.16 66 79.76 66.15 79.36 66.28C78.95 66.42 78.54 66.53 78.11 66.62C77.68 66.71 77.18 66.79 76.78 66.83C76.37 66.88 76.07 66.9 75.67 66.9C75.27 66.89 74.81 66.89 74.37 66.82C73.92 66.76 73.47 66.66 73.02 66.52C72.58 66.37 72.11 66.17 71.7 65.93C71.28 65.7 70.88 65.41 70.52 65.09C70.16 64.78 69.84 64.43 69.56 64.06C69.28 63.7 69.04 63.3 68.84 62.89C68.64 62.49 68.49 62.06 68.37 61.64C68.25 61.21 68.17 60.77 68.13 60.33C68.09 59.89 68.09 59.44 68.12 59C68.16 58.56 68.24 58.11 68.35 57.68C68.47 57.25 68.64 56.79 68.82 56.4C69 56.01 69.2 55.67 69.45 55.32C69.7 54.97 70.05 54.62 70.33 54.3C70.6 53.97 70.89 53.7 71.09 53.36C71.29 53.02 71.46 52.64 71.55 52.26C71.64 51.87 71.67 51.44 71.65 51.05C71.62 50.67 71.52 50.29 71.39 49.94C71.25 49.59 71.06 49.25 70.84 48.94C70.62 48.63 70.35 48.35 70.05 48.08C69.75 47.82 69.41 47.57 69.05 47.35C68.69 47.14 68.28 46.94 67.91 46.77C67.53 46.6 67.19 46.47 66.8 46.34C66.42 46.2 66.02 46.08 65.62 45.98C65.22 45.87 64.8 45.78 64.39 45.71C63.98 45.64 63.56 45.58 63.14 45.54C62.73 45.5 62.31 45.48 61.89 45.47C61.48 45.46 61.06 45.47 60.65 45.5C60.24 45.53 59.84 45.57 59.44 45.63C59.04 45.69 58.65 45.77 58.27 45.86C57.89 45.95 57.52 46.06 57.17 46.19C56.81 46.31 56.49 46.43 56.13 46.6C55.78 46.77 55.38 46.98 55.04 47.2C54.69 47.42 54.36 47.66 54.06 47.91C53.76 48.17 53.48 48.44 53.22 48.74C52.96 49.03 52.72 49.35 52.5 49.69C52.29 50.03 52.08 50.42 51.92 50.78C51.76 51.15 51.64 51.5 51.53 51.87C51.42 52.25 51.33 52.65 51.27 53.04C51.2 53.44 51.16 53.85 51.15 54.26C51.14 54.66 51.15 55.06 51.19 55.46C51.22 55.85 51.29 56.25 51.37 56.63C51.46 57.02 51.57 57.41 51.7 57.79C51.84 58.17 52 58.55 52.18 58.93C52.36 59.3 52.58 59.7 52.79 60.03C53 60.37 53.2 60.65 53.43 60.96C53.66 61.26 53.91 61.56 54.17 61.85C54.43 62.14 54.7 62.42 55 62.7C55.29 62.97 55.6 63.24 55.92 63.5C56.24 63.76 56.57 64.01 56.92 64.25C57.27 64.49 57.63 64.72 58.01 64.94C58.38 65.16 58.8 65.39 59.16 65.57C59.52 65.75 59.83 65.89 60.18 66.03C60.52 66.18 60.88 66.32 61.23 66.44C61.59 66.57 61.96 66.69 62.33 66.8C62.7 66.9 63.08 67 63.46 67.09C63.84 67.18 64.23 67.25 64.62 67.32C65.01 67.38 65.4 67.44 65.81 67.48C66.21 67.53 66.61 67.56 67.03 67.58C67.44 67.6 67.88 67.6 68.27 67.6C68.67 67.6 69.02 67.6 69.41 67.59C69.79 67.59 70.19 67.58 70.58 67.57C70.97 67.56 71.36 67.55 71.75 67.54C72.14 67.52 72.54 67.51 72.93 67.49C73.32 67.47 73.71 67.45 74.11 67.43C74.5 67.41 74.89 67.39 75.29 67.36C75.68 67.34 76.08 67.31 76.47 67.29C76.87 67.26 77.26 67.23 77.66 67.2C78.06 67.17 78.45 67.13 78.85 67.1C79.25 67.07 79.65 67.03 80.05 66.99C80.44 66.95 80.84 66.92 81.24 66.88C81.64 66.84 82.04 66.79 82.45 66.75C82.85 66.71 83.25 66.66 83.65 66.62C84.05 66.57 84.46 66.53 84.86 66.48C85.27 66.43 85.67 66.38 86.08 66.33C86.48 66.28 86.89 66.23 87.3 66.18C87.7 66.12 88.11 66.07 88.52 66.02C88.93 65.96 89.34 65.91 89.75 65.85C90.16 65.79 90.58 65.74 90.99 65.68C91.4 65.62 91.83 65.57 92.23 65.5C92.63 65.44 93.19 65.32 93.39 65.29A46 46 0 1 0 7.71 68.1Z"/><path d="M9.16 71.17C17.94 67.25 23.9 59.56 28 50C36 32 50 22 64 24C78 26 88 38 86 52C85.5 58.5 81 63.5 75.5 63.5C71.5 63.5 70.3 59 72.8 56.6C76.3 53.3 76 47 70 44C62 40 50 42 48 52C46 62 56 71 68 71C75.87 71 83.75 70.14 91.9 68.98A46 46 0 0 1 9.16 71.17Z"/></g></svg><svg class="v-wm" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 470 100" role="img" aria-label="RIVORA"><path fill="#FFFFFF" d="M18 9L18 91A9 9 0 0 1 0 91L0 9A9 9 0 0 1 18 9ZM9 0L38 0A9 9 0 0 1 38 18L9 18A9 9 0 0 1 9 0ZM38 0A30 30 0 0 1 38 60L38 42A12 12 0 0 0 38 18ZM9 42L38 42A9 9 0 0 1 38 60L9 60A9 9 0 0 1 9 42ZM40.46 45.96L67.46 85.96A9 9 0 0 1 52.54 96.04L25.54 56.04A9 9 0 0 1 40.46 45.96ZM102 9L102 91A9 9 0 0 1 84 91L84 9A9 9 0 0 1 102 9ZM132.42 5.82L163.42 87.82A9 9 0 0 1 146.58 94.18L115.58 12.18A9 9 0 0 1 132.42 5.82ZM146.58 87.82L177.58 5.82A9 9 0 0 1 194.42 12.18L163.42 94.18A9 9 0 0 1 146.58 87.82ZM303 50A51 51 0 1 1 201 50A51 51 0 1 1 303 50ZM285 50A33 33 0 1 0 219 50A33 33 0 1 0 285 50ZM333 9L333 91A9 9 0 0 1 315 91L315 9A9 9 0 0 1 333 9ZM324 0L353 0A9 9 0 0 1 353 18L324 18A9 9 0 0 1 324 0ZM353 0A30 30 0 0 1 353 60L353 42A12 12 0 0 0 353 18ZM324 42L353 42A9 9 0 0 1 353 60L324 60A9 9 0 0 1 324 42ZM355.46 45.96L382.46 85.96A9 9 0 0 1 367.54 96.04L340.54 56.04A9 9 0 0 1 355.46 45.96ZM390.58 87.82L421.58 5.82A9 9 0 0 1 438.42 12.18L407.42 94.18A9 9 0 0 1 390.58 87.82ZM438.42 5.82L469.42 87.82A9 9 0 0 1 452.58 94.18L421.58 12.18A9 9 0 0 1 438.42 5.82ZM411 58L449 58A9 9 0 0 1 449 76L411 76A9 9 0 0 1 411 58Z"/></svg></div><span class="cap">putih di atas Laut</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="lvl">Ikon aplikasi</span>
+        <h2>Ikon launcher</h2>
+      </div>
+      <div class="icons">
+        <svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Ikon aplikasi RIVORA"><defs><linearGradient id="rv-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22B2F2"/><stop offset="1" stop-color="#0347A8"/></linearGradient></defs><path fill="url(#rv-g)" d="M22.3 0H77.7A22.3 22.3 0 0 1 100 22.3V77.7A22.3 22.3 0 0 1 77.7 100H22.3A22.3 22.3 0 0 1 0 77.7V22.3A22.3 22.3 0 0 1 22.3 0Z"/><path fill="#FFFFFF" d="M2.71 88.36C13.4 84.21 20.53 75.26 25.36 64C34.32 43.84 50 32.64 65.68 34.88C81.36 37.12 92.56 50.56 90.32 66.24C89.76 73.52 84.72 79.12 78.56 79.12C74.08 79.12 72.74 74.08 75.54 71.39C79.46 67.7 79.12 60.64 72.4 57.28C63.44 52.8 50 55.04 47.76 66.24C45.52 77.44 56.72 87.52 70.16 87.52C79.57 87.52 88.98 86.42 98.77 84.99A22.3 22.3 0 0 1 77.7 100L22.3 100A22.3 22.3 0 0 1 2.71 88.36Z"/></svg>
+        <div class="icon-notes">
+          <p><b>Gradien biru</b> dari #22B2F2 ke #0347A8, ombak putih memenuhi ikon. Sudah terpasang di aplikasi Android sebagai adaptive icon, jadi bentuknya mengikuti launcher HP (lingkaran, squircle, atau kotak), dan sama dengan ikon di dalam aplikasi.</p>
+          <p><b>Ikon bertema Android 13+</b> memakai bentuk ombak satu warna, ikut warna wallpaper pengguna.</p>
+          <p><b>Ukuran kecil tetap terbaca.</b> Lingkaran dan gulungan ombak masih terlihat sampai 20 px.</p>
+          <div class="icon-sizes"><span class="sz"><svg viewBox="0 0 100 100" style="width:96px" aria-hidden="true"><g><path fill="#0361C3" d="M96 50A46 46 0 1 1 4 50A46 46 0 1 1 96 50Z"/><path fill="#35C1F4" d="M9.16 71.17C17.94 67.25 23.9 59.56 28 50C36 32 50 22 64 24C78 26 88 38 86 52C85.5 58.5 81 63.5 75.5 63.5C71.5 63.5 70.3 59 72.8 56.6C76.3 53.3 76 47 70 44C62 40 50 42 48 52C46 62 56 71 68 71C75.87 71 83.75 70.14 91.9 68.98A46 46 0 0 1 9.16 71.17Z"/></g></svg><small>96px</small></span><span class="sz"><svg viewBox="0 0 100 100" style="width:48px" aria-hidden="true"><g><path fill="#0361C3" d="M96 50A46 46 0 1 1 4 50A46 46 0 1 1 96 50Z"/><path fill="#35C1F4" d="M9.16 71.17C17.94 67.25 23.9 59.56 28 50C36 32 50 22 64 24C78 26 88 38 86 52C85.5 58.5 81 63.5 75.5 63.5C71.5 63.5 70.3 59 72.8 56.6C76.3 53.3 76 47 70 44C62 40 50 42 48 52C46 62 56 71 68 71C75.87 71 83.75 70.14 91.9 68.98A46 46 0 0 1 9.16 71.17Z"/></g></svg><small>48px</small></span><span class="sz"><svg viewBox="0 0 100 100" style="width:32px" aria-hidden="true"><g><path fill="#0361C3" d="M96 50A46 46 0 1 1 4 50A46 46 0 1 1 96 50Z"/><path fill="#35C1F4" d="M9.16 71.17C17.94 67.25 23.9 59.56 28 50C36 32 50 22 64 24C78 26 88 38 86 52C85.5 58.5 81 63.5 75.5 63.5C71.5 63.5 70.3 59 72.8 56.6C76.3 53.3 76 47 70 44C62 40 50 42 48 52C46 62 56 71 68 71C75.87 71 83.75 70.14 91.9 68.98A46 46 0 0 1 9.16 71.17Z"/></g></svg><small>32px</small></span><span class="sz"><svg viewBox="0 0 100 100" style="width:20px" aria-hidden="true"><g><path fill="#0361C3" d="M96 50A46 46 0 1 1 4 50A46 46 0 1 1 96 50Z"/><path fill="#35C1F4" d="M9.16 71.17C17.94 67.25 23.9 59.56 28 50C36 32 50 22 64 24C78 26 88 38 86 52C85.5 58.5 81 63.5 75.5 63.5C71.5 63.5 70.3 59 72.8 56.6C76.3 53.3 76 47 70 44C62 40 50 42 48 52C46 62 56 71 68 71C75.87 71 83.75 70.14 91.9 68.98A46 46 0 0 1 9.16 71.17Z"/></g></svg><small>20px</small></span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="lvl">Warna</span>
+        <h2>Palet warna</h2>
+        <p>Lima warna inti diambil dari laut dan air. Semuanya sama dengan tema aplikasi Flutter, jadi aplikasi, dasbor, dan slide tampil seragam. Klik warna untuk menyalin kode hex.</p>
+      </div>
+      <div class="swatches">
+<button class="sw" type="button" data-hex="#04214B" style="--c:#04214B;--t:#F4FAFE" aria-label="Salin Samudra #04214B">
+  <span class="sw-top"><span class="sw-name">Samudra</span><span class="sw-hex">#04214B</span></span>
+  <span class="sw-desc">Laut dalam. Tinta utama: teks, wordmark, latar gelap.</span><span class="sw-cr">15,9 : 1 di putih</span>
+</button>
+<button class="sw" type="button" data-hex="#0361C3" style="--c:#0361C3;--t:#FFFFFF" aria-label="Salin Laut #0361C3">
+  <span class="sw-top"><span class="sw-name">Laut</span><span class="sw-hex">#0361C3</span></span>
+  <span class="sw-desc">Air laut. Warna utama: tombol, tautan, tab aktif, lingkaran logo.</span><span class="sw-cr">6,0 : 1 di putih</span>
+</button>
+<button class="sw" type="button" data-hex="#35C1F4" style="--c:#35C1F4;--t:#04214B" aria-label="Salin Tirta #35C1F4">
+  <span class="sw-top"><span class="sw-name">Tirta</span><span class="sw-hex">#35C1F4</span></span>
+  <span class="sw-desc">Air, dari bahasa Bali dan Sanskerta. Ombak di logo, aksen, utama mode gelap.</span><span class="sw-cr">7,6 : 1 di Samudra</span>
+</button>
+<button class="sw" type="button" data-hex="#DFF2FE" style="--c:#DFF2FE;--t:#04214B" aria-label="Salin Buih #DFF2FE">
+  <span class="sw-top"><span class="sw-name">Buih</span><span class="sw-hex">#DFF2FE</span></span>
+  <span class="sw-desc">Buih ombak. Latar elemen terpilih dan kontainer.</span><span class="sw-cr">Samudra 13,8 : 1</span>
+</button>
+<button class="sw" type="button" data-hex="#F4FAFE" style="--c:#F4FAFE;--t:#04214B" aria-label="Salin Kabut #F4FAFE">
+  <span class="sw-top"><span class="sw-name">Kabut</span><span class="sw-hex">#F4FAFE</span></span>
+  <span class="sw-desc">Udara sesudah hujan. Latar halaman aplikasi dan dasbor.</span><span class="sw-cr">Samudra 15,1 : 1</span>
+</button></div>
+
+      <div class="sub">
+        <h3>Ramp Laut</h3>
+        <p>Turunan warna Laut yang dihitung di ruang warna OKLCH supaya terangnya naik rata. 100 = Buih, 600 = Laut. Pakai 700 untuk hover, tombol ditekan, dan kartu biru gelap bertulisan putih.</p>
+        <div class="ramp"><button class="rp" type="button" data-hex="#F0F8FE" style="--c:#F0F8FE;--t:#04214B" aria-label="Salin Laut 50 #F0F8FE"><b>50</b><span>#F0F8FE</span></button><button class="rp" type="button" data-hex="#DFF2FE" style="--c:#DFF2FE;--t:#04214B" aria-label="Salin Laut 100 #DFF2FE"><b>100</b><span>#DFF2FE</span></button><button class="rp" type="button" data-hex="#C4E2FE" style="--c:#C4E2FE;--t:#04214B" aria-label="Salin Laut 200 #C4E2FE"><b>200</b><span>#C4E2FE</span></button><button class="rp" type="button" data-hex="#9CCCFE" style="--c:#9CCCFE;--t:#04214B" aria-label="Salin Laut 300 #9CCCFE"><b>300</b><span>#9CCCFE</span></button><button class="rp" type="button" data-hex="#68ADFC" style="--c:#68ADFC;--t:#04214B" aria-label="Salin Laut 400 #68ADFC"><b>400</b><span>#68ADFC</span></button><button class="rp" type="button" data-hex="#3787EB" style="--c:#3787EB;--t:#FFFFFF" aria-label="Salin Laut 500 #3787EB"><b>500</b><span>#3787EB</span></button><button class="rp" type="button" data-hex="#0361C3" style="--c:#0361C3;--t:#FFFFFF" aria-label="Salin Laut 600 #0361C3"><b>600</b><span>#0361C3</span></button><button class="rp" type="button" data-hex="#024D9D" style="--c:#024D9D;--t:#FFFFFF" aria-label="Salin Laut 700 #024D9D"><b>700</b><span>#024D9D</span></button><button class="rp" type="button" data-hex="#003A79" style="--c:#003A79;--t:#FFFFFF" aria-label="Salin Laut 800 #003A79"><b>800</b><span>#003A79</span></button><button class="rp" type="button" data-hex="#012858" style="--c:#012858;--t:#FFFFFF" aria-label="Salin Laut 900 #012858"><b>900</b><span>#012858</span></button><button class="rp" type="button" data-hex="#011839" style="--c:#011839;--t:#FFFFFF" aria-label="Salin Laut 950 #011839"><b>950</b><span>#011839</span></button></div>
+      </div>
+      <div class="sub">
+        <h3>Ramp Tirta</h3>
+        <p>Aksen air untuk grafik, ilustrasi, dan garis pindai AI. 400 = Tirta. Untuk teks berwarna aksen di latar terang, pakai 700.</p>
+        <div class="ramp tirta"><button class="rp" type="button" data-hex="#D1F1FF" style="--c:#D1F1FF;--t:#04214B" aria-label="Salin Tirta 100 #D1F1FF"><b>100</b><span>#D1F1FF</span></button><button class="rp" type="button" data-hex="#A9E5FE" style="--c:#A9E5FE;--t:#04214B" aria-label="Salin Tirta 200 #A9E5FE"><b>200</b><span>#A9E5FE</span></button><button class="rp" type="button" data-hex="#6ED6FF" style="--c:#6ED6FF;--t:#04214B" aria-label="Salin Tirta 300 #6ED6FF"><b>300</b><span>#6ED6FF</span></button><button class="rp" type="button" data-hex="#35C1F4" style="--c:#35C1F4;--t:#04214B" aria-label="Salin Tirta 400 #35C1F4"><b>400</b><span>#35C1F4</span></button><button class="rp" type="button" data-hex="#00A8D5" style="--c:#00A8D5;--t:#FFFFFF" aria-label="Salin Tirta 500 #00A8D5"><b>500</b><span>#00A8D5</span></button><button class="rp" type="button" data-hex="#0587AC" style="--c:#0587AC;--t:#FFFFFF" aria-label="Salin Tirta 600 #0587AC"><b>600</b><span>#0587AC</span></button><button class="rp" type="button" data-hex="#066784" style="--c:#066784;--t:#FFFFFF" aria-label="Salin Tirta 700 #066784"><b>700</b><span>#066784</span></button></div>
+      </div>
+      <div class="sub">
+        <h3>Netral Batu</h3>
+        <p>Abu-abu kebiruan, sama dengan permukaan aplikasi. 300 untuk garis pembatas, 700 untuk teks sekunder.</p>
+        <div class="ramp batu"><button class="rp" type="button" data-hex="#F4FAFE" style="--c:#F4FAFE;--t:#04214B" aria-label="Salin Batu 50 #F4FAFE"><b>50</b><span>#F4FAFE</span></button><button class="rp" type="button" data-hex="#F0F7FD" style="--c:#F0F7FD;--t:#04214B" aria-label="Salin Batu 100 #F0F7FD"><b>100</b><span>#F0F7FD</span></button><button class="rp" type="button" data-hex="#E8F0F9" style="--c:#E8F0F9;--t:#04214B" aria-label="Salin Batu 200 #E8F0F9"><b>200</b><span>#E8F0F9</span></button><button class="rp" type="button" data-hex="#D6E0EB" style="--c:#D6E0EB;--t:#04214B" aria-label="Salin Batu 300 #D6E0EB"><b>300</b><span>#D6E0EB</span></button><button class="rp" type="button" data-hex="#6E7D91" style="--c:#6E7D91;--t:#FFFFFF" aria-label="Salin Batu 500 #6E7D91"><b>500</b><span>#6E7D91</span></button><button class="rp" type="button" data-hex="#47566C" style="--c:#47566C;--t:#FFFFFF" aria-label="Salin Batu 700 #47566C"><b>700</b><span>#47566C</span></button><button class="rp" type="button" data-hex="#04214B" style="--c:#04214B;--t:#FFFFFF" aria-label="Salin Batu 900 #04214B"><b>900</b><span>#04214B</span></button></div>
+      </div>
+
+      <div class="sub">
+        <h3>Level risiko RW</h3>
+        <p>Warna peta risiko dan daftar prioritas di dasbor. Batas skor adalah asumsi awal di rencana tim dan akan dikalibrasi saat pilot. Selalu tampilkan label teks di samping warna supaya tetap terbaca oleh pengguna buta warna.</p>
+        <div class="risk">
+          <div>
+            <div class="risk-gauge" aria-hidden="true"><span style="background:#2E9E6B"></span><span style="background:#E9A23B"></span><span style="background:#C8372D"></span></div>
+            <div class="risk-ticks" aria-hidden="true"><i style="left:0;transform:none">0</i><i style="left:40%">0,40</i><i style="left:70%">0,70</i><i style="right:0;transform:none">1</i></div>
+            <div class="risk-rows"><div class="risk-row"><span class="dot" style="--c:#2E9E6B"></span><span class="chip" style="--t:#17663F;--b:#E3F3EA">Aman</span><code>< 0,40</code><span class="hexes"><button type="button" class="hx" data-hex="#2E9E6B">#2E9E6B</button><button type="button" class="hx" data-hex="#17663F">#17663F</button><button type="button" class="hx" data-hex="#E3F3EA">#E3F3EA</button></span></div><div class="risk-row"><span class="dot" style="--c:#E9A23B"></span><span class="chip" style="--t:#8A4A00;--b:#FCEFD6">Waspada</span><code>0,40 – 0,69</code><span class="hexes"><button type="button" class="hx" data-hex="#E9A23B">#E9A23B</button><button type="button" class="hx" data-hex="#8A4A00">#8A4A00</button><button type="button" class="hx" data-hex="#FCEFD6">#FCEFD6</button></span></div><div class="risk-row"><span class="dot" style="--c:#C8372D"></span><span class="chip" style="--t:#A51C14;--b:#FBE4E1">Risiko tinggi</span><code>≥ 0,70</code><span class="hexes"><button type="button" class="hx" data-hex="#C8372D">#C8372D</button><button type="button" class="hx" data-hex="#A51C14">#A51C14</button><button type="button" class="hx" data-hex="#FBE4E1">#FBE4E1</button></span></div></div>
+            <p style="margin-top:14px;font-size:13px;color:var(--muted)">Urutan kode: solid (isi poligon dengan opacity 0,32 dan garis tepi), teks chip, latar chip. Semua pasangan teks dan latar di atas 6 : 1.</p>
+          </div>
+          <div>
+            <svg class="minimap" viewBox="0 0 276 200" role="img" aria-label="Contoh peta risiko per RW"><path d="M18 22 L92 14 L104 70 L40 86 L10 60Z" fill="#2E9E6B" fill-opacity=".32" stroke="#2E9E6B" stroke-width="1.6" stroke-linejoin="round"/><path d="M92 14 L170 20 L178 64 L104 70Z" fill="#E9A23B" fill-opacity=".32" stroke="#E9A23B" stroke-width="1.6" stroke-linejoin="round"/><path d="M170 20 L252 12 L262 76 L178 64Z" fill="#2E9E6B" fill-opacity=".32" stroke="#2E9E6B" stroke-width="1.6" stroke-linejoin="round"/><path d="M10 60 L40 86 L52 150 L8 142Z" fill="#E9A23B" fill-opacity=".32" stroke="#E9A23B" stroke-width="1.6" stroke-linejoin="round"/><path d="M40 86 L104 70 L120 136 L52 150Z" fill="#C8372D" fill-opacity=".32" stroke="#C8372D" stroke-width="1.6" stroke-linejoin="round"/><path d="M104 70 L178 64 L192 128 L120 136Z" fill="#C8372D" fill-opacity=".32" stroke="#C8372D" stroke-width="1.6" stroke-linejoin="round"/><path d="M178 64 L262 76 L268 140 L192 128Z" fill="#E9A23B" fill-opacity=".32" stroke="#E9A23B" stroke-width="1.6" stroke-linejoin="round"/><path d="M52 150 L120 136 L130 184 L60 190Z" fill="#2E9E6B" fill-opacity=".32" stroke="#2E9E6B" stroke-width="1.6" stroke-linejoin="round"/><path d="M120 136 L192 128 L204 186 L130 184Z" fill="#E9A23B" fill-opacity=".32" stroke="#E9A23B" stroke-width="1.6" stroke-linejoin="round"/><path d="M192 128 L268 140 L262 190 L204 186Z" fill="#2E9E6B" fill-opacity=".32" stroke="#2E9E6B" stroke-width="1.6" stroke-linejoin="round"/><g transform="translate(80 112)"><path d="M0 0c-5-6-8-9.5-8-13a8 8 0 0 1 16 0c0 3.5-3 7-8 13Z" fill="#A51C14" stroke="#fff" stroke-width="1.5"/><circle cy="-13" r="3" fill="#fff"/></g><g transform="translate(150 100)"><path d="M0 0c-5-6-8-9.5-8-13a8 8 0 0 1 16 0c0 3.5-3 7-8 13Z" fill="#A51C14" stroke="#fff" stroke-width="1.5"/><circle cy="-13" r="3" fill="#fff"/></g><g transform="translate(156 160)"><path d="M0 0c-5-6-8-9.5-8-13a8 8 0 0 1 16 0c0 3.5-3 7-8 13Z" fill="#9A4A06" stroke="#fff" stroke-width="1.5"/><circle cy="-13" r="3" fill="#fff"/></g><g transform="translate(222 104)"><path d="M0 0c-5-6-8-9.5-8-13a8 8 0 0 1 16 0c0 3.5-3 7-8 13Z" fill="#9A4A06" stroke="#fff" stroke-width="1.5"/><circle cy="-13" r="3" fill="#fff"/></g><g transform="translate(36 116)"><path d="M0 0c-5-6-8-9.5-8-13a8 8 0 0 1 16 0c0 3.5-3 7-8 13Z" fill="#5C6B0A" stroke="#fff" stroke-width="1.5"/><circle cy="-13" r="3" fill="#fff"/></g></svg>
+            <p class="map-cap">Contoh poligon RW dan pin saluran bermasalah di peta Leaflet.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub">
+        <h3>Kelas sumbatan AI</h3>
+        <p>Lima kelas keluaran AI (Lampiran C). Sudah dipakai di aplikasi pelapor; dasbor memakai warna yang sama. Warna risiko dan sumbatan sengaja tidak biru supaya tidak tertukar dengan warna merek.</p>
+        <div class="sumb"><span class="chip" style="--t:#17663F;--b:#E3F3EA">Bersih</span><span class="chip" style="--t:#5C6B0A;--b:#F1F4DC">Ringan</span><span class="chip" style="--t:#9A4A06;--b:#FCEBD9">Sedang</span><span class="chip" style="--t:#A51C14;--b:#FBE4E1">Berat</span><span class="chip" style="--t:#47566C;--b:#E8EDF3">Tidak terlihat</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="lvl">Tipografi</span>
+        <h2>Huruf</h2>
+      </div>
+      <div class="type">
+        <div class="type-card">
+          <span class="big">Aa</span>
+          <b>Atkinson Hyperlegible</b>
+          <p style="color:var(--muted)">Dibuat Braille Institute untuk keterbacaan tinggi. Cocok untuk petugas yang membaca layar di luar ruangan dan untuk warga dengan penglihatan rendah. Dipakai di aplikasi, dasbor, dan slide.</p>
+          <span class="meta">Regular 400 · Bold 700 · lisensi OFL · Google Fonts</span>
+        </div>
+        <div class="type-card">
+          <svg class="wmk" viewBox="0 0 470 100" aria-label="Wordmark RIVORA" role="img"><use href="#wm-src"/></svg>
+          <b>Wordmark khusus</b>
+          <p style="color:var(--muted)">Huruf RIVORA digambar dari garis dengan tebal sama dan ujung membulat: ramah, cair, dan serasi dengan ombak. Pakai file logonya, jangan diketik.</p>
+          <span class="meta">Tebal garis 18 % tinggi huruf · tanpa font</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="lvl">Aturan pakai</span>
+        <h2>Menjaga logo tetap utuh</h2>
+      </div>
+      <div class="rules">
+        <div class="rule">
+          <h3>Area aman</h3>
+          <svg class="clear" viewBox="-23 -23 146 146" role="img" aria-label="Area aman di sekeliling simbol"><rect x="-19" y="-19" width="138" height="138" fill="none" stroke="currentColor" stroke-dasharray="3 3" stroke-width=".8"/><rect x="-19" y="-19" width="23" height="23" class="unit"/><text x="-7.5" y="-3.5" class="u-t">x</text><g><path fill="#0361C3" d="M96 50A46 46 0 1 1 4 50A46 46 0 1 1 96 50Z"/><path fill="#35C1F4" d="M9.16 71.17C17.94 67.25 23.9 59.56 28 50C36 32 50 22 64 24C78 26 88 38 86 52C85.5 58.5 81 63.5 75.5 63.5C71.5 63.5 70.3 59 72.8 56.6C76.3 53.3 76 47 70 44C62 40 50 42 48 52C46 62 56 71 68 71C75.87 71 83.75 70.14 91.9 68.98A46 46 0 0 1 9.16 71.17Z"/></g></svg>
+          <p>Sisakan ruang kosong minimal <b>x</b> di semua sisi. <b>x</b> sama dengan seperempat diameter lingkaran simbol.</p>
+        </div>
+        <div class="rule">
+          <h3>Ukuran minimum</h3>
+          <div class="minsize">
+            <figure><svg viewBox="0 0 100 100" style="width:20px" aria-hidden="true"><use href="#mark-src"/></svg><figcaption>simbol 20 px · 6 mm</figcaption></figure>
+            <figure><svg viewBox="0 -16.7 637.4 133.4" style="width:96px" aria-hidden="true"><use href="#h-src"/></svg><figcaption>horizontal 96 px · 30 mm</figcaption></figure>
+          </div>
+          <p>Di bawah ukuran ini gulungan ombak hilang. Untuk ikon yang lebih kecil, pakai ikon aplikasi.</p>
+          <p>Di atas foto, pakai simbol berlingkaran putih atau letakkan logo pada pelat Samudra atau Kabut supaya kontrasnya terjaga.</p>
+        </div>
+      </div>
+      <div class="donts"><figure class="dont"><div class="dont-box"><svg viewBox="0 0 100 100" style="transform:scaleX(1.45);width:40%"><g><path fill="#0361C3" d="M96 50A46 46 0 1 1 4 50A46 46 0 1 1 96 50Z"/><path fill="#35C1F4" d="M9.16 71.17C17.94 67.25 23.9 59.56 28 50C36 32 50 22 64 24C78 26 88 38 86 52C85.5 58.5 81 63.5 75.5 63.5C71.5 63.5 70.3 59 72.8 56.6C76.3 53.3 76 47 70 44C62 40 50 42 48 52C46 62 56 71 68 71C75.87 71 83.75 70.14 91.9 68.98A46 46 0 0 1 9.16 71.17Z"/></g></svg></div><figcaption>Jangan ditarik atau dipipihkan</figcaption></figure><figure class="dont"><div class="dont-box"><svg viewBox="0 0 100 100" style="filter:hue-rotate(150deg) saturate(1.6);width:40%"><g><path fill="#0361C3" d="M96 50A46 46 0 1 1 4 50A46 46 0 1 1 96 50Z"/><path fill="#35C1F4" d="M9.16 71.17C17.94 67.25 23.9 59.56 28 50C36 32 50 22 64 24C78 26 88 38 86 52C85.5 58.5 81 63.5 75.5 63.5C71.5 63.5 70.3 59 72.8 56.6C76.3 53.3 76 47 70 44C62 40 50 42 48 52C46 62 56 71 68 71C75.87 71 83.75 70.14 91.9 68.98A46 46 0 0 1 9.16 71.17Z"/></g></svg></div><figcaption>Jangan ganti warna lingkaran dan ombak</figcaption></figure><figure class="dont"><div class="dont-box"><svg viewBox="0 0 100 100" style="transform:scaleX(-1);width:40%"><g><path fill="#0361C3" d="M96 50A46 46 0 1 1 4 50A46 46 0 1 1 96 50Z"/><path fill="#35C1F4" d="M9.16 71.17C17.94 67.25 23.9 59.56 28 50C36 32 50 22 64 24C78 26 88 38 86 52C85.5 58.5 81 63.5 75.5 63.5C71.5 63.5 70.3 59 72.8 56.6C76.3 53.3 76 47 70 44C62 40 50 42 48 52C46 62 56 71 68 71C75.87 71 83.75 70.14 91.9 68.98A46 46 0 0 1 9.16 71.17Z"/></g></svg></div><figcaption>Jangan balik arah ombak</figcaption></figure><figure class="dont"><div class="dont-box"><svg viewBox="0 0 100 100" style="filter:drop-shadow(3px 5px 2px rgba(0,0,0,.55));width:40%"><g><path fill="#0361C3" d="M96 50A46 46 0 1 1 4 50A46 46 0 1 1 96 50Z"/><path fill="#35C1F4" d="M9.16 71.17C17.94 67.25 23.9 59.56 28 50C36 32 50 22 64 24C78 26 88 38 86 52C85.5 58.5 81 63.5 75.5 63.5C71.5 63.5 70.3 59 72.8 56.6C76.3 53.3 76 47 70 44C62 40 50 42 48 52C46 62 56 71 68 71C75.87 71 83.75 70.14 91.9 68.98A46 46 0 0 1 9.16 71.17Z"/></g></svg></div><figcaption>Jangan diberi bayangan atau efek</figcaption></figure></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="lvl">File</span>
+        <h2>Lokasi file di repo</h2>
+      </div>
+      <div class="tbl"><table><tbody><tr><td><code>brand/logo/rivora-logo-horizontal.svg</code></td><td>Logo utama: header dasbor, slide judul</td></tr><tr><td><code>brand/logo/rivora-logo-horizontal-reverse.svg</code></td><td>Logo utama di latar gelap</td></tr><tr><td><code>brand/logo/rivora-logo-stacked.svg</code></td><td>Logo bertumpuk: splash, sampul laporan</td></tr><tr><td><code>brand/logo/rivora-mark.svg</code></td><td>Simbol saja: avatar, favicon, penanda peta</td></tr><tr><td><code>brand/logo/rivora-mark-mono*.svg</code></td><td>Satu warna: stempel, cetak hitam-putih</td></tr><tr><td><code>brand/tools/build_logo.py</code></td><td>Generator semua SVG, ikon Android, dan path Flutter</td></tr><tr><td><code>brand/logo/rivora-app-icon.svg</code></td><td>Ikon aplikasi (sudut membulat), PNG 1024/512</td></tr><tr><td><code>brand/png/*.png</code></td><td>Versi PNG transparan untuk PPT dan Canva</td></tr><tr><td><code>brand/tokens.css · tokens.json</code></td><td>Token warna untuk dasbor React</td></tr><tr><td><code>mobile/android/app/src/main/res</code></td><td>Ikon launcher Android (adaptive + themed)</td></tr></tbody></table></div>
+    </div>
+  </section>
+</main>
+<footer><div class="wrap">RIVORA · Tim Abis Ini ke WDP · Telkom University · 2026</div></footer>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="mark-src"><g><path fill="#0361C3" d="M96 50A46 46 0 1 1 4 50A46 46 0 1 1 96 50Z"/><path fill="#35C1F4" d="M9.16 71.17C17.94 67.25 23.9 59.56 28 50C36 32 50 22 64 24C78 26 88 38 86 52C85.5 58.5 81 63.5 75.5 63.5C71.5 63.5 70.3 59 72.8 56.6C76.3 53.3 76 47 70 44C62 40 50 42 48 52C46 62 56 71 68 71C75.87 71 83.75 70.14 91.9 68.98A46 46 0 0 1 9.16 71.17Z"/></g></g>
+    <g id="wm-src" fill="currentColor"><path d="M18 9L18 91A9 9 0 0 1 0 91L0 9A9 9 0 0 1 18 9ZM9 0L38 0A9 9 0 0 1 38 18L9 18A9 9 0 0 1 9 0ZM38 0A30 30 0 0 1 38 60L38 42A12 12 0 0 0 38 18ZM9 42L38 42A9 9 0 0 1 38 60L9 60A9 9 0 0 1 9 42ZM40.46 45.96L67.46 85.96A9 9 0 0 1 52.54 96.04L25.54 56.04A9 9 0 0 1 40.46 45.96ZM102 9L102 91A9 9 0 0 1 84 91L84 9A9 9 0 0 1 102 9ZM132.42 5.82L163.42 87.82A9 9 0 0 1 146.58 94.18L115.58 12.18A9 9 0 0 1 132.42 5.82ZM146.58 87.82L177.58 5.82A9 9 0 0 1 194.42 12.18L163.42 94.18A9 9 0 0 1 146.58 87.82ZM303 50A51 51 0 1 1 201 50A51 51 0 1 1 303 50ZM285 50A33 33 0 1 0 219 50A33 33 0 1 0 285 50ZM333 9L333 91A9 9 0 0 1 315 91L315 9A9 9 0 0 1 333 9ZM324 0L353 0A9 9 0 0 1 353 18L324 18A9 9 0 0 1 324 0ZM353 0A30 30 0 0 1 353 60L353 42A12 12 0 0 0 353 18ZM324 42L353 42A9 9 0 0 1 353 60L324 60A9 9 0 0 1 324 42ZM355.46 45.96L382.46 85.96A9 9 0 0 1 367.54 96.04L340.54 56.04A9 9 0 0 1 355.46 45.96ZM390.58 87.82L421.58 5.82A9 9 0 0 1 438.42 12.18L407.42 94.18A9 9 0 0 1 390.58 87.82ZM438.42 5.82L469.42 87.82A9 9 0 0 1 452.58 94.18L421.58 12.18A9 9 0 0 1 438.42 5.82ZM411 58L449 58A9 9 0 0 1 449 76L411 76A9 9 0 0 1 411 58Z"/></g>
+    <g id="h-src"><g transform="translate(-5.8 -22.5) scale(1.45)"><path fill="#0361C3" d="M96 50A46 46 0 1 1 4 50A46 46 0 1 1 96 50Z"/><path fill="#35C1F4" d="M9.16 71.17C17.94 67.25 23.9 59.56 28 50C36 32 50 22 64 24C78 26 88 38 86 52C85.5 58.5 81 63.5 75.5 63.5C71.5 63.5 70.3 59 72.8 56.6C76.3 53.3 76 47 70 44C62 40 50 42 48 52C46 62 56 71 68 71C75.87 71 83.75 70.14 91.9 68.98A46 46 0 0 1 9.16 71.17Z"/></g><path fill="#04214B" transform="translate(167.4 0)" d="M18 9L18 91A9 9 0 0 1 0 91L0 9A9 9 0 0 1 18 9ZM9 0L38 0A9 9 0 0 1 38 18L9 18A9 9 0 0 1 9 0ZM38 0A30 30 0 0 1 38 60L38 42A12 12 0 0 0 38 18ZM9 42L38 42A9 9 0 0 1 38 60L9 60A9 9 0 0 1 9 42ZM40.46 45.96L67.46 85.96A9 9 0 0 1 52.54 96.04L25.54 56.04A9 9 0 0 1 40.46 45.96ZM102 9L102 91A9 9 0 0 1 84 91L84 9A9 9 0 0 1 102 9ZM132.42 5.82L163.42 87.82A9 9 0 0 1 146.58 94.18L115.58 12.18A9 9 0 0 1 132.42 5.82ZM146.58 87.82L177.58 5.82A9 9 0 0 1 194.42 12.18L163.42 94.18A9 9 0 0 1 146.58 87.82ZM303 50A51 51 0 1 1 201 50A51 51 0 1 1 303 50ZM285 50A33 33 0 1 0 219 50A33 33 0 1 0 285 50ZM333 9L333 91A9 9 0 0 1 315 91L315 9A9 9 0 0 1 333 9ZM324 0L353 0A9 9 0 0 1 353 18L324 18A9 9 0 0 1 324 0ZM353 0A30 30 0 0 1 353 60L353 42A12 12 0 0 0 353 18ZM324 42L353 42A9 9 0 0 1 353 60L324 60A9 9 0 0 1 324 42ZM355.46 45.96L382.46 85.96A9 9 0 0 1 367.54 96.04L340.54 56.04A9 9 0 0 1 355.46 45.96ZM390.58 87.82L421.58 5.82A9 9 0 0 1 438.42 12.18L407.42 94.18A9 9 0 0 1 390.58 87.82ZM438.42 5.82L469.42 87.82A9 9 0 0 1 452.58 94.18L421.58 12.18A9 9 0 0 1 438.42 5.82ZM411 58L449 58A9 9 0 0 1 449 76L411 76A9 9 0 0 1 411 58Z"/></g>
+  </defs>
+</svg>
+
+<script>
+(function () {
+  var toast = document.getElementById('toast');
+  var timer;
+  function show(msg) {
+    toast.textContent = msg;
+    toast.hidden = false;
+    clearTimeout(timer);
+    timer = setTimeout(function () { toast.hidden = true; }, 1600);
+  }
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest('[data-hex]');
+    if (!el) return;
+    var hex = el.getAttribute('data-hex');
+    var done = function () { show(hex + ' disalin'); };
+    try {
+      navigator.clipboard.writeText(hex).then(done, function () { show(hex); });
+    } catch (err) { show(hex); }
+  });
+})();
+</script>

@@ -1,0 +1,80 @@
+/* RIVORA brand tokens: palet biru air. Sumber kebenaran: docs/BRAND.md
+ * Nilai inti sama dengan mobile/lib/theme/app_theme.dart, jadi app dan dasbor tampil seragam.
+ * Kontras dicek WCAG 2.1 (angka di samping = rasio terhadap latar yang disebut). */
+
+:root {
+  /* ---- Inti ---- */
+  --rv-samudra: #04214B; /* tinta: teks, wordmark, latar gelap   15,9:1 di putih */
+  --rv-laut: #0361C3;    /* warna utama: tombol, tautan, tab      6,0:1 di putih */
+  --rv-tirta: #35C1F4;   /* aksen air, ombak di logo              7,6:1 di Samudra; jangan untuk teks di latar terang */
+  --rv-buih: #DFF2FE;    /* latar terpilih, kontainer             Samudra 13,8:1 */
+  --rv-kabut: #F4FAFE;   /* latar halaman                         Samudra 15,1:1 */
+  --rv-putih: #FFFFFF;
+
+  /* ---- Ramp Laut (OKLCH, hue ~256) ---- */
+  --rv-laut-50: #F0F8FE;
+  --rv-laut-100: #DFF2FE;  /* = Buih */
+  --rv-laut-200: #C4E2FE;
+  --rv-laut-300: #9CCCFE;
+  --rv-laut-400: #68ADFC;
+  --rv-laut-500: #3787EB;  /* 3,6:1 di putih: hanya teks besar/ikon */
+  --rv-laut-600: #0361C3;  /* = Laut */
+  --rv-laut-700: #024D9D;  /* hover/pressed, kartu gelap (putih 8,2:1) */
+  --rv-laut-800: #003A79;
+  --rv-laut-900: #012858;  /* teks di atas Buih (12,6:1) */
+  --rv-laut-950: #011839;
+
+  /* ---- Ramp Tirta (aksen air, hue ~228) ---- */
+  --rv-tirta-100: #D1F1FF;
+  --rv-tirta-200: #A9E5FE;
+  --rv-tirta-300: #6ED6FF;
+  --rv-tirta-400: #35C1F4; /* = Tirta */
+  --rv-tirta-500: #00A8D5;
+  --rv-tirta-600: #0587AC;
+  --rv-tirta-700: #066784; /* teks aksen di latar terang (6,4:1) */
+
+  /* ---- Netral Batu (abu kebiruan, sama dengan surface app) ---- */
+  --rv-batu-50: #F4FAFE;   /* = Kabut */
+  --rv-batu-100: #F0F7FD;
+  --rv-batu-200: #E8F0F9;
+  --rv-batu-300: #D6E0EB;  /* garis tipis, pembatas */
+  --rv-batu-500: #6E7D91;  /* garis input, ikon non-aktif (4,2:1) */
+  --rv-batu-700: #47566C;  /* teks sekunder (7,5:1 di putih) */
+  --rv-batu-900: #04214B;  /* = Samudra */
+
+  /* ---- Level risiko RW (proposal 3.2: aman, waspada, risiko tinggi) ----
+   * solid = isi poligon peta (opacity 0,32) + garis + titik legenda
+   * teks/latar = chip/badge (semua >= 6:1) */
+  --rv-aman: #2E9E6B;
+  --rv-aman-teks: #17663F;
+  --rv-aman-latar: #E3F3EA;
+  --rv-waspada: #E9A23B;
+  --rv-waspada-teks: #8A4A00;
+  --rv-waspada-latar: #FCEFD6;
+  --rv-tinggi: #C8372D;
+  --rv-tinggi-teks: #A51C14;
+  --rv-tinggi-latar: #FBE4E1;
+
+  /* ---- Kelas sumbatan AI (Lampiran C), sama dengan RivoraColors.light ---- */
+  --rv-bersih-teks: #17663F;        --rv-bersih-latar: #E3F3EA;
+  --rv-ringan-teks: #5C6B0A;        --rv-ringan-latar: #F1F4DC;
+  --rv-sedang-teks: #9A4A06;        --rv-sedang-latar: #FCEBD9;
+  --rv-berat-teks: #A51C14;         --rv-berat-latar: #FBE4E1;
+  --rv-tidak-terlihat-teks: #47566C; --rv-tidak-terlihat-latar: #E8EDF3;
+
+  /* ---- Gradien ikon aplikasi dan hero ---- */
+  --rv-gradien-ikon: linear-gradient(135deg, #22B2F2 0%, #0347A8 100%);
+
+  /* ---- Tipografi ---- */
+  --rv-font: "Atkinson Hyperlegible", "Atkinson Hyperlegible Next", system-ui, sans-serif;
+}
+
+/* Mode gelap (nilai dari buildRivoraTheme(Brightness.dark)) */
+[data-theme="dark"], .rv-dark {
+  --rv-latar: #070F19;
+  --rv-permukaan: #0C1521;
+  --rv-teks: #E9F0F5;
+  --rv-teks-sekunder: #A8B6C3;
+  --rv-utama: #63C6FF;
+  --rv-pada-utama: #012C54;
+}
