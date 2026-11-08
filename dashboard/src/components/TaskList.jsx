@@ -1,5 +1,4 @@
 import BeforeAfter from './BeforeAfter'
-import Ikon from './Ikon'
 import { JENIS, STATUS_TUGAS, tanggalWib } from '../format'
 
 const URUTAN = ['baru', 'dikerjakan', 'selesai']
@@ -29,12 +28,8 @@ export default function TaskList({ tugas, onPilih }) {
               <div className="item-judul">
                 {JENIS[t.saluran.jenis]} · {t.saluran.rw_nama}
               </div>
-              <div className="item-meta">
-                <span>
-                  <Ikon nama="orang" ukuran={13} /> {t.petugas.nama}
-                </span>
-                <span className="teks-redup">Dibuat {tanggalWib(t.dibuat_at)}</span>
-              </div>
+              <p className="item-meta">Petugas: {t.petugas.nama}</p>
+              <p className="item-meta">Dibuat {tanggalWib(t.dibuat_at)}</p>
               {t.catatan && <div className="teks-redup kecil">"{t.catatan}"</div>}
               {t.status === 'selesai' && <BeforeAfter tugas={t} ringkas />}
             </li>

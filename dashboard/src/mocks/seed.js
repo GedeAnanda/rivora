@@ -1,5 +1,6 @@
 // Data contoh dasbor (VITE_USE_MOCK=1). Deterministik: hasilnya sama setiap dimuat.
-// Poligon RW = ILUSTRASI berupa grid di sekitar Gedebage, bukan batas resmi.
+// Batas kelurahan Rancabolang asli (OSM); poligon RW = ILUSTRASI, bukan batas resmi.
+import PETA from './rw-rancabolang.json'
 // Mengikuti isi seed backend (SRS backend FR-BE-18): ~20 saluran, ~30 laporan, 2 tidak terlihat,
 // satu RW demo dengan 1 saluran, satu RW tanpa laporan.
 
@@ -17,37 +18,30 @@ const antara = (a, b) => a + (b - a) * r()
 
 export const KELURAHAN = { id: 1, nama: 'Rancabolang', kecamatan: 'Gedebage' }
 
-export const TITIK_GENANGAN = [
-  { nama: 'Jl. Rancabolang', lat: -6.9508, lng: 107.6978 },
-  { nama: 'Pasar Induk Gedebage', lat: -6.9468, lng: 107.7002 },
-]
+// Batas kelurahan asli dari OpenStreetMap (relation 13290131, ODbL). Pembagian 12 RW = ilustrasi
+// Voronoi di dalam batas itu, bukan batas resmi. Dibuat sekali oleh buat-rw-rancabolang.mjs.
+const RW_POLIGON = PETA.rw.map((ring) => ring.map(([lng, lat]) => [lat, lng]))
 
-const PUSAT = [-6.9455, 107.6905]
-const KOLOM = 4
-const BARIS = 3
-const SEL = 0.0042
-
-const simpul = []
-for (let b = 0; b <= BARIS; b++) {
-  simpul.push([])
-  for (let k = 0; k <= KOLOM; k++) {
-    const tepi = b === 0 || b === BARIS || k === 0 || k === KOLOM
-    const geser = tepi ? 0.0004 : 0.0011
-    simpul[b].push([
-      PUSAT[0] + (BARIS / 2 - b) * SEL + antara(-geser, geser),
-      PUSAT[1] + (k - KOLOM / 2) * SEL + antara(-geser, geser),
-    ])
+function dalam([y, x], ring) {
+  let isi = false
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const [yi, xi] = ring[i]
+    const [yj, xj] = ring[j]
+    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) isi = !isi
   }
+  return isi
 }
+const pusatRing = (ring) => [ring.reduce((t, p) => t + p[0], 0) / ring.length, ring.reduce((t, p) => t + p[1], 0) / ring.length]
 
-function titikDalamSel(b, k) {
-  const u = antara(0.2, 0.8)
-  const v = antara(0.2, 0.8)
-  const [a, bb, c, d] = [simpul[b][k], simpul[b][k + 1], simpul[b + 1][k + 1], simpul[b + 1][k]]
-  return [
-    (1 - v) * ((1 - u) * a[0] + u * bb[0]) + v * ((1 - u) * d[0] + u * c[0]),
-    (1 - v) * ((1 - u) * a[1] + u * bb[1]) + v * ((1 - u) * d[1] + u * c[1]),
-  ]
+/** Titik acak (tetap) di dalam poligon RW, tidak terlalu dekat ke tepi. */
+function titikDalamRw(ring) {
+  const [c0, c1] = pusatRing(ring)
+  for (let coba = 0; coba < 200; coba++) {
+    const p = [c0 + antara(-0.0016, 0.0016), c1 + antara(-0.0016, 0.0016)]
+    const tepiAman = [[0.00012, 0], [-0.00012, 0], [0, 0.00012], [0, -0.00012]].every(([dy, dx]) => dalam([p[0] + dy, p[1] + dx], ring))
+    if (tepiAman) return p
+  }
+  return [c0, c1]
 }
 
 // Jarak meter sederhana (equirectangular), cukup untuk skala kelurahan
@@ -57,8 +51,19 @@ function jarakM([lat1, lng1], [lat2, lng2]) {
   return Math.sqrt(x * x + y * y) * 6371000
 }
 
-// elevasi_relatif per RW (1 = paling rendah di kelurahan), makin ke tenggara makin rendah
-const ELEVASI = [0.1, 0.2, 0.3, 0.4, 0.3, 0.5, 0.6, 0.7, 0.6, 0.8, 0.9, 1.0]
+// [ASUMSI data contoh] elevasi relatif: makin ke selatan dan timur makin rendah (arah aliran ke Citarum).
+// Nilai DEMNAS asli diisi backend.
+const PUSAT_RW = RW_POLIGON.map(pusatRing)
+const condong = PUSAT_RW.map(([lat, lng]) => -lat + lng)
+const [cMin, cMax] = [Math.min(...condong), Math.max(...condong)]
+const ELEVASI = condong.map((c) => Math.round((0.1 + (0.9 * (c - cMin)) / (cMax - cMin)) * 10) / 10)
+
+// Dua titik genangan langganan [ILUSTRASI] di RW paling rendah
+const terendah = ELEVASI.map((e, i) => [e, i]).sort((x, y) => y[0] - x[0])
+export const TITIK_GENANGAN = [
+  { nama: 'Jl. Rancabolang', lat: PUSAT_RW[terendah[0][1]][0], lng: PUSAT_RW[terendah[0][1]][1] },
+  { nama: 'ujung selatan Rancabolang', lat: PUSAT_RW[terendah[2][1]][0], lng: PUSAT_RW[terendah[2][1]][1] },
+]
 
 // Laporan per RW: tiap saluran = daftar kelas dari yang terlama ke terbaru.
 // RW 03 dibiarkan tanpa saluran (belum ada data). RW 12 = RW demo, 1 saluran.
@@ -80,10 +85,10 @@ const RENCANA = [
 const RENTANG = { bersih: [0.03, 0.12], ringan: [0.18, 0.36], sedang: [0.45, 0.66], berat: [0.74, 0.92] }
 const CATATAN = {
   bersih: 'Aliran terlihat lancar, tidak ada sampah berarti',
-  ringan: 'Ada sedikit sampah di tepi saluran, aliran masih lancar',
+  ringan: 'Rumput dan daun tumbuh di dasar saluran, aliran masih bisa lewat',
   sedang: 'Sampah menutupi sekitar separuh lebar saluran',
   berat: 'Sampah menutupi sebagian besar lebar saluran',
-  tidak_terlihat: 'Saluran tertutup beton, kondisi di dalam tidak terlihat',
+  tidak_terlihat: 'Pandangan kamera terhalang, kondisi saluran tidak terlihat jelas',
 }
 const PENYEBAB = { bersih: [], ringan: ['daun_ranting'], sedang: ['plastik'], berat: ['plastik', 'sedimen'], tidak_terlihat: [] }
 
@@ -104,11 +109,10 @@ export function buatSeed() {
   let idSaluran = 1
   let idLaporan = 1
 
-  for (let b = 0; b < BARIS; b++) {
-    for (let k = 0; k < KOLOM; k++) {
-      const i = b * KOLOM + k
-      const ring = [simpul[b][k], simpul[b][k + 1], simpul[b + 1][k + 1], simpul[b + 1][k], simpul[b][k]]
-      const pusat = [(ring[0][0] + ring[2][0]) / 2, (ring[0][1] + ring[2][1]) / 2]
+  {
+    for (let i = 0; i < RW_POLIGON.length; i++) {
+      const ring = RW_POLIGON[i]
+      const pusat = PUSAT_RW[i]
       const terdekat = TITIK_GENANGAN.map((g) => ({ g, m: jarakM(pusat, [g.lat, g.lng]) })).sort((x, y) => x.m - y.m)[0]
       // SRS backend 9.2: kedekatan = 1 - min(jarak/1000, 1); K = 0,5 elevasi + 0,5 kedekatan
       const kedekatan = 1 - Math.min(terdekat.m / 1000, 1)
@@ -123,7 +127,7 @@ export function buatSeed() {
       })
 
       for (const riwayat of RENCANA[i]) {
-        const [lat, lng] = titikDalamSel(b, k)
+        const [lat, lng] = titikDalamRw(ring)
         const s = { id: idSaluran++, rw_id: i + 1, jenis: riwayat[0] === 'tidak_terlihat' ? 'gorong_gorong' : 'terbuka', lat, lng }
         if (r() < 0.25 && s.jenis === 'terbuka') s.jenis = 'inlet_jalan'
         saluran.push(s)
@@ -140,7 +144,7 @@ export function buatSeed() {
             keyakinan: !terlihat ? 'rendah' : r() < 0.7 ? 'tinggi' : r() < 0.6 ? 'sedang' : 'rendah',
             penyebab: PENYEBAB[kelas],
             catatan: CATATAN[kelas],
-            foto_url: null,
+            foto_url: `/contoh-saluran/${kelas}.jpg`,
             captured_at: lalu(jam),
             ai_sumber: 'model',
             lokasi_demo: false,
@@ -193,7 +197,7 @@ export function buatSeed() {
     keyakinan: 'tinggi',
     penyebab: [],
     catatan: verifikasi.catatan,
-    foto_url: null,
+    foto_url: '/contoh-saluran/bersih.jpg',
     captured_at: lalu(0.5),
     ai_sumber: 'model',
     lokasi_demo: false,
@@ -206,7 +210,7 @@ export function buatSeed() {
     petugas_id: 3,
     status: 'selesai',
     catatan: null,
-    foto_sesudah_url: null,
+    foto_sesudah_url: '/contoh-saluran/bersih.jpg',
     verifikasi,
     dibuat_at: lalu(5),
     selesai_at: lalu(0.5),

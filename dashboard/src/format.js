@@ -1,22 +1,25 @@
 // Label enum, warna, dan format angka/waktu. Sumber: SRS dasbor bagian 8.
 
-// Warna kelas sumbatan = aplikasi mobile (mobile/lib/widgets/sumbatan_style.dart)
+// Warna dari rivora-brand-kit (panduan/BRAND.md bagian 3), sama dengan RivoraColors.light di aplikasi mobile.
+// warna = titik di peta dan legenda, teks/latar = chip.
 export const KELAS = {
-  bersih: { label: 'Bersih', warna: '#43A047' },
-  ringan: { label: 'Sumbatan ringan', warna: '#9E9D24' },
-  sedang: { label: 'Sumbatan sedang', warna: '#F57C00' },
-  berat: { label: 'Sumbatan berat', warna: '#D32F2F' },
-  tidak_terlihat: { label: 'Tidak terlihat', warna: '#607D8B' },
+  bersih: { label: 'Bersih', warna: '#17663F', latar: '#E3F3EA' },
+  ringan: { label: 'Sumbatan ringan', warna: '#5C6B0A', latar: '#F1F4DC' },
+  sedang: { label: 'Sumbatan sedang', warna: '#9A4A06', latar: '#FCEBD9' },
+  berat: { label: 'Sumbatan berat', warna: '#A51C14', latar: '#FBE4E1' },
+  tidak_terlihat: { label: 'Tidak terlihat', warna: '#47566C', latar: '#E8EDF3' },
 }
 
+// Poligon: fillOpacity 0,32, garis 1,6 (BRAND.md). Chip: teks/latar, kontras >= 6:1.
 export const LEVEL = {
-  aman: { label: 'Aman', warna: '#43A047', isi: 0.3, ikon: 'cek' },
-  waspada: { label: 'Waspada', warna: '#F57C00', isi: 0.35, ikon: 'seru' },
-  risiko_tinggi: { label: 'Risiko tinggi', warna: '#D32F2F', isi: 0.4, ikon: 'segitiga' },
+  aman: { label: 'Aman', warna: '#2E9E6B', teks: '#17663F', latar: '#E3F3EA', isi: 0.32 },
+  waspada: { label: 'Waspada', warna: '#E9A23B', teks: '#8A4A00', latar: '#FCEFD6', isi: 0.32 },
+  risiko_tinggi: { label: 'Risiko tinggi', warna: '#C8372D', teks: '#A51C14', latar: '#FBE4E1', isi: 0.32 },
 }
-export const BELUM_ADA_DATA = { label: 'Belum ada data', warna: '#9E9E9E', isi: 0.15, ikon: 'tanya' }
+export const BELUM_ADA_DATA = { label: 'Belum ada data', warna: '#6E7D91', teks: '#47566C', latar: '#E8EDF3', isi: 0.12 }
 
-export const WARNA_DITUGASKAN = '#1E63D6'
+// Tirta 700: penanda tugas, dibedakan dari biru Laut tombol utama
+export const WARNA_DITUGASKAN = '#066784'
 
 export const JENIS = {
   terbuka: 'Saluran terbuka',

@@ -1,24 +1,26 @@
-import Ikon from './Ikon'
 import { Keyakinan, LencanaKelas } from './Lencana'
 import { JENIS, STATUS_TUGAS, angka2, umur } from '../format'
 
 export function StatusTugasAtauTombol({ tugasAktif, onTugaskan }) {
   if (tugasAktif) {
     return (
-      <span className="status-tugas">
-        <Ikon nama="orang" ukuran={13} /> {tugasAktif.petugas_nama} · {STATUS_TUGAS[tugasAktif.status]}
-      </span>
+      <p className="status-tugas">
+
+        <span>
+          Ditugaskan ke <strong>{tugasAktif.petugas_nama}</strong>, {STATUS_TUGAS[tugasAktif.status].toLowerCase()}
+        </span>
+      </p>
     )
   }
   return (
     <button
-      className="tombol tombol-kecil"
+      className="tombol tombol-tugaskan"
       onClick={(e) => {
         e.stopPropagation()
         onTugaskan()
       }}
     >
-      Tugaskan
+      Tugaskan petugas
     </button>
   )
 }
@@ -33,11 +35,11 @@ export default function PriorityList({ data, saluranTerpilih, onPilih, onTugaska
       <div className={`kepala-daftar${meta.hujan_lebat_diprediksi ? ' mendesak' : ''}`}>
         {meta.hujan_lebat_diprediksi ? (
           <>
-            <Ikon nama="segitiga" ukuran={15} /> Bersihkan sebelum hujan: {prioritas.length} saluran
+            Bersihkan sebelum hujan: {prioritas.length} saluran
           </>
         ) : (
           <>
-            <Ikon nama="info" ukuran={15} /> Tidak ada hujan lebat 24 jam ke depan. Urutan berdasarkan kondisi saluran.
+            Tidak ada hujan lebat 24 jam ke depan. Urutan berdasarkan kondisi saluran.
           </>
         )}
       </div>
@@ -54,24 +56,23 @@ export default function PriorityList({ data, saluranTerpilih, onPilih, onTugaska
             onClick={() => onPilih(p.saluran_id, [p.lat, p.lng])}
             onKeyDown={(e) => e.key === 'Enter' && onPilih(p.saluran_id, [p.lat, p.lng])}
           >
-            <span className="peringkat">{p.peringkat}</span>
-            <div className="item-isi">
-              <div className="item-judul">
-                {JENIS[p.jenis]} · {p.rw_nama}
-              </div>
-              <div className="item-meta">
+            <div className="item-atas">
+              <span className="peringkat" aria-label={`Urutan ${p.peringkat}`}>{p.peringkat}</span>
+              <div className="item-isi">
+                <h3 className="item-judul">
+                  {p.rw_nama}, {JENIS[p.jenis].toLowerCase()}
+                </h3>
                 <LencanaKelas kelas={p.kelas} />
-                <Keyakinan nilai={p.keyakinan} />
+                <p className="item-meta">
+                  Dilaporkan {umur(p.captured_at)}. <Keyakinan nilai={p.keyakinan} />
+                </p>
               </div>
-              <div className="item-bawah">
-                <StatusTugasAtauTombol tugasAktif={p.tugas_aktif} onTugaskan={() => onTugaskan(p)} />
-                <span className="teks-redup kecil">{umur(p.captured_at)}</span>
+              <div className="item-skor">
+                <span>Skor</span>
+                <span className="angka besar">{angka2(p.skor_prioritas)}</span>
               </div>
             </div>
-            <div className="item-skor">
-              <span className="teks-redup kecil">Skor</span>
-              <span className="angka besar">{angka2(p.skor_prioritas)}</span>
-            </div>
+            <StatusTugasAtauTombol tugasAktif={p.tugas_aktif} onTugaskan={() => onTugaskan(p)} />
           </li>
         ))}
       </ol>
