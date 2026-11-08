@@ -10,6 +10,7 @@ import '../models/jenis_saluran.dart';
 import '../models/report.dart';
 import '../models/session.dart';
 import '../models/task.dart';
+import '../models/verification.dart';
 
 class ApiException implements Exception {
   const ApiException(this.message, {this.statusCode});
@@ -50,6 +51,20 @@ abstract class ApiClient {
 
   /// `GET /tasks?mine=1`: tugas milik petugas yang login.
   Future<List<Task>> myTasks();
+
+  /// `POST /tasks/:id/verify`: foto sesudah dibersihkan. AI membandingkan
+  /// dengan foto sebelum, skor RW diperbarui (proposal 3.2 langkah 4).
+  Future<VerificationResult> verifyTask({
+    required String taskId,
+    required File foto,
+    required double lat,
+    required double lng,
+    required DateTime capturedAt,
+  });
+
+  /// `POST /devices`: simpan token FCM supaya backend bisa mengirim
+  /// notifikasi tugas (proposal Tabel 12).
+  Future<void> registerDevice(String fcmToken);
 }
 
 class HttpApiClient implements ApiClient {
@@ -127,6 +142,43 @@ class HttpApiClient implements ApiClient {
     return [for (final item in _list(body)) Task.fromJson(item)];
   }
 
+  @override
+  Future<VerificationResult> verifyTask({
+    required String taskId,
+    required File foto,
+    required double lat,
+    required double lng,
+    required DateTime capturedAt,
+  }) async {
+    final request =
+        http.MultipartRequest(
+            'POST',
+            Uri.parse('$_baseUrl/tasks/${Uri.encodeComponent(taskId)}/verify'),
+          )
+          ..fields['lat'] = lat.toString()
+          ..fields['lng'] = lng.toString()
+          ..fields['captured_at'] = capturedAt.toUtc().toIso8601String()
+          ..files.add(
+            await http.MultipartFile.fromPath(
+              'foto',
+              foto.path,
+              contentType: MediaType('image', 'jpeg'),
+            ),
+          );
+    final body = await _sendJson(request, gagal: 'Verifikasi gagal dikirim');
+    return VerificationResult.fromJson(body as Map<String, dynamic>);
+  }
+
+  @override
+  Future<void> registerDevice(String fcmToken) async {
+    await _sendJson(
+      http.Request('POST', Uri.parse('$_baseUrl/devices'))
+        ..headers['Content-Type'] = 'application/json'
+        ..body = jsonEncode({'fcm_token': fcmToken}),
+      gagal: 'Token notifikasi gagal disimpan',
+    );
+  }
+
   /// Menerima `[...]` atau `{ "data": [...] }`.
   List<Map<String, dynamic>> _list(Object? body) {
     final raw = body is Map<String, dynamic> ? body['data'] : body;
@@ -184,6 +236,7 @@ class MockApiClient implements ApiClient {
   MockApiClient({
     this.delay = const Duration(seconds: 2),
     this.listDelay = const Duration(milliseconds: 500),
+    this.tugasBaruSetelah = const Duration(seconds: 20),
   }) : _reports = _contohLaporan(),
        _tasks = _contohTugas();
 
@@ -287,11 +340,91 @@ class MockApiClient implements ApiClient {
     return [for (final json in _reports) Report.fromJson(json)];
   }
 
+  /// Tugas baru contoh yang "dikirim lurah" beberapa detik setelah petugas
+  /// pertama kali membuka daftar tugas, supaya notifikasi bisa didemokan.
+  final Duration tugasBaruSetelah;
+  DateTime? _pertamaMuatTugas;
+  final Map<String, int> _percobaanVerifikasi = {};
+
   @override
   Future<List<Task>> myTasks() async {
     await Future<void>.delayed(listDelay);
+    final now = DateTime.now();
+    _pertamaMuatTugas ??= now;
+    final adaTugasBaru = now.difference(_pertamaMuatTugas!) >= tugasBaruSetelah;
+    if (adaTugasBaru && !_tasks.any((t) => t['id'] == 't5')) {
+      _tasks.insert(0, _tugasBaru());
+    }
     return [for (final json in _tasks) Task.fromJson(json)];
   }
+
+  @override
+  Future<VerificationResult> verifyTask({
+    required String taskId,
+    required File foto,
+    required double lat,
+    required double lng,
+    required DateTime capturedAt,
+  }) async {
+    await Future<void>.delayed(delay);
+    final task = _tasks.firstWhere(
+      (t) => t['id'] == taskId,
+      orElse: () => throw const ApiException('Tugas tidak ditemukan.'),
+    );
+    final percobaan = (_percobaanVerifikasi[taskId] ?? 0) + 1;
+    _percobaanVerifikasi[taskId] = percobaan;
+
+    // Tugas t3 sengaja gagal di percobaan pertama supaya tampilan
+    // "masih ada sumbatan" ikut teruji.
+    final bersih = !(taskId == 't3' && percobaan == 1);
+    final laporan = task['laporan'] as Map<String, dynamic>;
+    final skorSebelum = (task['skor_prioritas'] as num).toDouble();
+    final sumbatanSebelum =
+        ((laporan['ai'] as Map<String, dynamic>)['skor_sumbatan'] as num?)
+            ?.toDouble() ??
+        0.5;
+    final sumbatanSesudah = bersih ? 0.08 : 0.42;
+    // Rumus proposal 3.3: komponen sumbatan berbobot 0,4.
+    final skorSesudah =
+        (skorSebelum - 0.4 * (sumbatanSebelum - sumbatanSesudah)).clamp(
+          0.0,
+          1.0,
+        );
+
+    if (bersih) {
+      task['status'] = 'selesai';
+      final laporanId = laporan['id'];
+      for (final r in _reports) {
+        if (r['id'] == laporanId) {
+          r['status'] = 'ditangani';
+          r['ditangani_at'] = DateTime.now().toUtc().toIso8601String();
+        }
+      }
+    } else {
+      task['status'] = 'dikerjakan';
+    }
+
+    return VerificationResult.fromJson({
+      'verifikasi': {
+        'sudah_bersih': bersih,
+        'kelas_sesudah': bersih ? 'bersih' : 'sedang',
+        'skor_sumbatan_sesudah': sumbatanSesudah,
+        'keyakinan': 'tinggi',
+        'catatan': bersih
+            ? 'Sumbatan sudah terangkat, dasar saluran terlihat dan aliran lancar'
+            : 'Masih ada sedimen di sudut inlet, sekitar sepertiga lubang tertutup',
+      },
+      'tugas': task,
+      'rw': {
+        'nama': task['rw'],
+        'skor_sebelum': skorSebelum,
+        'skor_sesudah': bersih ? skorSesudah : skorSebelum - 0.02,
+      },
+    });
+  }
+
+  @override
+  Future<void> registerDevice(String fcmToken) async {}
 
   static String _lalu(Duration d) =>
       DateTime.now().subtract(d).toUtc().toIso8601String();
@@ -334,6 +467,7 @@ class MockApiClient implements ApiClient {
     required double lng,
     required Map<String, dynamic> ai,
     required Duration lalu,
+    String? laporanId,
   }) => {
     'id': id,
     'status': status,
@@ -341,8 +475,27 @@ class MockApiClient implements ApiClient {
     'skor_prioritas': skor,
     'rw': rw,
     'saluran': {'jenis_saluran': jenis, 'lat': lat, 'lng': lng},
-    'laporan': {'id': 'laporan-$id', 'ai': ai},
+    'laporan': {'id': laporanId ?? 'laporan-$id', 'ai': ai},
   };
+
+  static Map<String, dynamic> _tugasBaru() => _tugas(
+    id: 't5',
+    status: 'baru',
+    skor: 0.79,
+    rw: 'RW 04',
+    jenis: 'inlet_jalan',
+    lat: -6.9432,
+    lng: 107.6881,
+    ai: const {
+      'saluran_terlihat': true,
+      'kelas_sumbatan': 'berat',
+      'skor_sumbatan': 0.78,
+      'penyebab': ['plastik', 'daun_ranting'],
+      'keyakinan': 'tinggi',
+      'catatan': 'Kantong plastik dan daun menutup hampir seluruh inlet',
+    },
+    lalu: Duration.zero,
+  );
 
   static List<Map<String, dynamic>> _contohTugas() => [
     _tugas(
@@ -366,6 +519,9 @@ class MockApiClient implements ApiClient {
       lng: 107.6870,
       ai: _contohAi[1],
       lalu: const Duration(hours: 1, minutes: 15),
+      // Laporan warga yang sama: setelah t2 diverifikasi bersih, laporan
+      // ini ikut berubah menjadi "Sudah ditangani".
+      laporanId: 'contoh-102',
     ),
     _tugas(
       id: 't3',
