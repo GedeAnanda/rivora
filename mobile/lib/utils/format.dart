@@ -29,3 +29,23 @@ String formatKoordinat(double lat, double lng) =>
 /// Desimal gaya Indonesia: `0,85`
 String formatDesimal(double value, {int digits = 2}) =>
     value.toStringAsFixed(digits).replaceAll('.', ',');
+
+/// `baru saja`, `12 menit lalu`, `3 jam lalu`, `kemarin`, lalu tanggal.
+String formatRelatif(DateTime t, {DateTime? now}) {
+  final sekarang = now ?? DateTime.now();
+  final selisih = sekarang.difference(t);
+  if (selisih.inMinutes < 1) return 'baru saja';
+  if (selisih.inMinutes < 60) return '${selisih.inMinutes} menit lalu';
+  if (selisih.inHours < 24 && sekarang.day == t.toLocal().day) {
+    return '${selisih.inHours} jam lalu';
+  }
+  if (selisih.inHours < 48) {
+    return 'kemarin, ${_dua(t.toLocal().hour)}:${_dua(t.toLocal().minute)}';
+  }
+  return formatWaktu(t);
+}
+
+/// `350 m`, `1,2 km`
+String formatJarak(double meter) => meter < 1000
+    ? '${meter.round()} m'
+    : '${formatDesimal(meter / 1000, digits: 1)} km';

@@ -88,6 +88,23 @@ class LocationService {
           timeLimit: Duration(seconds: 15),
         );
 
+  /// Posisi terakhir yang diketahui, tanpa menunggu GPS dan tanpa dialog
+  /// izin. Dipakai untuk menampilkan jarak ke lokasi tugas.
+  Future<Position?> lastKnown() async {
+    final permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
+      return null;
+    }
+    try {
+      return await Geolocator.getLastKnownPosition(
+        forceAndroidLocationManager: Platform.isAndroid,
+      );
+    } on Exception {
+      return null;
+    }
+  }
+
   Future<void> openFix(LocationFix fix) async {
     switch (fix) {
       case LocationFix.appSettings:
