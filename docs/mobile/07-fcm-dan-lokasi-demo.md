@@ -24,6 +24,8 @@ Lewati tombol "Next" untuk langkah SDK di konsol: plugin `com.google.gms.google-
 | Jenis notifikasi | SRS bagian 11: `type: "tugas_baru"`; kode B (`notify/fcm.js`): `jenis: "tugas_baru"` | **Keduanya diterima** (`tugasIdDariNotifikasi`) | ✅ Diperbaiki di tahap ini |
 | Data lain | `tugas_id`, `saluran_id`, `lat`, `lng` (string) | `tugas_id` membuka detail tugas; lainnya tidak wajib | ✅ |
 | Verifikasi | multipart `foto`, `lat`, `lng`, `captured_at` | Sama | ✅ |
+| AI gagal menilai foto sesudah | SRS 7.10: `verifikasi: null`. Kode B (`routes/tasks.js`): `ai_sumber: "gagal"` + objek cadangan (`kelas_sesudah: "tidak_terlihat"`), tugas tetap `dikerjakan` | **Ketiga bentuk** (null, `gagal`, `tidak_terlihat`) ditampilkan "AI belum bisa menilai foto" + Foto ulang. Catatan cadangan untuk lurah tidak ditampilkan ke petugas | ✅ Diperbaiki (sebelumnya tampil "Masih ada sumbatan") |
+| `PATCH /tasks/:id` (Mulai kerjakan, P2) | Belum ada di kode B | Tombol tetap ada; sampai endpoint dibuat, server membalas error dan pesannya ditampilkan | ⏳ Menunggu B |
 | `lokasi_demo=true` | Opsional, berlaku kalau backend `DEMO_MODE` aktif: laporan/verifikasi dipasang ke saluran demo, batas 30 m dilewati | Dikirim hanya di build **`LOKASI_DEMO=true`** | ✅ Baru |
 
 Sebelum perbaikan, notifikasi dari kode backend saat ini (`jenis`) tetap muncul, tapi mengetuknya hanya membuka app, bukan detail tugas.
@@ -53,7 +55,11 @@ Pertanyaan B: nama field flag lokasi palsu. App **tidak mengirim** field ini. Lo
 
 ## Hasil uji
 
-`flutter analyze`: **No issues found**. `flutter test`: **48 tes lulus** (`test/tahap07_test.dart`: payload `type`, payload `jenis`, pesan lain, `tugas_id` kosong). Build `--dart-define=LOKASI_DEMO=true` berhasil dikompilasi.
+`flutter analyze`: **No issues found**. `flutter test`: **53 tes lulus** (`test/tahap07_test.dart`: payload `type`/`jenis`, pesan lain, `tugas_id` kosong, verifikasi `gagal`/`tidak_terlihat`/null/normal, alur mock t5). Build `--dart-define=LOKASI_DEMO=true` berhasil dikompilasi.
+
+**Mode contoh:** tugas **t5** (tugas baru RW 04) sengaja gagal dinilai AI pada percobaan pertama (bentuk respons sama dengan backend), lalu bersih pada percobaan kedua. Teruji di emulator:
+
+![AI belum bisa menilai foto](img/07-ai-gagal-menilai.png)
 
 ### Firebase terpasang (8 November 2026, 14.04)
 
