@@ -1,9 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="RIVORA">
-  <title>RIVORA</title>
-  <defs><mask id="m"><rect x="-10" y="-10" width="140" height="140" fill="#fff"/><path d="M0 77 C 20 72, 32 82, 50 75 S 82 56, 101 52" fill="none" stroke="#000" stroke-width="6.5" stroke-linecap="round"/><circle cx="58" cy="51" r="15.5" fill="#000"/></mask></defs>
-  <rect width="512" height="512" rx="112" fill="#0d5e53"/>
-  <g transform="translate(66 65) scale(3.2)">
-    <path mask="url(#m)" fill="#ffffff" d="M6 74 C 18 32, 76 12, 115 42 C 96 92, 30 106, 6 74 Z"/>
-    <path fill="#4cc9d9" d="M58 38.5 C 58 38.5, 66 47.5, 66 53 A8 8 0 0 1 50 53 C 50 47.5, 58 38.5, 58 38.5 Z"/>
-  </g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="RIVORA"><title>RIVORA</title><defs><linearGradient id="rv-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22B2F2"/><stop offset="1" stop-color="#0347A8"/></linearGradient></defs><path fill="url(#rv-g)" d="M22.3 0H77.7A22.3 22.3 0 0 1 100 22.3V77.7A22.3 22.3 0 0 1 77.7 100H22.3A22.3 22.3 0 0 1 0 77.7V22.3A22.3 22.3 0 0 1 22.3 0Z"/><path fill="#FFFFFF" d="M2.71 88.36C13.4 84.21 20.53 75.26 25.36 64C34.32 43.84 50 32.64 65.68 34.88C81.36 37.12 92.56 50.56 90.32 66.24C89.76 73.52 84.72 79.12 78.56 79.12C74.08 79.12 72.74 74.08 75.54 71.39C79.46 67.7 79.12 60.64 72.4 57.28C63.44 52.8 50 55.04 47.76 66.24C45.52 77.44 56.72 87.52 70.16 87.52C79.57 87.52 88.98 86.42 98.77 84.99A22.3 22.3 0 0 1 77.7 100L22.3 100A22.3 22.3 0 0 1 2.71 88.36Z"/></svg>

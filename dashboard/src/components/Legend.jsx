@@ -1,4 +1,3 @@
-import Ikon from './Ikon'
 import { BELUM_ADA_DATA, KELAS, LEVEL, WARNA_DITUGASKAN } from '../format'
 
 /** Legenda pojok kiri bawah peta (FR-DB-05). */
@@ -13,11 +12,10 @@ export default function Legend() {
             className="kotak-level"
             style={{
               background: l.warna,
-              opacity: l === BELUM_ADA_DATA ? 0.45 : 0.75,
+              opacity: l === BELUM_ADA_DATA ? 0.4 : 0.6,
               outline: l === BELUM_ADA_DATA ? `2px dashed ${l.warna}` : 'none',
             }}
           />
-          <Ikon nama={l.ikon} ukuran={12} />
           {l.label}
         </div>
       ))}

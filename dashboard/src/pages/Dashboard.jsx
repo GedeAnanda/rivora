@@ -140,22 +140,23 @@ export default function Dashboard({ onKeluar }) {
     <div className="aplikasi">
       <header className="kepala">
         <div className="merek">
-          <span className="logo" aria-hidden="true">
-            <Ikon nama="air" ukuran={18} />
-          </span>
-          <div>
-            <div className="nama-produk">
-              RIVORA <span className="nama-kelurahan">· Kelurahan {meta?.kelurahan?.nama ?? ''}</span>
-            </div>
-            <div className="tagline">See The Flood Before You See The Water.</div>
-          </div>
+          <img className="logo-kepala" src="/brand/rivora-logo-putih.svg" alt="RIVORA" />
+          <div className="nama-kelurahan">Kelurahan {meta?.kelurahan?.nama ?? ''}</div>
         </div>
         <RainCard meta={meta} />
         <div className="kepala-kanan">
-          {demoMode && <DemoRainSlider meta={meta} onKirim={kirimSimulasi} />}
+          {demoMode && (
+            <details className="demo-hujan">
+              <summary>Simulasi hujan</summary>
+              <div className="demo-panel">
+                <p>Untuk presentasi. Mengganti nilai hujan 24 jam di seluruh sistem.</p>
+                <DemoRainSlider meta={meta} onKirim={kirimSimulasi} />
+              </div>
+            </details>
+          )}
           {USE_MOCK && <span className="lencana lencana-contoh">Data contoh</span>}
-          <button className="tombol-ikon terang" onClick={onKeluar} aria-label="Keluar" title="Keluar">
-            <Ikon nama="keluar" />
+          <button className="tombol-keluar" onClick={onKeluar}>
+            <Ikon nama="keluar" ukuran={18} /> Keluar
           </button>
         </div>
       </header>
@@ -191,15 +192,26 @@ export default function Dashboard({ onKeluar }) {
             fokus={fokus}
             onPilihRw={pilihRw}
             onPilihSaluran={pilihSaluran}
+            onKlikKosong={tutupDetail}
           />
         </div>
 
         <aside className="sisi">
+          {rwAktif || saluranTerpilih ? (
+            <div className="sisi-detail">
+              <button className="tombol-kembali" onClick={tutupDetail}>
+                <Ikon nama="kembali" ukuran={20} /> Kembali ke daftar
+              </button>
+              {rwAktif && <RwDetail props={rwAktif} saluran={data?.saluran} onPilihSaluran={pilihSaluran} />}
+              {saluranTerpilih && <SaluranDetail data={detail.data} galat={detail.galat} onTugaskan={setTugaskan} />}
+            </div>
+          ) : (
+            <>
           <div className="tab" role="tablist">
             {[
-              ['prioritas', 'Prioritas'],
-              ['tugas', 'Tugas'],
-              ['cek', 'Cek'],
+              ['prioritas', 'Perlu dibersihkan'],
+              ['tugas', 'Tugas petugas'],
+              ['cek', 'Cek langsung'],
             ].map(([kunci, label]) => (
               <button
                 key={kunci}
@@ -224,18 +236,10 @@ export default function Dashboard({ onKeluar }) {
             )}
           </div>
 
-          {(rwAktif || saluranTerpilih) && (
-            <div className="sisi-detail">
-              {rwAktif && <RwDetail props={rwAktif} saluran={data?.saluran} onPilihSaluran={pilihSaluran} onTutup={tutupDetail} />}
-              {saluranTerpilih && (
-                <SaluranDetail data={detail.data} galat={detail.galat} onTugaskan={setTugaskan} onTutup={tutupDetail} />
-              )}
-            </div>
-          )}
-          {!rwAktif && !saluranTerpilih && (
-            <p className="petunjuk">
-              <Ikon nama="info" ukuran={14} /> Klik wilayah RW di peta untuk melihat kenapa skornya seperti itu.
-            </p>
+          <p className="petunjuk">
+            Klik wilayah RW di peta untuk melihat alasan skornya.
+          </p>
+            </>
           )}
         </aside>
       </main>
