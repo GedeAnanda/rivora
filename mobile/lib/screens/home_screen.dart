@@ -513,6 +513,8 @@ class _PratinjauPeta extends StatelessWidget {
                     rw: riskRepository.data?.rw ?? const [],
                     posisiSaya: posisi,
                     interaktif: false,
+                    atribusi: true,
+                    atribusiDiAtas: true,
                   ),
                 ),
               ),
