@@ -1,13 +1,29 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import Ikon from '../components/Ikon'
 import { api, token, USE_MOCK } from '../api/client'
+
+// Foto dari Wikimedia Commons (CC BY-SA), kredit wajib tampil: lihat KREDIT_FOTO di kaki halaman.
+const FITUR = [
+  { foto: '/login/kartu-1.jpg', posisi: '100% 100%', teks: <>Petugas dan warga <b>memotret saluran</b>, AI menilai sumbatannya.</> },
+  { foto: '/login/kartu-2.jpg', posisi: '40% 50%', teks: <>Daftar saluran yang <b>perlu dibersihkan</b> sebelum hujan turun.</> },
+  { foto: '/login/kartu-3.jpg', posisi: '50% 50%', teks: <><b>Bukti foto</b> sebelum dan sesudah pembersihan.</> },
+]
+
+const KREDIT_FOTO = [
+  ['Galeri ega', 'Gotong_Royong_Membersihkan_Sungai.jpg', 'CC BY-SA 4.0'],
+  ['DayakSibiriak', 'Waste_in_rain_gutter_near_school_Bali.jpg', 'CC BY-SA 4.0'],
+  ['Komarudin0412', 'Cuaca_hukan_sore_hari_jalan_baru_babakan_raden_2014-01-18_17-49.jpg', 'CC BY-SA 3.0'],
+  ['Macdanpets', 'Man_cleaning_drainage_in_Agbara,_Lagos_Badagry_Expressway.jpg', 'CC BY-SA 4.0'],
+]
 
 /** Login lurah (FR-DB-01). Hanya role lurah yang boleh masuk. */
 export default function Login({ onMasuk }) {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [lihat, setLihat] = useState(false)
   const [kirim, setKirim] = useState(false)
   const [galat, setGalat] = useState(null)
+  const inputPertama = useRef(null)
 
   async function masuk(e) {
     e.preventDefault()
@@ -30,48 +46,107 @@ export default function Login({ onMasuk }) {
 
   return (
     <div className="halaman-login">
-      <form className="kartu-login" onSubmit={masuk}>
-        <div className="merek merek-gelap">
+      <header className="login-nav">
+        <div className="merek">
           <span className="logo" aria-hidden="true">
-            <Ikon nama="air" ukuran={20} />
+            <Ikon nama="air" ukuran={18} />
           </span>
-          <div>
-            <div className="nama-produk">RIVORA</div>
-            <div className="tagline">See The Flood Before You See The Water.</div>
+          <span className="login-merek">RIVORA</span>
+        </div>
+        <span className="login-nav-ket">Dasbor kelurahan</span>
+      </header>
+
+      <section className="hero">
+        <div className="hero-tengah">
+          <form className="kartu-login" onSubmit={masuk}>
+            <h1>Lihat genangan sebelum airnya datang</h1>
+
+            <input ref={inputPertama} className="isian" placeholder="Username" aria-label="Username"
+              autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} required autoFocus />
+            <div className="isian-bungkus">
+              <input className="isian" type={lihat ? 'text' : 'password'} placeholder="Password" aria-label="Password"
+                autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <button type="button" className="tombol-ikon isian-mata" onClick={() => setLihat((x) => !x)}
+                aria-label={lihat ? 'Sembunyikan password' : 'Tampilkan password'}>
+                <Ikon nama={lihat ? 'mata_tutup' : 'mata'} ukuran={18} />
+              </button>
+            </div>
+
+            {galat && <p className="galat">{galat}</p>}
+
+            <p className="login-kecil">Khusus akun lurah atau koordinator lapangan kelurahan.</p>
+
+            <button className="tombol tombol-pill" disabled={kirim}>
+              {kirim ? 'Memeriksa...' : 'Masuk'}
+            </button>
+
+            {USE_MOCK && (
+              <p className="login-kecil">
+                Mode data contoh: username <strong>lurah</strong>, password apa saja.
+              </p>
+            )}
+          </form>
+          <div className="kartu-login kedua">Petugas atau warga? Pakai aplikasi RIVORA di Android.</div>
+        </div>
+        <a className="hero-kredit" href="https://commons.wikimedia.org/wiki/File:Gotong_Royong_Membersihkan_Sungai.jpg" target="_blank" rel="noreferrer">
+          Foto: Galeri ega, Wikimedia Commons, CC BY-SA 4.0
+        </a>
+      </section>
+
+      <section className="fitur">
+        {FITUR.map((f, i) => (
+          <div key={i} className="fitur-kartu" style={{ '--foto': `url(${f.foto})` }}>
+            <img className="fitur-foto" src={f.foto} alt="" style={{ objectPosition: f.posisi }} />
+            <p>{f.teks}</p>
+          </div>
+        ))}
+      </section>
+
+      <section className="login-ajak">
+        <h2>Saluran lancar, genangan berkurang.</h2>
+        <button className="tombol tombol-pill" onClick={() => inputPertama.current?.focus()}>
+          Masuk ke dasbor
+        </button>
+      </section>
+
+      <footer className="login-kaki">
+        <div className="kaki-dalam">
+          <div className="kaki-kolom">
+            <h3>RIVORA</h3>
+            <span>Sistem prediksi dan pencegahan genangan berbasis kondisi saluran drainase</span>
+          </div>
+          <div className="kaki-kolom">
+            <h3>Produk</h3>
+            <span>Dasbor kelurahan</span>
+            <span>Aplikasi pelapor (Android)</span>
+          </div>
+          <div className="kaki-kolom">
+            <h3>Sumber data</h3>
+            <span>Open-Meteo dan BMKG</span>
+            <span>OpenStreetMap</span>
+            <span>DEMNAS (BIG)</span>
+          </div>
+          <div className="kaki-kolom">
+            <h3>Tim Abis Ini ke WDP</h3>
+            <span>I Gede Ananda Bela Persada</span>
+            <span>Fatih Akram Wicaksono</span>
+            <span>Wildan Panji Maulana</span>
           </div>
         </div>
-        <h1>Masuk dasbor kelurahan</h1>
-
-        <label className="label-isian">
-          <span>Username</span>
-          <input autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} required autoFocus />
-        </label>
-        <label className="label-isian">
-          <span>Password</span>
-          <input
-            type="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </label>
-
-        {galat && <p className="galat">{galat}</p>}
-
-        <button className="tombol tombol-penuh" disabled={kirim}>
-          {kirim ? 'Memeriksa...' : 'Masuk'}
-        </button>
-
-        {USE_MOCK && (
-          <p className="catatan-kecil">
-            <Ikon nama="info" ukuran={14} />
-            <span>
-              Mode data contoh: masuk dengan username <strong>lurah</strong> dan password apa saja.
+        <div className="kaki-bawah">© RIVORA 2026 · Telkom University · CR YOUTH 2026 Hackathon</div>
+        <div className="kaki-kredit">
+          Foto dari Wikimedia Commons:{' '}
+          {KREDIT_FOTO.map(([nama, file, lisensi], i) => (
+            <span key={file}>
+              {i > 0 && ' · '}
+              <a href={`https://commons.wikimedia.org/wiki/File:${file}`} target="_blank" rel="noreferrer">
+                {nama}
+              </a>{' '}
+              ({lisensi})
             </span>
-          </p>
-        )}
-      </form>
+          ))}
+        </div>
+      </footer>
     </div>
   )
 }

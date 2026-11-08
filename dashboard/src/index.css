@@ -914,32 +914,222 @@ section + section .judul-grup {
   border-top: 1px solid var(--garis);
 }
 
-/* ---------- Login ---------- */
+/* ---------- Login (tata letak mengikuti referensi: nav, hero bergambar + kartu tengah, tiga kartu fitur, kaki) ---------- */
 .halaman-login {
   min-height: 100vh;
+  background: #fff;
+  --lebar: min(1064px, calc(100% - 32px));
+}
+.login-nav {
+  width: var(--lebar);
+  margin: 0 auto;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.login-merek {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--teal-gelap);
+}
+.login-nav-ket {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 9999px;
+  background: #eff1f4;
+  color: var(--teks);
+}
+
+.hero {
+  position: relative;
+  width: var(--lebar);
+  margin: 0 auto;
+  min-height: 640px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--teal-gelap) url('/login/hero.jpg') center / cover no-repeat;
   display: grid;
   place-items: center;
-  padding: 16px;
-  background: var(--latar);
+  padding: 56px 16px;
 }
-.kartu-login {
-  width: min(380px, 100%);
-  padding: 28px;
-  border-radius: 14px;
-  background: var(--kartu);
-  border: 1px solid var(--garis);
+.hero-kredit {
+  position: absolute;
+  right: 12px;
+  bottom: 10px;
+  font-size: 11px;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  text-decoration: none;
+}
+.hero-kredit:hover {
+  text-decoration: underline;
+}
+.hero-tengah {
+  position: relative;
+  z-index: 1;
+  width: min(400px, 100%);
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
+}
+.kartu-login {
+  padding: 32px 24px 24px;
+  border-radius: 12px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: center;
 }
 .kartu-login h1 {
-  font-size: 26px;
-  line-height: 1.15;
-  letter-spacing: -0.025em;
+  font-size: 22px;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.kartu-login.kedua {
+  padding: 16px 24px;
+  font-size: 14.5px;
+  color: var(--teks);
+}
+.isian {
+  width: 100%;
+  height: 56px;
+  padding: 0 14px;
+  border: 1px solid #c9cdd3;
+  border-radius: 8px;
+  font-size: 16px;
+  background: #fff;
+}
+.isian:focus {
+  outline: 2px solid var(--teal);
+  outline-offset: -1px;
+}
+.isian-bungkus {
+  position: relative;
+}
+.isian-bungkus .isian {
+  padding-right: 48px;
+}
+.isian-mata {
+  position: absolute;
+  right: 10px;
+  top: 13px;
+}
+.login-kecil {
+  font-size: 13px;
+  color: var(--teks-2);
+  text-align: left;
+}
+.tombol-pill {
+  height: 48px;
+  border-radius: 9999px;
+  font-size: 16px;
   margin-top: 6px;
 }
-.merek-gelap .nama-produk {
-  color: var(--navy);
+
+.fitur {
+  width: var(--lebar);
+  margin: 32px auto 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+/* Seperti referensi: foto yang sama diburamkan jadi latar kartu, foto tajam di dalamnya */
+.fitur-kartu {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 12px;
+  padding: 26px 30px 24px;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  background: #2b2b2b;
+}
+.fitur-kartu::before {
+  content: '';
+  position: absolute;
+  inset: -24px;
+  z-index: -1;
+  background: var(--foto) center / cover;
+  filter: blur(18px) brightness(0.55);
+}
+.fitur-foto {
+  width: 100%;
+  aspect-ratio: 280 / 320;
+  object-fit: cover;
+  border-radius: 12px;
+  display: block;
+}
+.fitur-kartu p {
+  font-size: 16px;
+  line-height: 1.3;
+  text-align: center;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+.kaki-kredit {
+  width: var(--lebar);
+  margin: 10px auto 0;
+  font-size: 12px;
+  color: var(--teks-redup);
+}
+.kaki-kredit a {
+  color: inherit;
+}
+
+.login-ajak {
+  padding: 40px 16px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+.login-ajak h2 {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+.login-ajak .tombol-pill {
+  padding: 0 24px;
+}
+
+.login-kaki {
+  background: #f0f2f5;
+  padding: 40px 0 24px;
+}
+.kaki-dalam,
+.kaki-bawah {
+  width: var(--lebar);
+  margin: 0 auto;
+}
+.kaki-dalam {
+  display: grid;
+  grid-template-columns: 1.4fr repeat(3, 1fr);
+  gap: 24px;
+}
+.kaki-kolom {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 14px;
+  color: #4a5568;
+}
+.kaki-kolom h3 {
+  font-size: 14px;
+  color: var(--teks);
+}
+.kaki-bawah {
+  margin-top: 36px;
+  padding-top: 20px;
+  border-top: 1px solid #d5d9df;
+  font-size: 14px;
+  color: var(--teks-2);
 }
 .catatan-kecil {
   display: flex;
