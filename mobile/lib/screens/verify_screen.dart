@@ -19,6 +19,7 @@ import '../widgets/report_photo.dart';
 import '../widgets/status_chip.dart';
 import '../widgets/sumbatan_style.dart';
 import 'lapor_flow.dart';
+import '../theme/rivora_icons.dart';
 
 enum _Tahap { tinjau, kirim, hasil }
 
@@ -38,9 +39,10 @@ class VerifyScreen extends StatefulWidget {
   final Position position;
   final DateTime capturedAt;
 
-  /// Jarak maksimal dari titik saluran **[ASUMSI]**, turunan Tabel 8
-  /// (foto wajib dengan GPS supaya tidak ada laporan palsu).
-  static const batasJarakMeter = 100.0;
+  /// Jarak maksimal dari titik saluran, sama dengan aturan backend
+  /// (backend SRS FR-BE-17, mobile SRS FR-MB-10). Turunan Tabel 8: foto
+  /// wajib dengan GPS supaya tidak ada laporan palsu.
+  static const batasJarakMeter = 30.0;
 
   @override
   State<VerifyScreen> createState() => _VerifyScreenState();
@@ -78,13 +80,20 @@ class _VerifyScreenState extends State<VerifyScreen> {
     if (_tahap != _Tahap.tinjau || _diblokir) return;
     setState(() => _tahap = _Tahap.kirim);
     try {
-      final hasil = await api.verifyTask(
+      // Skor RW sebelum, untuk menunjukkan dampak pembersihan (proposal 3.3).
+      final rw = widget.tugas.rw;
+      final sebelum = (await riskRepository.refresh())?.rwBernama(rw)?.skor;
+      final mentah = await api.verifyTask(
         taskId: widget.tugas.id,
         foto: widget.photo,
         lat: widget.position.latitude,
         lng: widget.position.longitude,
         capturedAt: widget.capturedAt,
       );
+      final sesudah = mentah.sudahBersih
+          ? (await riskRepository.refresh())?.rwBernama(rw)?.skor
+          : null;
+      final hasil = mentah.denganSkorRw(rw, sebelum, sesudah);
       final updated = hasil.tugas;
       if (updated != null) {
         taskRepository.replace(updated);
@@ -125,6 +134,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
       radius: 0,
       kelas: widget.tugas.ai.kelas,
       jenis: widget.tugas.jenisSaluran,
+      placeholderAlignment: const Alignment(-0.5, 0),
       semanticLabel: 'Foto sebelum dibersihkan',
     );
   }
@@ -140,6 +150,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
     final hasil = _hasil;
     final judul = switch (_tahap) {
       _Tahap.hasil when hasil!.sudahBersih => 'Verifikasi selesai',
+      _Tahap.hasil when !hasil!.dinilai => 'Belum bisa dinilai',
       _Tahap.hasil => 'Belum bersih',
       _ => 'Verifikasi pembersihan',
     };
@@ -152,7 +163,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
           leading: _tahap == _Tahap.hasil
               ? IconButton(
                   tooltip: 'Tutup',
-                  icon: const Icon(Icons.close_rounded),
+                  icon: const Icon(RIcons.tutup),
                   onPressed: _keDaftarTugas,
                 )
               : null,
@@ -205,7 +216,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
                       onPressed: _tahap == _Tahap.kirim || _diblokir
                           ? null
                           : _kirim,
-                      icon: const Icon(Icons.verified_outlined),
+                      icon: const Icon(RIcons.verifikasi),
                       label: Text(
                         _tahap == _Tahap.kirim
                             ? 'Memeriksa…'
@@ -233,7 +244,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
                     flex: 3,
                     child: FilledButton.icon(
                       onPressed: _fotoUlang,
-                      icon: const Icon(Icons.photo_camera_rounded),
+                      icon: const Icon(RIcons.kamera),
                       label: const Text('Foto ulang'),
                     ),
                   ),
@@ -298,7 +309,7 @@ class _Tinjau extends StatelessWidget {
         const SizedBox(height: Space.sm),
         Row(
           children: [
-            Icon(Icons.swipe_rounded, size: 16, color: scheme.onSurfaceVariant),
+            Icon(RIcons.ketuk, size: 16, color: scheme.onSurfaceVariant),
             const SizedBox(width: Space.xs + 2),
             Text(
               'Geser atau ketuk foto untuk membandingkan.',
@@ -326,9 +337,7 @@ class _Tinjau extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Icon(
-                        terlaluJauh
-                            ? Icons.wrong_location_outlined
-                            : Icons.where_to_vote_rounded,
+                        terlaluJauh ? RIcons.peringatan : RIcons.lokasi,
                         color: lokasiWarna.fg,
                       ),
                       const SizedBox(width: Space.sm),
@@ -363,22 +372,18 @@ class _Tinjau extends StatelessWidget {
                 ),
                 const SizedBox(height: Space.md),
                 _Info(
-                  icon: Icons.schedule_rounded,
+                  icon: RIcons.waktu,
                   text: 'Difoto ${formatWaktu(capturedAt)}',
                 ),
                 const SizedBox(height: Space.sm),
                 _Info(
-                  icon: Icons.place_outlined,
+                  icon: RIcons.lokasi,
                   text: [?tugas.rw, tugas.jenisSaluran.label].join(' · '),
                 ),
                 const SizedBox(height: Space.sm),
                 Row(
                   children: [
-                    Icon(
-                      Icons.history_rounded,
-                      size: 20,
-                      color: scheme.onSurfaceVariant,
-                    ),
+                    Icon(RIcons.ai, size: 20, color: scheme.onSurfaceVariant),
                     const SizedBox(width: Space.sm),
                     Text('Sebelum: ', style: theme.textTheme.bodyMedium),
                     SumbatanBadge(kelas: tugas.ai.kelas, compact: true),
@@ -411,7 +416,21 @@ class _Hasil extends StatelessWidget {
     final scheme = theme.colorScheme;
     final rv = context.rivora;
     final bersih = hasil.sudahBersih;
+    final dinilai = hasil.dinilai;
     final aksen = bersih ? rv.bersih : rv.sedang;
+    final judul = !dinilai
+        ? 'AI belum bisa menilai foto'
+        : bersih
+        ? 'Saluran sudah bersih'
+        : 'Masih ada sumbatan';
+    final keterangan = !dinilai
+        ? (hasil.pesan ??
+              'Foto kurang jelas atau terlalu gelap. Foto ulang dari sudut '
+                  'yang sama.')
+        : bersih
+        ? 'AI membandingkan foto sebelum dan sesudah. Tugas tercatat selesai '
+              'dan pelapor melihat foto buktinya.'
+        : 'Bersihkan bagian yang tersisa, lalu foto ulang dari sudut yang sama.';
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -434,7 +453,7 @@ class _Hasil extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
-                    bersih ? Icons.check_rounded : Icons.priority_high_rounded,
+                    bersih ? RIcons.centang : RIcons.peringatan,
                     size: 40,
                     color: aksen.fg,
                   ),
@@ -442,17 +461,13 @@ class _Hasil extends StatelessWidget {
               ),
               const SizedBox(height: Space.md),
               Text(
-                bersih ? 'Saluran sudah bersih' : 'Masih ada sumbatan',
+                judul,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.headlineSmall,
               ),
               const SizedBox(height: Space.xs),
               Text(
-                bersih
-                    ? 'AI membandingkan foto sebelum dan sesudah. Tugas '
-                          'tercatat selesai dan pelapor melihat foto buktinya.'
-                    : 'Bersihkan bagian yang tersisa, lalu foto ulang dari '
-                          'sudut yang sama.',
+                keterangan,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: scheme.onSurfaceVariant,
@@ -466,29 +481,43 @@ class _Hasil extends StatelessWidget {
           _SkorRw(hasil: hasil),
           const SizedBox(height: Space.lg),
         ],
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(Space.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SectionTitle('Penilaian AI sesudah dibersihkan'),
-                SumbatanBadge(kelas: hasil.kelasSesudah),
-                if (hasil.catatan.isNotEmpty) ...[
+        if (hasil.hasilDemo) ...[
+          Row(
+            children: [
+              Icon(RIcons.contoh, size: 18, color: scheme.onSurfaceVariant),
+              const SizedBox(width: Space.sm),
+              Text(
+                'Hasil contoh (mode demo)',
+                style: theme.textTheme.bodyMedium,
+              ),
+            ],
+          ),
+          const SizedBox(height: Space.md),
+        ],
+        if (dinilai)
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(Space.lg),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SectionTitle('Penilaian AI sesudah dibersihkan'),
+                  SumbatanBadge(kelas: hasil.kelasSesudah),
+                  if (hasil.catatan.isNotEmpty) ...[
+                    const SizedBox(height: Space.md),
+                    Text(hasil.catatan, style: theme.textTheme.bodyLarge),
+                  ],
                   const SizedBox(height: Space.md),
-                  Text(hasil.catatan, style: theme.textTheme.bodyLarge),
-                ],
-                const SizedBox(height: Space.md),
-                Text(
-                  'Keyakinan ${hasil.keyakinan}',
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: scheme.onSurfaceVariant,
+                  Text(
+                    'Keyakinan ${hasil.keyakinan}',
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
         const SizedBox(height: Space.lg),
         BeforeAfterCompare(before: before, after: after),
       ],
@@ -566,7 +595,7 @@ class _SkorRw extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: Space.sm),
                     child: Icon(
-                      Icons.arrow_forward_rounded,
+                      RIcons.panah,
                       size: 18,
                       color: scheme.onSurfaceVariant,
                     ),

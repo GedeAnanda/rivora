@@ -105,13 +105,17 @@ class AiResultCard extends StatelessWidget {
                         horizontal: Space.md,
                         vertical: Space.xs + 2,
                       ),
+                      // Tag datar tanpa garis: bukan tombol, tidak bisa
+                      // diketuk.
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(Radii.sm),
-                        border: Border.all(color: scheme.outline),
+                        color: scheme.surfaceContainerHigh,
                       ),
                       child: Text(
                         labelPenyebab[p] ?? p,
-                        style: theme.textTheme.labelLarge,
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
                       ),
                     ),
                 ],

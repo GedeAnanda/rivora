@@ -12,6 +12,7 @@ import '../widgets/sumbatan_style.dart';
 import '../widgets/motion.dart';
 import 'app_shell.dart';
 import 'task_detail_screen.dart';
+import '../theme/rivora_icons.dart';
 
 /// Tugas petugas, diurutkan dari prioritas tertinggi (proposal 3.2 langkah 3).
 class TasksScreen extends StatefulWidget {
@@ -53,10 +54,10 @@ class _TasksScreenState extends State<TasksScreen> {
           final theme = Theme.of(context);
           return RefreshIndicator(
             onRefresh: repo.refresh,
-            edgeOffset: 152,
+            edgeOffset: 112,
             child: CustomScrollView(
               slivers: [
-                SliverAppBar.large(
+                SliverAppBar.medium(
                   title: Text(
                     aktif.isEmpty ? 'Tugas' : 'Tugas · ${aktif.length} aktif',
                   ),
@@ -64,7 +65,7 @@ class _TasksScreenState extends State<TasksScreen> {
                     IconButton(
                       tooltip: 'Lihat di peta',
                       onPressed: () => shellTab.value = Tabs.peta,
-                      icon: const Icon(Icons.map_outlined),
+                      icon: const Icon(RIcons.peta),
                     ),
                     const SizedBox(width: Space.sm),
                   ],
@@ -76,7 +77,7 @@ class _TasksScreenState extends State<TasksScreen> {
                     hasScrollBody: false,
                     child: Center(
                       child: EmptyState(
-                        icon: Icons.cloud_off_rounded,
+                        icon: RIcons.offline,
                         title: 'Tugas gagal dimuat',
                         message: repo.error!,
                         actionLabel: 'Coba lagi',
@@ -89,7 +90,7 @@ class _TasksScreenState extends State<TasksScreen> {
                     hasScrollBody: false,
                     child: Center(
                       child: EmptyState(
-                        icon: Icons.assignment_turned_in_outlined,
+                        icon: RIcons.tugas,
                         title: 'Belum ada tugas',
                         message:
                             'Tugas pembersihan dari kelurahan akan muncul di '
@@ -110,8 +111,8 @@ class _TasksScreenState extends State<TasksScreen> {
                         Text(
                           aktif.isEmpty
                               ? 'Semua tugas selesai. Terima kasih!'
-                              : 'Urut dari skor prioritas tertinggi: gabungan '
-                                    'prakiraan hujan, sumbatan, dan kerentanan.',
+                              : 'Urut dari sumbatan terparah, lalu yang paling '
+                                    'lama ditugaskan. Tarik ke bawah untuk muat ulang.',
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
@@ -178,12 +179,17 @@ class _TaskCard extends StatelessWidget {
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(Space.lg),
+          padding: const EdgeInsets.fromLTRB(
+            Space.md,
+            Space.lg,
+            Space.md,
+            Space.lg,
+          ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _Rank(rank: rank, selesai: task.selesai),
-              const SizedBox(width: Space.md),
+              _Nomor(rank: rank, selesai: task.selesai),
+              const SizedBox(width: Space.sm),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -192,34 +198,37 @@ class _TaskCard extends StatelessWidget {
                       [?task.rw, task.jenisSaluran.label].join(' · '),
                       style: theme.textTheme.titleMedium,
                     ),
-                    const SizedBox(height: Space.sm),
-                    Wrap(
-                      spacing: Space.sm,
-                      runSpacing: Space.xs,
-                      children: [
-                        SumbatanBadge(kelas: task.ai.kelas, compact: true),
-                        TugasStatusChip(status: task.status),
-                      ],
-                    ),
-                    const SizedBox(height: Space.sm),
+                    const SizedBox(height: Space.xs + 2),
                     Wrap(
                       spacing: Space.md,
                       runSpacing: Space.xs,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
-                        if (task.skorPrioritas != null)
-                          Text(
-                            'Prioritas ${formatDesimal(task.skorPrioritas!)}',
-                            style: muted?.copyWith(fontWeight: FontWeight.w700),
-                          ),
-                        if (jarak != null)
-                          Text(formatJarak(jarak!), style: muted),
-                        Text(formatRelatif(task.createdAt), style: muted),
+                        SumbatanBadge(kelas: task.kelasSebelum, compact: true),
+                        TugasStatusChip(status: task.status),
                       ],
+                    ),
+                    if (task.catatanLurah != null) ...[
+                      const SizedBox(height: Space.sm),
+                      Text(
+                        task.catatanLurah!,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                    ],
+                    const SizedBox(height: Space.sm),
+                    Text(
+                      [
+                        'Ditugaskan ${formatRelatif(task.createdAt)}',
+                        if (jarak != null) formatJarak(jarak!),
+                      ].join(' · '),
+                      style: muted,
                     ),
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right_rounded, color: scheme.onSurfaceVariant),
+              Icon(RIcons.chevron, size: 20, color: scheme.onSurfaceVariant),
             ],
           ),
         ),
@@ -228,8 +237,9 @@ class _TaskCard extends StatelessWidget {
   }
 }
 
-class _Rank extends StatelessWidget {
-  const _Rank({required this.rank, required this.selesai});
+/// Nomor urut tugas aktif (angka saja, tanpa kotak berwarna).
+class _Nomor extends StatelessWidget {
+  const _Nomor({required this.rank, required this.selesai});
 
   final int? rank;
   final bool selesai;
@@ -237,33 +247,21 @@ class _Rank extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final pertama = rank == 1;
     return Semantics(
-      label: selesai ? 'Selesai' : 'Prioritas nomor $rank',
+      label: selesai ? 'Selesai' : 'Nomor $rank',
       excludeSemantics: true,
-      child: Container(
-        width: 36,
-        height: 36,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: selesai
-              ? context.rivora.bersih.bg
-              : pertama
-              ? scheme.primary
-              : scheme.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(Radii.sm),
-        ),
+      child: SizedBox(
+        width: 32,
         child: selesai
-            ? Icon(
-                Icons.check_rounded,
-                size: 20,
-                color: context.rivora.bersih.fg,
-              )
+            ? Icon(RIcons.selesai, size: 22, color: context.rivora.bersih.fg)
             : Text(
                 '$rank',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: pertama ? scheme.onPrimary : scheme.onSurface,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  height: 1,
+                  color: rank == 1
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurfaceVariant,
                 ),
               ),
       ),

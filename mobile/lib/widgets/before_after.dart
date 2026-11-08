@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../theme/app_theme.dart';
+import '../theme/rivora_icons.dart';
 
 /// Pembanding foto sebelum dan sesudah dibersihkan (proposal 3.2 langkah 4).
 ///
@@ -137,11 +138,7 @@ class _Handle extends StatelessWidget {
         ],
         border: Border.all(color: const Color(0xFF0B6E79), width: 2),
       ),
-      child: const Icon(
-        Icons.compare_arrows_rounded,
-        color: Color(0xFF0B6E79),
-        size: 22,
-      ),
+      child: const Icon(RIcons.bandingkan, color: Color(0xFF0B6E79), size: 22),
     );
   }
 }
