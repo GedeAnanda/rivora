@@ -98,46 +98,51 @@ class AiResultCard extends StatelessWidget {
             const SizedBox(height: Space.lg),
             const Divider(),
             const SizedBox(height: Space.md),
-            Text(
-              'Penyebab',
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: scheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: Space.sm),
-            if (ai.penyebab.isEmpty)
+            // Foto tidak memperlihatkan saluran: penyebab tidak relevan
+            // ("Tidak ada penyebab dominan" justru menyesatkan).
+            if (ai.kelas != KelasSumbatan.tidakTerlihat) ...[
               Text(
-                'Tidak ada penyebab dominan',
-                style: theme.textTheme.bodyMedium,
-              )
-            else
-              Wrap(
-                spacing: Space.sm,
-                runSpacing: Space.sm,
-                children: [
-                  for (final p in ai.penyebab)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: Space.md,
-                        vertical: Space.xs + 2,
-                      ),
-                      // Tag datar tanpa garis: bukan tombol, tidak bisa
-                      // diketuk.
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(Radii.sm),
-                        color: scheme.surfaceContainerHigh,
-                      ),
-                      child: Text(
-                        labelPenyebab[p] ?? p,
-                        style: theme.textTheme.labelLarge?.copyWith(
-                          color: scheme.onSurfaceVariant,
+                'Penyebab',
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: Space.sm),
+              if (ai.penyebab.isEmpty)
+                Text(
+                  'Tidak ada penyebab dominan',
+                  style: theme.textTheme.bodyMedium,
+                )
+              else
+                Wrap(
+                  spacing: Space.sm,
+                  runSpacing: Space.sm,
+                  children: [
+                    for (final p in ai.penyebab)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: Space.md,
+                          vertical: Space.xs + 2,
+                        ),
+                        // Tag datar tanpa garis: bukan tombol, tidak bisa
+                        // diketuk.
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(Radii.sm),
+                          color: scheme.surfaceContainerHigh,
+                        ),
+                        child: Text(
+                          labelPenyebab[p] ?? p,
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
                         ),
                       ),
-                    ),
-                ],
-              ),
+                  ],
+                ),
+            ],
             if (ai.catatan.isNotEmpty) ...[
-              const SizedBox(height: Space.lg),
+              if (ai.kelas != KelasSumbatan.tidakTerlihat)
+                const SizedBox(height: Space.lg),
               Text(
                 'Catatan',
                 style: theme.textTheme.labelLarge?.copyWith(

@@ -36,6 +36,10 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   late final Future<Report?> _laporan = _muatLaporan();
   bool _mengubah = false;
 
+  /// `true` kalau server belum punya `PATCH /tasks/:id` (404/405). Berlaku
+  /// selama app terbuka; tombol "Mulai kerjakan" disembunyikan.
+  static bool _mulaiTidakTersedia = false;
+
   Future<Report?> _muatLaporan() async {
     final id = widget.task.laporanId;
     if (id == null) return null;
@@ -56,8 +60,20 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
       );
     } on ApiException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(e.message)));
+      final belumAda = e.statusCode == 404 || e.statusCode == 405;
+      if (belumAda) setState(() => _mulaiTidakTersedia = true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            belumAda
+                // Bukan pesan teknis ("Endpoint tidak ditemukan"): status
+                // tetap tercatat lewat verifikasi foto sesudah.
+                ? 'Langsung ambil foto sesudah saja. Status tugas diperbarui '
+                      'saat foto dikirim.'
+                : e.message,
+          ),
+        ),
+      );
     } finally {
       if (mounted) setState(() => _mengubah = false);
     }
@@ -235,7 +251,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                   Space.lg,
                 ),
                 child: _TombolBawah(
-                  mulai: t.status == 'baru'
+                  mulai: t.status == 'baru' && !_mulaiTidakTersedia
                       ? OutlinedButton(
                           onPressed: _mengubah ? null : () => _mulaiKerjakan(t),
                           child: Text(

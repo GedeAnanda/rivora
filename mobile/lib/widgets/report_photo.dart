@@ -111,7 +111,7 @@ class _Placeholder extends StatelessWidget {
             children: [
               JenisPictogram(
                 jenis: jenis ?? JenisSaluran.terbuka,
-                size: besar ? 56 : 34,
+                size: besar ? 44 : 28,
                 color: fg,
               ),
               if (besar) ...[

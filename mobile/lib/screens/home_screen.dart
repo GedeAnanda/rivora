@@ -437,7 +437,7 @@ class _TugasMini extends StatelessWidget {
                       alignment: Alignment.center,
                       child: JenisPictogram(
                         jenis: task.jenisSaluran,
-                        size: 26,
+                        size: 22,
                         color: c.fg,
                       ),
                     ),

@@ -263,7 +263,7 @@ class _JenisOption extends StatelessWidget {
               children: [
                 JenisPictogram(
                   jenis: jenis,
-                  size: 40,
+                  size: 32,
                   color: selected
                       ? scheme.onPrimaryContainer
                       : scheme.onSurfaceVariant,

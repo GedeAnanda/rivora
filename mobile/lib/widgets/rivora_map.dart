@@ -29,7 +29,8 @@ class RivoraMap extends StatelessWidget {
   final double zoom;
   final List<Marker> markers;
 
-  /// Poligon RW berwarna level risiko (peta risiko, proposal Tabel 3).
+  /// RW berwarna level risiko (peta risiko, proposal Tabel 3), digambar
+  /// sebagai lingkaran radius di pusat RW.
   final List<RwRisk> rw;
   final LatLng? posisiSaya;
   final bool interaktif;
@@ -46,8 +47,6 @@ class RivoraMap extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final gelap = Theme.of(context).brightness == Brightness.dark;
-    final label = Theme.of(context).textTheme.labelSmall;
-    final halo = Theme.of(context).colorScheme.surface.withValues(alpha: 0.9);
     return FlutterMap(
       mapController: controller,
       options: MapOptions(
@@ -70,23 +69,35 @@ class RivoraMap extends StatelessWidget {
           userAgentPackageName: 'id.rivora.rivora',
           tileBuilder: gelap ? darkModeTileBuilder : _tileRedam,
         ),
+        // Risiko RW sebagai lingkaran lembut: beberapa lingkaran sepusat
+        // yang makin pekat ke tengah (gradasi radial), plus garis tepi tipis.
         if (rw.isNotEmpty)
-          PolygonLayer(
-            polygons: [
+          CircleLayer(
+            circles: [
               for (final r in rw)
-                if (r.polygon.length >= 3)
-                  Polygon(
-                    points: r.polygon,
-                    color: RivoraColors.light
+                if (r.pusat case final pusat?) ...[
+                  for (var i = 0; i < _lapisan; i++)
+                    CircleMarker(
+                      point: pusat,
+                      radius: r.radiusMeter * (1 - i / _lapisan * 0.8),
+                      useRadiusInMeter: true,
+                      color: context.rivora
+                          .risiko(r.level)
+                          .fg
+                          .withValues(alpha: gelap ? 0.036 : 0.03),
+                    ),
+                  CircleMarker(
+                    point: pusat,
+                    radius: r.radiusMeter,
+                    useRadiusInMeter: true,
+                    color: Colors.transparent,
+                    borderColor: context.rivora
                         .risiko(r.level)
                         .fg
-                        .withValues(alpha: 0.16),
-                    borderColor: RivoraColors.light
-                        .risiko(r.level)
-                        .fg
-                        .withValues(alpha: 0.7),
-                    borderStrokeWidth: 1.5,
+                        .withValues(alpha: 0.5),
+                    borderStrokeWidth: 1,
                   ),
+                ],
             ],
           ),
         // Nama RW hanya di peta penuh; di pratinjau kecil menumpuk pin.
@@ -97,23 +108,10 @@ class RivoraMap extends StatelessWidget {
                 if (r.titikLabel case final titik?)
                   Marker(
                     point: titik,
-                    width: 72,
-                    height: 20,
+                    width: 88,
+                    height: 26,
                     child: IgnorePointer(
-                      child: Center(
-                        child: Text(
-                          r.nama,
-                          maxLines: 1,
-                          style: (label ?? const TextStyle()).copyWith(
-                            color: context.rivora.risiko(r.level).fg,
-                            fontWeight: FontWeight.w700,
-                            shadows: [
-                              Shadow(color: halo, blurRadius: 3),
-                              Shadow(color: halo, blurRadius: 6),
-                            ],
-                          ),
-                        ),
-                      ),
+                      child: Center(child: _LabelRw(rw: r)),
                     ),
                   ),
             ],
@@ -155,6 +153,59 @@ class RivoraMap extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+/// Jumlah lingkaran sepusat per RW. 14 × alpha 0,03 → tengah ±35 %,
+/// tepi 3 %: gradasi halus tanpa cincin yang terlihat.
+const _lapisan = 14;
+
+/// Label nama RW: kapsul kecil di tepi selatan lingkaran, warna level.
+class _LabelRw extends StatelessWidget {
+  const _LabelRw({required this.rw});
+
+  final RwRisk rw;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final warna = context.rivora.risiko(rw.level).fg;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface.withValues(alpha: 0.94),
+        borderRadius: BorderRadius.circular(99),
+        border: Border.all(color: warna.withValues(alpha: 0.55)),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x1A000000),
+            blurRadius: 4,
+            offset: Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(color: warna, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 5),
+          Text(
+            rw.nama,
+            maxLines: 1,
+            softWrap: false,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: warna,
+              fontWeight: FontWeight.w700,
+              height: 1.2,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
