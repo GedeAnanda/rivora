@@ -55,3 +55,19 @@ class SumbatanBadge extends StatelessWidget {
 
 /// Nama jenis saluran untuk aksesibilitas/ringkasan.
 String namaJenis(JenisSaluran j) => j.label;
+
+/// Kondisi saluran dalam kalimat sehari-hari (pengganti skor 0–1).
+String kataSumbatan(KelasSumbatan k) => switch (k) {
+  KelasSumbatan.berat => 'Hampir tertutup penuh, air sulit mengalir',
+  KelasSumbatan.sedang => 'Tertutup sebagian, aliran air terhambat',
+  KelasSumbatan.ringan => 'Ada sedikit sampah, air masih mengalir',
+  KelasSumbatan.bersih => 'Tidak ada sampah, air mengalir lancar',
+  KelasSumbatan.tidakTerlihat => 'Bagian dalam saluran tidak terlihat di foto',
+};
+
+/// Keyakinan AI dalam kata (Tabel 8: keyakinan selalu ditampilkan).
+String kataKeyakinan(String keyakinan) => switch (keyakinan) {
+  'tinggi' => 'AI yakin',
+  'sedang' => 'AI cukup yakin',
+  _ => 'AI kurang yakin',
+};

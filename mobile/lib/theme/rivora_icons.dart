@@ -72,6 +72,15 @@ abstract final class RIcons {
   static const gpsMati = IconData(0xedd4, fontFamily: _regular); // gpsSlash
   static const notifikasi = IconData(0xe0ce, fontFamily: _regular); // bell
 
+  // Faktor risiko dan cuaca (bahasa warga)
+  static const sampah = IconData(0xe4a6, fontFamily: _regular); // trash
+  static const genangan = IconData(0xe6de, fontFamily: _regular); // waves
+  static const tetes = IconData(0xe210, fontFamily: _regular); // drop
+  static const cerah = IconData(0xe472, fontFamily: _regular); // sun
+  static const saran = IconData(0xe2dc, fontFamily: _regular); // lightbulb
+  static const tanya = IconData(0xe3e8, fontFamily: _regular); // question
+  static const aman = IconData(0xe40c, fontFamily: _regular); // shieldCheck
+
   // Status
   static const selesai = IconData(0xe184, fontFamily: _regular); // checkCircle
   static const peringatan = IconData(0xe4e0, fontFamily: _regular); // warning

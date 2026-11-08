@@ -19,6 +19,8 @@ class RivoraMap extends StatelessWidget {
     this.rw = const [],
     this.posisiSaya,
     this.interaktif = true,
+    this.atribusi,
+    this.atribusiDiAtas = false,
     this.controller,
     this.onTapPeta,
   });
@@ -31,6 +33,13 @@ class RivoraMap extends StatelessWidget {
   final List<RwRisk> rw;
   final LatLng? posisiSaya;
   final bool interaktif;
+
+  /// Tampilkan atribusi OpenStreetMap. Default: ikut [interaktif]. Peta
+  /// statis yang cukup besar sebaiknya tetap menampilkannya.
+  final bool? atribusi;
+
+  /// Atribusi di kanan atas (pratinjau yang punya label di bawah).
+  final bool atribusiDiAtas;
   final MapController? controller;
   final VoidCallback? onTapPeta;
 
@@ -123,11 +132,13 @@ class RivoraMap extends StatelessWidget {
         MarkerLayer(markers: markers),
         // Atribusi OSM wajib terlihat; strip kecil di pojok kanan bawah.
         // Layar peta memberi ruang di bawah legenda untuk strip ini.
-        if (interaktif)
+        if (atribusi ?? interaktif)
           Align(
-            alignment: Alignment.bottomRight,
+            alignment: atribusiDiAtas
+                ? Alignment.topRight
+                : Alignment.bottomRight,
             child: Container(
-              margin: const EdgeInsets.only(right: 4, bottom: 4),
+              margin: const EdgeInsets.all(4),
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface
