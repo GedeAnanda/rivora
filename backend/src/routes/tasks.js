@@ -193,7 +193,7 @@ router.post('/:id/verify', wajibLogin('petugas'), terimaFoto, async (req, res) =
   }
 
   const v = dariHasilVerifikasi(await nilaiVerifikasi(t.foto_sebelum, req.file));
-  const fotoUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+  const fotoUrl = await require('../storage').simpanFoto(req, req.file);
 
   // Kondisi baru saluran = laporan sumber 'verifikasi' → skor RW ikut turun
   const lv = await db.query(

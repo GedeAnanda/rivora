@@ -9,6 +9,7 @@ const db = require('../db');
 const { httpError, ambilId } = require('../errors');
 const { cariAtauBuatSaluran } = require('../saluran');
 const { lokasiDemoDiminta, saluranDemo, cadanganDemo } = require('../demo');
+const { simpanFoto } = require('../storage');
 
 const router = express.Router();
 
@@ -210,7 +211,7 @@ router.post('/', terimaFoto, async (req, res) => {
   const saluran = lokasiDemo
     ? { id: await saluranDemo(), baru: false }
     : await cariAtauBuatSaluran({ lat, lng, jenis });
-  const fotoUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+  const fotoUrl = await simpanFoto(req, req.file);
   const pelaporId = req.user ? req.user.id : null; // token opsional (FR-BE-01)
 
   const { rows } = await db.query(
