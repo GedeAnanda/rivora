@@ -1,0 +1,70 @@
+/* RIVORA brand tokens. Sumber kebenaran: docs/BRAND.md
+ * Nilai inti sama dengan mobile/lib/theme/app_theme.dart, jadi app dan dasbor tampil seragam.
+ * Kontras dicek WCAG 2.1 (angka di samping = rasio terhadap latar yang disebut). */
+
+:root {
+  /* ---- Inti ---- */
+  --rv-malam: #0B1F2A;   /* tinta utama, teks, badan logo      16,9:1 di putih */
+  --rv-arus: #0B6E79;    /* warna utama, tombol, tautan          6,0:1 di putih */
+  --rv-bening: #5FC3CF;  /* aksen air, primary mode gelap        8,2:1 di Malam */
+  --rv-embun: #D3ECEE;   /* latar terpilih, container           Malam 13,7:1    */
+  --rv-kabut: #F3F6F5;   /* latar halaman                        Malam 15,5:1    */
+  --rv-putih: #FFFFFF;
+
+  /* ---- Ramp Arus (OKLCH, hue 207) ---- */
+  --rv-arus-50: #EAFBFD;
+  --rv-arus-100: #D3ECEE;  /* = Embun */
+  --rv-arus-200: #A9E3EC;
+  --rv-arus-300: #5FC3CF;  /* = Bening */
+  --rv-arus-400: #39B1C0;
+  --rv-arus-500: #028C9A;  /* 4,0:1 di putih: hanya teks besar/ikon */
+  --rv-arus-600: #0B6E79;  /* = Arus */
+  --rv-arus-700: #055763;  /* hover/pressed */
+  --rv-arus-800: #04414A;
+  --rv-arus-900: #022C33;
+
+  /* ---- Netral Batu (sama dengan surface app) ---- */
+  --rv-batu-50: #F8FAF9;
+  --rv-batu-100: #F3F6F5;  /* = Kabut */
+  --rv-batu-200: #EDF1F0;
+  --rv-batu-300: #DCE3E1;  /* garis tipis, pembatas */
+  --rv-batu-500: #7A8B90;  /* garis input, ikon non-aktif (3,5:1) */
+  --rv-batu-700: #46575D;  /* teks sekunder (7,6:1 di putih) */
+  --rv-batu-900: #0B1F2A;  /* = Malam */
+
+  /* ---- Level risiko RW (proposal 3.2: aman, waspada, risiko tinggi) ----
+   * solid = isi poligon peta (opacity 0,35) + garis + titik legenda
+   * teks/latar = chip/badge (semua >= 6:1) */
+  --rv-aman: #2E9E6B;
+  --rv-aman-teks: #17663F;
+  --rv-aman-latar: #E3F3EA;
+  --rv-waspada: #E9A23B;
+  --rv-waspada-teks: #8A4A00;
+  --rv-waspada-latar: #FCEFD6;
+  --rv-tinggi: #C8372D;
+  --rv-tinggi-teks: #A51C14;
+  --rv-tinggi-latar: #FBE4E1;
+
+  /* ---- Kelas sumbatan AI (Lampiran C), sama dengan RivoraColors.light ---- */
+  --rv-bersih-teks: #17663F;        --rv-bersih-latar: #E3F3EA;
+  --rv-ringan-teks: #5C6B0A;        --rv-ringan-latar: #F1F4DC;
+  --rv-sedang-teks: #9A4A06;        --rv-sedang-latar: #FCEBD9;
+  --rv-berat-teks: #A51C14;         --rv-berat-latar: #FBE4E1;
+  --rv-tidak-terlihat-teks: #4A5A62; --rv-tidak-terlihat-latar: #E7ECEE;
+
+  /* ---- Gradien ikon aplikasi ---- */
+  --rv-gradien-ikon: linear-gradient(135deg, #11808C 0%, #0A4E57 100%);
+
+  /* ---- Tipografi ---- */
+  --rv-font: "Atkinson Hyperlegible", "Atkinson Hyperlegible Next", system-ui, sans-serif;
+}
+
+/* Mode gelap (nilai dari buildRivoraTheme(Brightness.dark)) */
+[data-theme="dark"], .rv-dark {
+  --rv-latar: #0D1417;
+  --rv-permukaan: #152024;
+  --rv-teks: #E6EEF0;
+  --rv-teks-sekunder: #A7B6BB;
+  --rv-utama: #5FC3CF;
+  --rv-pada-utama: #00363D;
+}
