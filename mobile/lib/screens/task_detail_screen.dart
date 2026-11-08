@@ -11,6 +11,7 @@ import '../utils/format.dart';
 import '../utils/maps.dart';
 import '../widgets/ai_result_card.dart';
 import '../widgets/common.dart';
+import '../widgets/lokasi_mini.dart';
 import '../widgets/motion.dart';
 import '../widgets/report_photo.dart';
 import '../widgets/status_chip.dart';
@@ -182,19 +183,11 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SectionTitle('Kondisi sebelum'),
-                      Row(
-                        children: [
-                          SumbatanBadge(kelas: t.kelasSebelum),
-                          if (t.skorSebelum != null) ...[
-                            const SizedBox(width: Space.md),
-                            Text(
-                              'skor ${formatDesimal(t.skorSebelum!)}',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: scheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ],
+                      SumbatanBadge(kelas: t.kelasSebelum),
+                      const SizedBox(height: Space.xs),
+                      Text(
+                        kataSumbatan(t.kelasSebelum),
+                        style: theme.textTheme.bodyMedium,
                       ),
                     ],
                   ),
@@ -210,26 +203,14 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SectionTitle('Lokasi'),
-                  Row(
-                    children: [
-                      Icon(
-                        RIcons.lokasi,
-                        size: 20,
-                        color: scheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: Space.sm),
-                      Expanded(
-                        child: Text(
-                          formatKoordinat(t.lat, t.lng),
-                          style: theme.textTheme.bodyMedium,
-                        ),
-                      ),
-                      if (jarak != null)
-                        Text(
-                          formatJarak(jarak),
-                          style: theme.textTheme.labelLarge,
-                        ),
-                    ],
+                  LokasiMini(
+                    lat: t.lat,
+                    lng: t.lng,
+                    rw: t.rw,
+                    kelas: t.kelasSebelum,
+                    keterangan: jarak == null
+                        ? null
+                        : '${formatJarak(jarak)} dari posisimu',
                   ),
                   const SizedBox(height: Space.md),
                   OutlinedButton.icon(

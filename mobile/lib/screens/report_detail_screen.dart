@@ -8,6 +8,7 @@ import '../utils/format.dart';
 import '../utils/maps.dart';
 import '../widgets/ai_result_card.dart';
 import '../widgets/common.dart';
+import '../widgets/lokasi_mini.dart';
 import '../widgets/report_photo.dart';
 import '../widgets/status_chip.dart';
 import '../theme/rivora_icons.dart';
@@ -130,17 +131,12 @@ class _ReportDetailScreenState extends State<ReportDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SectionTitle('Lokasi'),
-                  _InfoRow(
-                    icon: RIcons.lokasi,
-                    text: [
-                      ?report.rw,
-                      formatKoordinat(report.lat, report.lng),
-                    ].join(' · '),
-                  ),
-                  const SizedBox(height: Space.sm),
-                  _InfoRow(
-                    icon: RIcons.waktu,
-                    text: 'Difoto ${formatWaktu(report.capturedAt)}',
+                  LokasiMini(
+                    lat: report.lat,
+                    lng: report.lng,
+                    rw: report.rw,
+                    kelas: report.kelasKini,
+                    keterangan: 'Difoto ${formatWaktu(report.capturedAt)}',
                   ),
                   const SizedBox(height: Space.lg),
                   OutlinedButton.icon(
@@ -172,26 +168,6 @@ class _LabeledPhoto extends StatelessWidget {
         Text(label, style: Theme.of(context).textTheme.labelLarge),
         const SizedBox(height: Space.xs),
         child,
-      ],
-    );
-  }
-}
-
-class _InfoRow extends StatelessWidget {
-  const _InfoRow({required this.icon, required this.text});
-
-  final IconData icon;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, size: 20, color: theme.colorScheme.onSurfaceVariant),
-        const SizedBox(width: Space.sm),
-        Expanded(child: Text(text, style: theme.textTheme.bodyMedium)),
       ],
     );
   }

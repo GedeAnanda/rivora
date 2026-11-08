@@ -10,6 +10,7 @@ import '../services/repositories.dart';
 import '../theme/app_theme.dart';
 import '../utils/format.dart';
 import '../widgets/common.dart';
+import '../widgets/lokasi_mini.dart';
 import '../widgets/motion.dart';
 import '../widgets/pictogram.dart';
 import '../widgets/step_progress.dart';
@@ -126,28 +127,17 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
           ),
           const SizedBox(height: Space.md),
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: Space.lg,
-              vertical: Space.md,
-            ),
+            padding: const EdgeInsets.all(Space.md),
             decoration: BoxDecoration(
               color: scheme.surfaceContainer,
               borderRadius: BorderRadius.circular(Radii.md),
             ),
-            child: Column(
-              children: [
-                _Meta(
-                  icon: RIcons.lokasi,
-                  text: formatKoordinat(pos.latitude, pos.longitude),
-                  trailing: '±${pos.accuracy.round()} m',
-                ),
-                const SizedBox(height: Space.sm),
-                _Meta(
-                  icon: RIcons.waktu,
-                  text: formatWaktu(widget.capturedAt),
-                  trailing: 'otomatis',
-                ),
-              ],
+            child: LokasiMini(
+              lat: pos.latitude,
+              lng: pos.longitude,
+              akurasi: pos.accuracy,
+              keterangan: 'Difoto ${formatWaktu(widget.capturedAt)}',
+              ringkas: true,
             ),
           ),
           const SizedBox(height: Space.xl),
@@ -215,31 +205,6 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _Meta extends StatelessWidget {
-  const _Meta({required this.icon, required this.text, required this.trailing});
-
-  final IconData icon;
-  final String text;
-  final String trailing;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final muted = theme.colorScheme.onSurfaceVariant;
-    return Row(
-      children: [
-        Icon(icon, size: 20, color: muted),
-        const SizedBox(width: Space.sm),
-        Expanded(child: Text(text, style: theme.textTheme.bodyMedium)),
-        Text(
-          trailing,
-          style: theme.textTheme.bodySmall?.copyWith(color: muted),
-        ),
-      ],
     );
   }
 }

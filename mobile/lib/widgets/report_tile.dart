@@ -19,7 +19,7 @@ class ReportTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final lokasi = report.rw ?? formatKoordinat(report.lat, report.lng);
+    final lokasi = report.rw ?? 'Lokasi GPS tercatat';
     return Card(
       child: InkWell(
         onTap: () => Navigator.of(context).push(
