@@ -1,47 +1,50 @@
 import 'package:flutter/material.dart';
 
 import '../models/ai_result.dart';
-
-Color warnaSumbatan(KelasSumbatan kelas) => switch (kelas) {
-  KelasSumbatan.bersih => Colors.green.shade600,
-  KelasSumbatan.ringan => Colors.lime.shade800,
-  KelasSumbatan.sedang => Colors.orange.shade700,
-  KelasSumbatan.berat => Colors.red.shade700,
-  KelasSumbatan.tidakTerlihat => Colors.blueGrey.shade500,
-};
+import '../theme/app_theme.dart';
 
 IconData ikonSumbatan(KelasSumbatan kelas) => switch (kelas) {
-  KelasSumbatan.bersih => Icons.check_circle,
-  KelasSumbatan.ringan => Icons.info,
-  KelasSumbatan.sedang => Icons.warning_amber_rounded,
-  KelasSumbatan.berat => Icons.dangerous,
-  KelasSumbatan.tidakTerlihat => Icons.visibility_off,
+  KelasSumbatan.bersih => Icons.check_circle_rounded,
+  KelasSumbatan.ringan => Icons.info_rounded,
+  KelasSumbatan.sedang => Icons.warning_rounded,
+  KelasSumbatan.berat => Icons.error_rounded,
+  KelasSumbatan.tidakTerlihat => Icons.visibility_off_rounded,
 };
 
-/// Label kelas sumbatan berwarna, dipakai di layar hasil.
+/// Label kelas sumbatan: ikon + teks + warna (tidak hanya warna).
 class SumbatanBadge extends StatelessWidget {
-  const SumbatanBadge({super.key, required this.kelas});
+  const SumbatanBadge({super.key, required this.kelas, this.compact = false});
 
   final KelasSumbatan kelas;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
-    final color = warnaSumbatan(kelas);
+    final color = context.rivora.sumbatan(kelas);
+    final text = Theme.of(context).textTheme;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? Space.sm : Space.md,
+        vertical: compact ? 2 : Space.xs + 2,
+      ),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: color),
+        color: color.bg,
+        borderRadius: BorderRadius.circular(Radii.sm),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(ikonSumbatan(kelas), size: 18, color: color),
-          const SizedBox(width: 6),
-          Text(
-            kelas.label,
-            style: TextStyle(color: color, fontWeight: FontWeight.w600),
+          Icon(ikonSumbatan(kelas), size: compact ? 14 : 18, color: color.fg),
+          SizedBox(width: compact ? Space.xs : 6),
+          Flexible(
+            child: Text(
+              kelas.label,
+              overflow: TextOverflow.ellipsis,
+              style: (compact ? text.labelMedium : text.labelLarge)?.copyWith(
+                color: color.fg,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ),
         ],
       ),
