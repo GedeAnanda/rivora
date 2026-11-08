@@ -20,8 +20,9 @@ class PushService {
 
   bool get enabled => _enabled;
 
-  /// Dipanggil saat pengguna membuka notifikasi dari luar aplikasi.
-  VoidCallback? onOpenTasks;
+  /// Dipanggil saat pengguna membuka notifikasi "tugas baru" dari luar
+  /// aplikasi. Argumen = `data.tugas_id` (mobile SRS FR-MB-09).
+  void Function(String? tugasId)? onOpenTask;
 
   /// Dipanggil saat pesan masuk ketika aplikasi sedang terbuka.
   void Function(String title, String body)? onForegroundMessage;
@@ -56,16 +57,23 @@ class PushService {
         taskWatcher.checkNow();
         reportRepository.refresh(silent: true);
         final n = message.notification;
-        if (n != null && message.data['jenis'] != 'tugas_baru') {
+        if (n != null && message.data['type'] != 'tugas_baru') {
           onForegroundMessage?.call(n.title ?? 'RIVORA', n.body ?? '');
         }
       }),
     );
-    _subs.add(
-      FirebaseMessaging.onMessageOpenedApp.listen((_) => onOpenTasks?.call()),
-    );
+    _subs.add(FirebaseMessaging.onMessageOpenedApp.listen(_buka));
     final initial = await messaging.getInitialMessage();
-    if (initial != null) onOpenTasks?.call();
+    if (initial != null) _buka(initial);
+  }
+
+  /// Payload backend: `data.type = "tugas_baru"`, `data.tugas_id`.
+  void _buka(RemoteMessage m) {
+    if (m.data['type'] == 'tugas_baru') {
+      onOpenTask?.call(m.data['tugas_id'] as String?);
+    } else {
+      onOpenTask?.call(null);
+    }
   }
 
   Future<void> _register(String token) async {

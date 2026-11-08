@@ -63,6 +63,16 @@ class AiResult {
   /// Saluran tertutup atau tidak jelas → harus dicek manual (proposal 3.2).
   bool get perluCekManual =>
       kelas == KelasSumbatan.tidakTerlihat || !saluranTerlihat;
+
+  Map<String, dynamic> toJson() => {
+    'jenis_saluran': jenisSaluran,
+    'saluran_terlihat': saluranTerlihat,
+    'kelas_sumbatan': kelas.apiValue,
+    'skor_sumbatan': skorSumbatan,
+    'penyebab': penyebab,
+    'keyakinan': keyakinan,
+    'catatan': catatan,
+  };
 }
 
 const Map<String, String> labelPenyebab = {
